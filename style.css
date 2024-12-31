@@ -1,87 +1,157 @@
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    line-height: 1.6;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-    color: #eaeaea;
-    background-color: #121212;
-}
-.center {
-    text-align: center;
-    margin: 2em 0;
-}
-.projects-container {
-    text-align: center;
-}
-img {
-    max-width: 100%;
-    height: auto;
-}
-code, pre {
-    background-color: #333;
-    padding: 16px;
-    border-radius: 6px;
-    overflow-x: auto;
-    color: #eaeaea;
-}
-h1, h2 {
-    border-bottom: 1px solid #333;
-    padding-bottom: 0.3em;
-}
-.heart {
-    color: #ff0000;
-    display: inline-block;
-    margin: 0 4px;
-}
-.project-link {
-    color: #40E0D0;
-    text-decoration: none;
-    transition: color 0.3s ease, border-color 0.3s ease;
-    font-size: 1.5em;
-    margin: 10px 0;
-    display: inline-block;
-}
-.project-link:hover {
-    color: #90FFEF;
-    text-decoration: underline;
-}
-.footer-link {
-    color: #40E0D0;
-    text-decoration: none;
-    transition: color 0.3s ease, border-color 0.3s ease;
-}
-.footer-link:hover {
-    color: #90FFEF;
-    text-decoration: underline;
-}
-button {
-    font-family: inherit;
-    background: #121212;
-    color: #eaeaea;
-    border: 1px solid #eaeaea;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: all 0.3s ease;
-}
-button:hover {
-    background: #eaeaea;
-    color: #121212;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(234, 234, 234, 0.2);
-}
+<style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #eaeaea;
+            background-color: #121212;
+        }
+        .center {
+            text-align: center;
+            margin: 2em 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        code, pre {
+            background-color: #333;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            color: #eaeaea;
+        }
+        h1, h2 {
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.3em;
+        }
+        .heart {
+            color: #ff0000;
+        }
+        a {
+            color: #40E0D0;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        a:hover {
+            color: #90FFEF;
+            border-bottom-color: #40E0D0;
+        }
+        
+        a:hover::after {
+            transform: scaleX(1);
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            background: rgba(18, 18, 18, 0.3);
+        }
+        .overlay-content {
+            font-family: inherit;
+            background: #121212;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            z-index: 12;
+            border: 2px solid #eaeaea;
+            max-width: 400px;
+            margin: 20px;
+        }
+        .tape {
+            position: fixed;
+            inset: -100px;
+            z-index: 11;
+            background-image: repeating-linear-gradient(
+                45deg,
+                #ffd700 0,
+                #ffd700 30px,
+                #000 30px,
+                #000 60px
+            );
+            background-size: 84.85px 84.85px;
+        }
 
-code, pre {
-    background-color: #333;
-    padding: 4px 8px;
-    border-radius: 4px;
-    overflow-x: auto;
-    color: #eaeaea;
-    font-size: 0.9em;
-    line-height: 1.4;
-    word-break: break-word;
-    display: inline-block;
-    vertical-align: middle;
-}
+        .tape:nth-child(2) {
+            background-image: repeating-linear-gradient(
+                -45deg,
+                #ffd700 0,
+                #ffd700 30px,
+                #000 30px,
+                #000 60px
+            );
+        }
+
+        @media (max-width: 768px) {
+            .tape {
+                position: absolute;
+                height: calc(100% + 200px);
+            }
+            .overlay-content {
+                margin: 10px;
+            }
+        }
+        
+        button {
+            font-family: inherit;
+            background: #121212;
+            color: #eaeaea;
+            border: 1px solid #eaeaea;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .overlay {
+            transition: opacity 0.3s ease-out;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        @keyframes softPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideInFromTop {
+            0% { transform: translateY(-10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        h1, h2 {
+            animation: slideInFromTop 0.5s ease-out;
+        }
+
+        .heart {
+            color: #ff0000;
+            display: inline-block;
+            animation: softPulse 2s infinite;
+        }
+
+        button {
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #eaeaea;
+            color: #121212;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(234, 234, 234, 0.2);
+        }
+    </style>
