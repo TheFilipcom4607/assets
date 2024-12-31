@@ -72,3 +72,16 @@ button:hover {
     transform: translateY(-2px);
     box-shadow: 0 2px 8px rgba(234, 234, 234, 0.2);
 }
+
+code, pre {
+    background-color: #333;
+    padding: 4px 8px;
+    border-radius: 4px; 
+    overflow-x: auto;
+    color: #eaeaea;
+    font-size: 0.9em; 
+    line-height: 1.4; 
+    word-break: break-word; 
+    display: inline-block; 
+}
+
