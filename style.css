@@ -62,29 +62,47 @@ a:hover {
     border-bottom-color: #40E0D0;
 }
 
-button, select {
+button {
     font-family: inherit;
-    background: #121212;
+    background: #1e1e1e;
     color: #eaeaea;
-    border: 1px solid #eaeaea;
+    border: 1px solid #40E0D0;
     padding: 10px 20px;
     border-radius: 6px;
     cursor: pointer;
-    margin-top: 20px;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    margin: 5px;
     font-size: 1rem;
 }
 
-button:hover, select:hover {
-    background: #eaeaea;
+button:hover {
+    background: #40E0D0;
     color: #121212;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(234, 234, 234, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(64, 224, 208, 0.3);
 }
 
-button:active, select:active {
+button:active {
     transform: translateY(0);
     box-shadow: none;
+}
+
+select {
+    font-family: inherit;
+    background: #1e1e1e;
+    color: #eaeaea;
+    border: 1px solid #40E0D0;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+select:hover {
+    background: #40E0D0;
+    color: #121212;
 }
 
 .overlay {
