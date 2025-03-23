@@ -7,17 +7,21 @@ body {
     color: #eaeaea;
     background-color: #121212;
 }
+
 .center {
     text-align: center;
     margin: 2em 0;
 }
+
 .projects-container {
     text-align: center;
 }
+
 img {
     max-width: 100%;
     height: auto;
 }
+
 code, pre {
     background-color: #333;
     padding: 2px 6px;
@@ -29,69 +33,60 @@ code, pre {
     display: inline-block;
     vertical-align: middle;
 }
+
 h1, h2 {
     border-bottom: 1px solid #333;
     padding-bottom: 0.3em;
     animation: slideInFromTop 0.5s ease-out;
 }
+
 .heart {
     color: #ff0000;
     display: inline-block;
     animation: softPulse 2s infinite;
 }
-.project-link {
-    color: #40E0D0;
-    text-decoration: none;
-    transition: color 0.3s ease, border-color 0.3s ease;
-    font-size: 1.5em;
-    margin: 10px 0;
-    display: inline-block;
-}
-.project-link:hover {
-    color: #90FFEF;
-    text-decoration: underline;
-}
-.footer-link {
-    color: #40E0D0;
-    text-decoration: none;
-    transition: color 0.3s ease, border-color 0.3s ease;
-}
-.footer-link:hover {
-    color: #90FFEF;
-    text-decoration: underline;
-}
+
+.project-link,
+.footer-link,
 a {
     color: #40E0D0;
     text-decoration: none;
-    border-bottom: 1px solid transparent;
     transition: color 0.3s ease, border-color 0.3s ease;
 }
 
+.project-link:hover,
+.footer-link:hover,
 a:hover {
     color: #90FFEF;
+    text-decoration: underline;
     border-bottom-color: #40E0D0;
 }
 
-a:hover::after {
-    transform: scaleX(1);
-}
-button {
+button, select {
     font-family: inherit;
     background: #121212;
     color: #eaeaea;
     border: 1px solid #eaeaea;
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     margin-top: 20px;
     transition: all 0.3s ease;
+    font-size: 1rem;
 }
-button:hover {
+
+button:hover, select:hover {
     background: #eaeaea;
     color: #121212;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(234, 234, 234, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(234, 234, 234, 0.2);
 }
+
+button:active, select:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
 .overlay {
     position: fixed;
     top: 0;
@@ -106,10 +101,12 @@ button:hover {
     background: rgba(18, 18, 18, 0.3);
     transition: opacity 0.3s ease-out;
 }
+
 .hidden {
     opacity: 0;
     pointer-events: none;
 }
+
 .overlay-content {
     font-family: inherit;
     background: #121212;
@@ -122,6 +119,7 @@ button:hover {
     max-width: 400px;
     margin: 20px;
 }
+
 .tape {
     position: fixed;
     inset: -100px;
@@ -135,6 +133,7 @@ button:hover {
     );
     background-size: 84.85px 84.85px;
 }
+
 .tape:nth-child(2) {
     background-image: repeating-linear-gradient(
         -45deg,
@@ -144,20 +143,24 @@ button:hover {
         #000 60px
     );
 }
+
 @media (max-width: 768px) {
     .tape {
         position: absolute;
         height: calc(100% + 200px);
     }
+
     .overlay-content {
         margin: 10px;
     }
 }
+
 @keyframes softPulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.02); }
     100% { transform: scale(1); }
 }
+
 @keyframes slideInFromTop {
     0% { transform: translateY(-10px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
