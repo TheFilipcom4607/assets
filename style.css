@@ -54,17 +54,6 @@ a {
     transition: color 0.3s ease, border-color 0.3s ease;
 }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.page-content {
-  flex: 1;
-  padding: 20px;
-}
 
 footer {
   text-align: center;
