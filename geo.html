@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Address → Coordinates (D° MM.mmm)</title>
+  <!-- External stylesheet -->
+  <link rel="stylesheet" href="https://assets.thefilip.com/style.css">
+  <style>
+    /* Only minimal layout overrides; main styles come from thefilip.com */
+    body {
+      max-width: 500px;
+      margin: 2em auto;
+      padding: 1em;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h2>Address → Coordinates (D° MM.mmm)</h2>
+
+  <label for="address">Enter address:</label>
+  <input type="text" id="address"
+         placeholder="e.g. 1600 Amphitheatre Parkway, Mountain View, CA" />
+
+  <button id="go">Convert &amp; Copy</button>
+  <div id="result" class="hidden"></div>
+
+  <script>
+    // Convert decimal degrees to "D° MM.mmm" string
+    function toDegMin(dd, isLatitude) {
+      const prefix = isLatitude
+        ? (dd >= 0 ? 'N' : 'S')
+        : (dd >= 0 ? 'E' : 'W');
+      const absDeg = Math.abs(dd);
+      const degrees = Math.floor(absDeg);
+      const minutes = (absDeg - degrees) * 60;
+      const degStr = degrees.toString().padStart(isLatitude ? 2 : 3, '0');
+      const minStr = minutes.toFixed(3).padStart(6, '0');
+      return `${prefix} ${degStr}° ${minStr}`;
+    }
+
+    document.getElementById('go').addEventListener('click', () => {
+      const addr = document.getElementById('address').value.trim();
+      if (!addr) {
+        alert('Please enter an address first.');
+        return;
+      }
+
+      const url = 'https://nominatim.openstreetmap.org/search'
+        + '?format=json'
+        + '&limit=1'
+        + '&q=' + encodeURIComponent(addr);
+
+      fetch(url, { headers: { 'Accept-Language': 'en' } })
+        .then(res => res.json())
+        .then(data => {
+          if (!data.length) throw new Error('No results found');
+          const { lat, lon } = data[0];
+          const latNum = parseFloat(lat);
+          const lonNum = parseFloat(lon);
+
+          const formatted = `${toDegMin(latNum, true)} ${toDegMin(lonNum, false)}`;
+
+          const resultDiv = document.getElementById('result');
+          resultDiv.textContent = formatted;
+          resultDiv.classList.remove('hidden');
+
+          navigator.clipboard.writeText(formatted)
+            .then(() => {
+              resultDiv.textContent += '  (Copied!)';
+            })
+            .catch(() => {
+              alert('Coordinates: ' + formatted + '\n\n(Copy failed.)');
+            });
+        })
+        .catch(err => {
+          alert('Error: ' + err.message);
+        });
+    });
+  </script>
+</body>
+</html>
