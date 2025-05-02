@@ -6,7 +6,7 @@
   <!-- External stylesheet -->
   <link rel="stylesheet" href="https://assets.thefilip.com/style.css">
   <style>
-    /* Only minimal layout overrides; main styles come from thefilip.com */
+    /* Minimal overrides; main styles come from thefilip.com */
     body {
       max-width: 500px;
       margin: 2em auto;
@@ -27,16 +27,58 @@
 
   <script>
     // Convert decimal degrees to "D° MM.mmm" string
-    function toDegMin(dd, isLatitude) {
-      const prefix = isLatitude
+    function toDegMin(dd, isLat) {
+      const prefix = isLat
         ? (dd >= 0 ? 'N' : 'S')
         : (dd >= 0 ? 'E' : 'W');
       const absDeg = Math.abs(dd);
-      const degrees = Math.floor(absDeg);
-      const minutes = (absDeg - degrees) * 60;
-      const degStr = degrees.toString().padStart(isLatitude ? 2 : 3, '0');
-      const minStr = minutes.toFixed(3).padStart(6, '0');
+      const deg = Math.floor(absDeg);
+      const min = (absDeg - deg) * 60;
+      const degStr = deg.toString().padStart(isLat ? 2 : 3, '0');
+      const minStr = min.toFixed(3).padStart(6, '0');
       return `${prefix} ${degStr}° ${minStr}`;
+    }
+
+    // Cross-browser copy-to-clipboard
+    function copyToClipboard(text) {
+      // Try the modern API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text)
+          .catch(() => fallbackCopy(text));
+      }
+      // Fallback
+      return fallbackCopy(text);
+    }
+
+    function fallbackCopy(text) {
+      return new Promise((resolve, reject) => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        // Prevent scrolling to bottom on iOS
+        ta.style.position = 'fixed';
+        ta.style.top = '0';
+        ta.style.left = '0';
+        ta.style.width = '1px';
+        ta.style.height = '1px';
+        ta.style.padding = '0';
+        ta.style.border = 'none';
+        ta.style.outline = 'none';
+        ta.style.boxShadow = 'none';
+        ta.style.background = 'transparent';
+
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+
+        try {
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          ok ? resolve() : reject();
+        } catch (err) {
+          document.body.removeChild(ta);
+          reject(err);
+        }
+      });
     }
 
     document.getElementById('go').addEventListener('click', () => {
@@ -47,25 +89,24 @@
       }
 
       const url = 'https://nominatim.openstreetmap.org/search'
-        + '?format=json'
-        + '&limit=1'
-        + '&q=' + encodeURIComponent(addr);
+                + '?format=json&limit=1&q='
+                + encodeURIComponent(addr);
 
       fetch(url, { headers: { 'Accept-Language': 'en' } })
         .then(res => res.json())
         .then(data => {
           if (!data.length) throw new Error('No results found');
-          const { lat, lon } = data[0];
-          const latNum = parseFloat(lat);
-          const lonNum = parseFloat(lon);
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          const formatted = `${toDegMin(lat, true)} ${toDegMin(lon, false)}`;
 
-          const formatted = `${toDegMin(latNum, true)} ${toDegMin(lonNum, false)}`;
-
+          // Show it
           const resultDiv = document.getElementById('result');
           resultDiv.textContent = formatted;
           resultDiv.classList.remove('hidden');
 
-          navigator.clipboard.writeText(formatted)
+          // Copy it
+          copyToClipboard(formatted)
             .then(() => {
               resultDiv.textContent += '  (Copied!)';
             })
