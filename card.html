@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Die‑Cast Model Shelf Card Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'aviation-blue': '#1e3a8a',
+            'aviation-gold': '#fbbf24',
+          },
+          fontFamily: {
+            'sans': ['Inter', 'system-ui', 'sans-serif'],
+            'display': ['Montserrat', 'Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    .card-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .form-shadow {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    .preview-gradient {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
+  <div class="w-full max-w-5xl">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-display font-bold text-aviation-blue">Die‑Cast Model Shelf Card Generator</h1>
+      <p class="text-gray-600 mt-2">Create beautiful display cards for your model aircraft collection</p>
+    </div>
+
+    <div class="w-full grid md:grid-cols-5 gap-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+      <!-- Form panel -->
+      <form id="card-form" class="md:col-span-2 space-y-5 fade-in">
+        <div class="bg-gray-50 rounded-xl p-5 form-shadow">
+          <h2 class="font-display font-semibold text-lg text-aviation-blue mb-4">Aircraft Details</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="font-medium block mb-1.5 text-gray-700">Aircraft Model</label>
+              <input id="aircraft" type="text" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition" placeholder="Airbus A300‑600ST" />
+            </div>
+            <div>
+              <label class="font-medium block mb-1.5 text-gray-700">Nickname <span class="text-sm text-gray-500">(optional)</span></label>
+              <input id="nickname" type="text" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition" placeholder="Beluga" />
+            </div>
+            <div>
+              <label class="font-medium block mb-1.5 text-gray-700">Airline</label>
+              <input id="airline" type="text" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition" placeholder="Airbus Transport" />
+            </div>
+            <div>
+              <label class="font-medium block mb-1.5 text-gray-700">Airline Logo URL</label>
+              <input id="logo" type="url" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition" placeholder="https://example.com/logo.png" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-5 form-shadow">
+          <h2 class="font-display font-semibold text-lg text-aviation-blue mb-4">Model Specifications</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="font-medium block mb-1.5 text-gray-700">Scale</label>
+              <select id="scale" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition">
+                <option value="1:400">1 : 400</option>
+                <option value="1:500">1 : 500</option>
+                <option value="1:200">1 : 200</option>
+                <option value="1:144">1 : 144</option>
+                <option value="1:100">1 : 100</option>
+                <option value="1:72">1 : 72</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-medium block mb-1.5 text-gray-700">Length (cm)</label>
+              <input id="length" type="number" step="0.1" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition" placeholder="18.2" />
+            </div>
+          </div>
+        </div>
+
+        <button type="button" id="download" class="w-full bg-aviation-blue text-white rounded-lg p-3 font-medium hover:bg-blue-800 transform hover:scale-[1.02] transition flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download Card PDF
+        </button>
+      </form>
+
+      <!-- Preview panel -->
+      <div class="md:col-span-3 flex flex-col items-center justify-center fade-in">
+        <h2 class="font-display font-semibold text-lg text-aviation-blue mb-4 self-start">Preview</h2>
+        <div class="preview-gradient w-full rounded-xl p-8 flex items-center justify-center">
+          <!-- Card preview -->
+          <div id="card" class="w-full max-w-md aspect-[5/3] bg-white rounded-xl card-shadow p-6 flex flex-col border border-gray-200">
+            <!-- Logo top -->
+            <div class="flex justify-center mb-2">
+              <img id="card-logo" src="" alt="logo" class="h-16 w-auto object-contain hidden" />
+            </div>
+            
+            <!-- Airline & aircraft names -->
+            <div class="text-center mt-1">
+              <p id="card-airline" class="text-xl font-display font-semibold text-aviation-blue break-words"></p>
+              <p id="card-aircraft" class="text-lg text-gray-700 break-words mt-1"></p>
+            </div>
+            
+            <!-- Nickname -->
+            <p id="card-nickname" class="italic text-center text-gray-600 hidden my-2 text-lg"></p>
+            
+            <!-- Spacer pushes bottom row down -->
+            <div class="flex-1"></div>
+            
+            <!-- Scale & length row -->
+            <div class="flex justify-between text-base text-gray-700 border-t border-gray-200 pt-3 mt-3">
+              <div>
+                <span class="text-gray-500 text-sm">Scale:</span>
+                <span id="card-scale" class="font-medium"></span>
+              </div>
+              <div>
+                <span class="text-gray-500 text-sm">Length:</span>
+                <span id="card-length" class="font-medium"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-gray-500 text-sm mt-4">PDF will be sized to fit standard business card sleeve protectors</p>
+      </div>
+    </div>
+    
+    <footer class="text-center text-gray-500 text-sm mt-8">
+      Created for aviation enthusiasts and model collectors
+    </footer>
+  </div>
+
+  <!-- html2pdf for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    // Form inputs
+    const form = {
+      aircraft: document.getElementById('aircraft'),
+      airline: document.getElementById('airline'),
+      logo: document.getElementById('logo'),
+      scale: document.getElementById('scale'),
+      length: document.getElementById('length'),
+      nickname: document.getElementById('nickname')
+    };
+
+    // Card outputs
+    const card = {
+      airline: document.getElementById('card-airline'),
+      aircraft: document.getElementById('card-aircraft'),
+      logo: document.getElementById('card-logo'),
+      scale: document.getElementById('card-scale'),
+      length: document.getElementById('card-length'),
+      nickname: document.getElementById('card-nickname')
+    };
+
+    // Update card preview whenever form changes
+    function updateCard() {
+      card.airline.textContent = form.airline.value;
+      card.aircraft.textContent = form.aircraft.value;
+      card.scale.textContent = form.scale.value || '';
+      card.length.textContent = form.length.value ? `${form.length.value} cm` : '';
+
+      if (form.nickname.value) {
+        card.nickname.textContent = `"${form.nickname.value}"`;
+        card.nickname.classList.remove('hidden');
+      } else {
+        card.nickname.classList.add('hidden');
+      }
+
+      if (form.logo.value) {
+        card.logo.src = form.logo.value;
+        card.logo.classList.remove('hidden');
+        // Handle logo loading error
+        card.logo.onerror = function() {
+          this.classList.add('hidden');
+          console.log('Logo image failed to load');
+        };
+        card.logo.onload = function() {
+          this.classList.remove('hidden');
+        };
+      } else {
+        card.logo.classList.add('hidden');
+      }
+    }
+
+    // Bind input events
+    Object.values(form).forEach(el => el.addEventListener('input', updateCard));
+
+    // Initial render
+    updateCard();
+
+    // PDF download handler
+    document.getElementById('download').addEventListener('click', () => {
+      updateCard();
+      
+      // Apply PDF-specific styling
+      const cardElement = document.getElementById('card');
+      const originalStyles = cardElement.getAttribute('style') || '';
+      
+      // Ensure clean look for PDF
+      cardElement.style.boxShadow = 'none';
+      cardElement.style.border = '1px solid #e5e7eb';
+      
+      html2pdf().set({
+        margin: [4, 4],
+        filename: `${form.aircraft.value || 'model'}_${form.scale.value}.pdf`,
+        html2canvas: { scale: 3 }, // Higher quality
+        jsPDF: { unit: 'mm', format: [90, 54] } // credit card size
+      }).from(cardElement).save().then(() => {
+        // Restore original styles
+        cardElement.setAttribute('style', originalStyles);
+      });
+    });
+  </script>
+</body>
+</html>
