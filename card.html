@@ -53,19 +53,21 @@
     .airline-text.short {
       font-size: 2.5rem;
     }
-    /* Logo container styling */
+    /* Logo styling - fixed exact dimensions */
     .logo-container {
+      width: 140px;
+      height: 50px;
+      margin: 0 auto;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 160px;
-      height: 64px;
-      margin: 0 auto;
     }
-    .logo-container img {
-      max-width: 100%;
-      max-height: 100%;
+    #card-logo {
+      width: 140px;
+      height: 50px;
       object-fit: contain;
+      display: block;
     }
   </style>
 </head>
@@ -137,9 +139,9 @@
         <div class="preview-gradient w-full rounded-xl p-8 flex items-center justify-center">
           <!-- Card preview -->
           <div id="card" class="w-full max-w-md aspect-[5/3] bg-white rounded-xl card-shadow p-6 flex flex-col border border-gray-200 relative overflow-hidden">
-            <!-- Logo container with fixed dimensions -->
+            <!-- Logo container with strictly fixed dimensions -->
             <div class="logo-container mb-3">
-              <img id="card-logo" src="" alt="logo" class="hidden" />
+              <img id="card-logo" src="" alt="logo" style="display: none;" />
             </div>
             
             <!-- Airline & aircraft names -->
@@ -231,18 +233,21 @@
 
       if (form.logo.value) {
         card.logo.src = form.logo.value;
-        card.logo.classList.remove('hidden');
+        card.logo.style.display = 'block';
         
         // Handle logo loading error
         card.logo.onerror = function() {
-          this.classList.add('hidden');
+          this.style.display = 'none';
           console.log('Logo image failed to load');
         };
         card.logo.onload = function() {
-          this.classList.remove('hidden');
+          // Force exact dimensions on load
+          this.style.display = 'block';
+          this.style.width = '140px';
+          this.style.height = '50px';
         };
       } else {
-        card.logo.classList.add('hidden');
+        card.logo.style.display = 'none';
       }
     }
 
