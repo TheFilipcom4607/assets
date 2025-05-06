@@ -53,7 +53,7 @@
     .airline-text.short {
       font-size: 2.5rem;
     }
-    /* Logo styling - fixed exact dimensions */
+    /* Logo styling - fixed container, logo fills it */
     .logo-container {
       width: 250px;
       height: 160px;
@@ -63,9 +63,10 @@
       align-items: center;
       justify-content: center;
     }
+    /* Updated logo scaling */
     #card-logo {
-      width: 240px;
-      height: 150px;
+      width: 100%; /* fill the container width */
+      height: 100%; /* fill the container height */
       object-fit: contain;
       display: block;
     }
@@ -225,7 +226,7 @@
       }
 
       if (form.nickname.value) {
-        card.nickname.textContent = `"${form.nickname.value}"`;
+        card.nickname.textContent = `\"${form.nickname.value}\"`;
         card.nickname.classList.remove('hidden');
       } else {
         card.nickname.classList.add('hidden');
@@ -241,10 +242,8 @@
           console.log('Logo image failed to load');
         };
         card.logo.onload = function() {
-          // Force exact dimensions on load
+          // Ensure the logo is visible and fills the container
           this.style.display = 'block';
-          this.style.width = '140px';
-          this.style.height = '50px';
         };
       } else {
         card.logo.style.display = 'none';
