@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Die‑Cast Model Shelf Card Generator</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -13,32 +14,40 @@
             'aviation-gold': '#fbbf24',
           },
           fontFamily: {
-            'sans': ['Inter', 'system-ui', 'sans-serif'],
-            'display': ['Montserrat', 'Inter', 'system-ui', 'sans-serif'],
-          }
-        }
-      }
-    }
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['Montserrat', 'Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* ------------------------------ Shadows ----------------------------- */
     .card-shadow {
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
     .form-shadow {
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
+
+    /* ------------------------------ Animations ------------------------- */
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     .fade-in {
       animation: fadeIn 0.3s ease-out forwards;
     }
-    .preview-gradient {
-      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    }
+
+    /* ------------------------------ Card hover ------------------------- */
     #card {
       transition: all 0.3s ease;
     }
@@ -46,19 +55,20 @@
       transform: translateY(-5px);
       box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.08);
     }
-    /* Airline text dynamic sizing */
+
+    /* ------------------------------ Airline text ----------------------- */
     .airline-text {
       transition: font-size 0.3s ease;
     }
     .airline-text.short {
-      font-size: 2.5rem;
+      font-size: 2.4rem; /* big but still fits */
     }
-    /* Logo styling */
+
+    /* ------------------------------ Logo scaling ----------------------- */
     .logo-container {
       width: 250px;
       height: 160px;
       margin: 0 auto;
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -66,8 +76,6 @@
     #card-logo {
       max-width: 100%;
       max-height: 100%;
-      width: auto;
-      height: auto;
       object-fit: contain;
       display: block;
     }
@@ -75,16 +83,17 @@
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
   <div class="w-full max-w-5xl">
-    <!-- Header -->
-    <div class="text-center mb-8">
+    <!-- ------------------------------ Header --------------------------- -->
+    <header class="text-center mb-8">
       <h1 class="text-3xl md:text-4xl font-display font-bold text-aviation-blue">Die‑Cast Model Shelf Card Generator</h1>
       <p class="text-gray-600 mt-2">Create beautiful display cards for your model aircraft collection</p>
-    </div>
+    </header>
 
     <div class="w-full grid md:grid-cols-5 gap-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
-      <!-- Form panel -->
-      <form id="card-form" class="md:col-span-2 space-y-5 fade-in">
-        <div class="bg-gray-50 rounded-xl p-5 form-shadow">
+      <!-- ------------------------------ Form panel --------------------- -->
+      <form id="card-form" class="md:col-span-2 space-y-5 fade-in" autocomplete="off">
+        <!-- Aircraft details -->
+        <section class="bg-gray-50 rounded-xl p-5 form-shadow">
           <h2 class="font-display font-semibold text-lg text-aviation-blue mb-4">Aircraft Details</h2>
           <div class="space-y-4">
             <div>
@@ -104,29 +113,32 @@
               <input id="logo" type="url" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition" placeholder="https://example.com/logo.png" />
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="bg-gray-50 rounded-xl p-5 form-shadow">
+        <!-- Model specs -->
+        <section class="bg-gray-50 rounded-xl p-5 form-shadow">
           <h2 class="font-display font-semibold text-lg text-aviation-blue mb-4">Model Specifications</h2>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="font-medium block mb-1.5 text-gray-700">Scale</label>
               <select id="scale" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition">
+                <option value="">Select…</option>
+                <option value="1:72">1 : 72</option>
+                <option value="1:100">1 : 100</option>
+                <option value="1:144">1 : 144</option>
+                <option value="1:200">1 : 200</option>
                 <option value="1:400">1 : 400</option>
                 <option value="1:500">1 : 500</option>
-                <option value="1:200">1 : 200</option>
-                <option value="1:144">1 : 144</option>
-                <option value="1:100">1 : 100</option>
-                <option value="1:72">1 : 72</option>
               </select>
             </div>
             <div>
-              <label class="font-medium block mb-1.5 text-gray-700">Length <span class="text-sm text-gray-500">(optional, cm)</span></label>
+              <label class="font-medium block mb-1.5 text-gray-700">Length <span class="text-sm text-gray-500">(cm, optional)</span></label>
               <input id="length" type="number" step="0.1" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition" placeholder="18.2" />
             </div>
           </div>
-        </div>
+        </section>
 
+        <!-- Download button -->
         <button type="button" id="download" class="w-full bg-aviation-blue text-white rounded-lg p-3 font-medium hover:bg-blue-800 transform hover:scale-[1.02] transition flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -135,22 +147,146 @@
         </button>
       </form>
 
-      <!-- Preview panel -->
+      <!-- ------------------------------ Preview panel ------------------ -->
       <div class="md:col-span-3 flex flex-col items-center justify-center fade-in">
         <h2 class="font-display font-semibold text-lg text-aviation-blue mb-4 self-start">Preview</h2>
         <div class="preview-gradient w-full rounded-xl p-8 flex items-center justify-center">
           <!-- Card preview -->
           <div id="card" class="w-full max-w-md aspect-[5/3] bg-white rounded-xl card-shadow p-6 flex flex-col border border-gray-200 relative overflow-hidden">
-            <!-- Logo container with strictly fixed dimensions -->
+            <!-- Logo container -->
             <div class="logo-container mb-3">
-              <img id="card-logo" src="" alt="logo" style="display: none;" />
+              <img id="card-logo" src="" alt="Airline logo" style="display:none;" />
             </div>
-            
-            <!-- Airline & aircraft names -->
+
+            <!-- Airline & aircraft -->
             <div class="text-center mt-1 relative z-10">
               <p id="card-airline" class="text-xl md:text-2xl font-display font-semibold text-aviation-blue break-words airline-text"></p>
               <p id="card-aircraft" class="text-lg text-gray-700 break-words"></p>
             </div>
-            
+
             <!-- Nickname -->
-            <p id="card-nickname
+            <p id="card-nickname" class="italic text-center text-gray-600 hidden my-2 text-lg relative z-10"></p>
+
+            <!-- Spacer -->
+            <div class="flex-1"></div>
+
+            <!-- Scale & length -->
+            <div class="flex justify-between text-base text-gray-700 border-t border-gray-200 pt-3 mt-3 relative z-10">
+              <div class="flex-1 text-center">
+                <span id="card-scale" class="font-medium"></span>
+              </div>
+              <div id="length-container" class="flex-1 text-center hidden">
+                <span id="card-length" class="font-medium"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-gray-500 text-sm mt-4">PDF fits standard business‑card sleeves</p>
+      </div>
+    </div>
+
+    <footer class="text-center text-gray-500 text-sm mt-8">Created for aviation enthusiasts and model collectors</footer>
+  </div>
+
+  <!-- ------------------------------ Libraries ----------------------- -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- ------------------------------ App Script ---------------------- -->
+  <script>
+    /* ----------------------------- DOM refs -------------------------- */
+    const form = {
+      aircraft: document.getElementById('aircraft'),
+      airline: document.getElementById('airline'),
+      logo: document.getElementById('logo'),
+      scale: document.getElementById('scale'),
+      length: document.getElementById('length'),
+      nickname: document.getElementById('nickname'),
+    };
+
+    const card = {
+      airline: document.getElementById('card-airline'),
+      aircraft: document.getElementById('card-aircraft'),
+      logo: document.getElementById('card-logo'),
+      scale: document.getElementById('card-scale'),
+      length: document.getElementById('card-length'),
+      nickname: document.getElementById('card-nickname'),
+    };
+
+    /* ------------------------- Update preview ------------------------ */
+    function updateCard() {
+      // Airline text + dynamic sizing
+      card.airline.textContent = form.airline.value.trim();
+      if (form.airline.value.trim().length > 0 && form.airline.value.trim().length <= 3) {
+        card.airline.classList.add('short');
+      } else {
+        card.airline.classList.remove('short');
+      }
+
+      // Aircraft model
+      card.aircraft.textContent = form.aircraft.value.trim();
+
+      // Scale
+      card.scale.textContent = form.scale.value ? `Scale ${form.scale.value}` : '';
+
+      // Length (optional)
+      const lengthContainer = document.getElementById('length-container');
+      if (form.length.value) {
+        card.length.textContent = `${form.length.value} cm`;
+        lengthContainer.classList.remove('hidden');
+      } else {
+        lengthContainer.classList.add('hidden');
+      }
+
+      // Nickname (optional)
+      if (form.nickname.value.trim()) {
+        card.nickname.textContent = `"${form.nickname.value.trim()}"`;
+        card.nickname.classList.remove('hidden');
+      } else {
+        card.nickname.classList.add('hidden');
+      }
+
+      // Logo (optional)
+      if (form.logo.value.trim()) {
+        card.logo.src = form.logo.value.trim();
+        card.logo.style.display = 'block';
+        card.logo.onload = () => {
+          card.logo.style.display = 'block';
+        };
+        card.logo.onerror = () => {
+          card.logo.style.display = 'none';
+        };
+      } else {
+        card.logo.style.display = 'none';
+      }
+    }
+
+    /* ------------------------- Bind events --------------------------- */
+    Object.values(form).forEach((el) => el.addEventListener('input', updateCard));
+    updateCard(); // initial render
+
+    /* ------------------------- PDF download -------------------------- */
+    document.getElementById('download').addEventListener('click', () => {
+      updateCard();
+      const cardEl = document.getElementById('card');
+      const originalStyle = cardEl.getAttribute('style') || '';
+
+      // remove shadow/border for clean PDF
+      cardEl.style.boxShadow = 'none';
+      cardEl.style.border = '1px solid #e5e7eb';
+
+      html2pdf()
+        .set({
+          margin: [4, 4],
+          filename: `${form.aircraft.value.trim() || 'model'}_${form.scale.value || 'scale'}.pdf`,
+          html2canvas: { scale: 3 },
+          jsPDF: { unit: 'mm', format: [90, 54] }, // credit‑card size
+        })
+        .from(cardEl)
+        .save()
+        .then(() => {
+          cardEl.setAttribute('style', originalStyle);
+        });
+    });
+  </script>
+</body>
+</html>
