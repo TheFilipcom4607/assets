@@ -53,7 +53,20 @@
     .airline-text.short {
       font-size: 2.5rem;
     }
-  </style>
+    /* Logo container styling */
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 160px;
+      height: 64px;
+      margin: 0 auto;
+    }
+    .logo-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
@@ -124,11 +137,9 @@
         <div class="preview-gradient w-full rounded-xl p-8 flex items-center justify-center">
           <!-- Card preview -->
           <div id="card" class="w-full max-w-md aspect-[5/3] bg-white rounded-xl card-shadow p-6 flex flex-col border border-gray-200 relative overflow-hidden">
-            <!-- Logo container with fixed height -->
-            <div class="flex justify-center mb-3 h-16">
-              <div class="flex items-center justify-center">
-                <img id="card-logo" src="" alt="logo" class="max-h-16 max-w-32 object-contain hidden" />
-              </div>
+            <!-- Logo container with fixed dimensions -->
+            <div class="logo-container mb-3">
+              <img id="card-logo" src="" alt="logo" class="hidden" />
             </div>
             
             <!-- Airline & aircraft names -->
@@ -220,11 +231,6 @@
 
       if (form.logo.value) {
         card.logo.src = form.logo.value;
-        
-        // LOGO SIZE
-        card.logo.style.maxWidth = '160px';
-        card.logo.style.maxHeight = '80px';
-        
         card.logo.classList.remove('hidden');
         
         // Handle logo loading error
