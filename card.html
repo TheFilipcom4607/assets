@@ -183,7 +183,7 @@
               </div>
 
               <!-- Nickname -->
-              <p id="card-nickname" class="text-center text-gray-600 hidden my-2 text-lg relative z-10"></p>
+              <p id="card-nickname" class="text-center text-gray-500 hidden my-2 text-lg relative z-10"></p>
 
               <!-- Spacer -->
               <div class="flex-1"></div>
@@ -258,7 +258,7 @@
 
       // Nickname (optional)
       if (form.nickname.value.trim()) {
-        card.nickname.textContent = `"${form.nickname.value.trim()}"`;
+        card.nickname.textContent = `${form.nickname.value.trim()}`;
         card.nickname.classList.remove('hidden');
       } else {
         card.nickname.classList.add('hidden');
