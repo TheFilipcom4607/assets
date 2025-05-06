@@ -53,7 +53,7 @@
     .airline-text.short {
       font-size: 2.5rem;
     }
-    /* Logo styling - fixed container, logo fills it */
+    /* Logo styling */
     .logo-container {
       width: 250px;
       height: 160px;
@@ -63,10 +63,12 @@
       align-items: center;
       justify-content: center;
     }
-    /* Updated logo scaling */
     #card-logo {
-      width: 100%; /* fill the container width */
-      height: 100%; /* fill the container height */
+      /* Allow both tall and wide logos to fit without distortion */
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
       object-fit: contain;
       display: block;
     }
@@ -178,106 +180,4 @@
   </div>
 
   <!-- html2pdf for PDF export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-  <script>
-    // Form inputs
-    const form = {
-      aircraft: document.getElementById('aircraft'),
-      airline: document.getElementById('airline'),
-      logo: document.getElementById('logo'),
-      scale: document.getElementById('scale'),
-      length: document.getElementById('length'),
-      nickname: document.getElementById('nickname')
-    };
-
-    // Card outputs
-    const card = {
-      airline: document.getElementById('card-airline'),
-      aircraft: document.getElementById('card-aircraft'),
-      logo: document.getElementById('card-logo'),
-      scale: document.getElementById('card-scale'),
-      length: document.getElementById('card-length'),
-      nickname: document.getElementById('card-nickname')
-    };
-
-    // Update card preview whenever form changes
-    function updateCard() {
-      const lengthContainer = document.getElementById('length-container');
-      const airlineElement = card.airline;
-      
-      // Set airline name and adjust text size for short names
-      airlineElement.textContent = form.airline.value;
-      if (form.airline.value && form.airline.value.length <= 3) {
-        airlineElement.classList.add('short');
-      } else {
-        airlineElement.classList.remove('short');
-      }
-      
-      card.aircraft.textContent = form.aircraft.value;
-      card.scale.textContent = form.scale.value ? `Scale ${form.scale.value}` : '';
-      
-      // Handle length as optional
-      if (form.length.value) {
-        card.length.textContent = `${form.length.value} cm`;
-        lengthContainer.classList.remove('hidden');
-      } else {
-        lengthContainer.classList.add('hidden');
-      }
-
-      if (form.nickname.value) {
-        card.nickname.textContent = `\"${form.nickname.value}\"`;
-        card.nickname.classList.remove('hidden');
-      } else {
-        card.nickname.classList.add('hidden');
-      }
-
-      if (form.logo.value) {
-        card.logo.src = form.logo.value;
-        card.logo.style.display = 'block';
-        
-        // Handle logo loading error
-        card.logo.onerror = function() {
-          this.style.display = 'none';
-          console.log('Logo image failed to load');
-        };
-        card.logo.onload = function() {
-          // Ensure the logo is visible and fills the container
-          this.style.display = 'block';
-        };
-      } else {
-        card.logo.style.display = 'none';
-      }
-    }
-
-    // Bind input events
-    Object.values(form).forEach(el => el.addEventListener('input', updateCard));
-
-    // Initial render
-    updateCard();
-
-    // PDF download handler
-    document.getElementById('download').addEventListener('click', () => {
-      updateCard();
-      
-      // Apply PDF-specific styling
-      const cardElement = document.getElementById('card');
-      const originalStyles = cardElement.getAttribute('style') || '';
-      
-      // Ensure clean look for PDF
-      cardElement.style.boxShadow = 'none';
-      cardElement.style.border = '1px solid #e5e7eb';
-      
-      html2pdf().set({
-        margin: [4, 4],
-        filename: `${form.aircraft.value || 'model'}_${form.scale.value}.pdf`,
-        html2canvas: { scale: 3 }, // Higher quality
-        jsPDF: { unit: 'mm', format: [90, 54] } // credit card size
-      }).from(cardElement).save().then(() => {
-        // Restore original styles
-        cardElement.setAttribute('style', originalStyles);
-      });
-    });
-  </script>
-</body>
-</html>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10
