@@ -39,6 +39,21 @@
     .preview-gradient {
       background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
     }
+    #card {
+      transition: all 0.3s ease;
+    }
+    #card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.08);
+    }
+    /* Airline text dynamic sizing */
+    .airline-text {
+      transition: font-size 0.3s ease;
+    }
+    .airline-text.short {
+      font-size: 2.5rem;
+    }
+  </style>
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
@@ -89,7 +104,7 @@
               </select>
             </div>
             <div>
-              <label class="font-medium block mb-1.5 text-gray-700">Length (cm)</label>
+              <label class="font-medium block mb-1.5 text-gray-700">Length <span class="text-sm text-gray-500">(optional, cm)</span></label>
               <input id="length" type="number" step="0.1" class="w-full rounded-lg border border-gray-300 p-2.5 focus:ring-2 focus:ring-aviation-blue focus:border-aviation-blue transition" placeholder="18.2" />
             </div>
           </div>
@@ -108,32 +123,33 @@
         <h2 class="font-display font-semibold text-lg text-aviation-blue mb-4 self-start">Preview</h2>
         <div class="preview-gradient w-full rounded-xl p-8 flex items-center justify-center">
           <!-- Card preview -->
-          <div id="card" class="w-full max-w-md aspect-[5/3] bg-white rounded-xl card-shadow p-6 flex flex-col border border-gray-200">
-            <!-- Logo top -->
-            <div class="flex justify-center mb-2">
-              <img id="card-logo" src="" alt="logo" class="h-16 w-auto object-contain hidden" />
+          <div id="card" class="w-full max-w-md aspect-[5/3] bg-white rounded-xl card-shadow p-6 flex flex-col border border-gray-200 relative overflow-hidden">
+            <!-- Logo container with fixed height -->
+            <div class="flex justify-center mb-3 h-16">
+              <div class="flex items-center justify-center">
+                <img id="card-logo" src="" alt="logo" class="max-h-16 max-w-32 object-contain hidden" />
+              </div>
             </div>
             
             <!-- Airline & aircraft names -->
-            <div class="text-center mt-1">
-              <p id="card-airline" class="text-xl font-display font-semibold text-aviation-blue break-words"></p>
-              <p id="card-aircraft" class="text-lg text-gray-700 break-words mt-1"></p>
+            <div class="text-center mt-1 relative z-10">
+              <p id="card-airline" class="text-xl md:text-2xl font-display font-semibold text-aviation-blue break-words airline-text"></p>
+              <div class="h-px w-16 bg-aviation-blue mx-auto my-2"></div>
+              <p id="card-aircraft" class="text-lg text-gray-700 break-words"></p>
             </div>
             
             <!-- Nickname -->
-            <p id="card-nickname" class="italic text-center text-gray-600 hidden my-2 text-lg"></p>
+            <p id="card-nickname" class="italic text-center text-gray-600 hidden my-2 text-lg relative z-10"></p>
             
             <!-- Spacer pushes bottom row down -->
             <div class="flex-1"></div>
             
             <!-- Scale & length row -->
-            <div class="flex justify-between text-base text-gray-700 border-t border-gray-200 pt-3 mt-3">
-              <div>
-                <span class="text-gray-500 text-sm">Scale:</span>
+            <div class="flex justify-between text-base text-gray-700 border-t border-gray-200 pt-3 mt-3 relative z-10">
+              <div class="flex-1 text-center">
                 <span id="card-scale" class="font-medium"></span>
               </div>
-              <div>
-                <span class="text-gray-500 text-sm">Length:</span>
+              <div id="length-container" class="flex-1 text-center hidden">
                 <span id="card-length" class="font-medium"></span>
               </div>
             </div>
@@ -174,10 +190,27 @@
 
     // Update card preview whenever form changes
     function updateCard() {
-      card.airline.textContent = form.airline.value;
+      const lengthContainer = document.getElementById('length-container');
+      const airlineElement = card.airline;
+      
+      // Set airline name and adjust text size for short names
+      airlineElement.textContent = form.airline.value;
+      if (form.airline.value && form.airline.value.length <= 3) {
+        airlineElement.classList.add('short');
+      } else {
+        airlineElement.classList.remove('short');
+      }
+      
       card.aircraft.textContent = form.aircraft.value;
-      card.scale.textContent = form.scale.value || '';
-      card.length.textContent = form.length.value ? `${form.length.value} cm` : '';
+      card.scale.textContent = form.scale.value ? `Scale ${form.scale.value}` : '';
+      
+      // Handle length as optional
+      if (form.length.value) {
+        card.length.textContent = `${form.length.value} cm`;
+        lengthContainer.classList.remove('hidden');
+      } else {
+        lengthContainer.classList.add('hidden');
+      }
 
       if (form.nickname.value) {
         card.nickname.textContent = `"${form.nickname.value}"`;
@@ -188,7 +221,13 @@
 
       if (form.logo.value) {
         card.logo.src = form.logo.value;
+        
+        // Force constrained dimensions on the logo
+        card.logo.style.maxWidth = '120px';
+        card.logo.style.maxHeight = '60px';
+        
         card.logo.classList.remove('hidden');
+        
         // Handle logo loading error
         card.logo.onerror = function() {
           this.classList.add('hidden');
