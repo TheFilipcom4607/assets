@@ -2,121 +2,98 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Address → Coordinates (D° MM.mmm)</title>
-  <!-- External stylesheet -->
+  <title>Address → Coordinates (+ QTH)</title>
+
   <link rel="stylesheet" href="https://assets.thefilip.com/style.css">
   <style>
-    /* Minimal overrides; main styles come from thefilip.com */
-    body {
-      max-width: 500px;
-      margin: 2em auto;
-      padding: 1em;
-    }
-    .hidden { display: none; }
+    body { max-width: 520px; margin: 2em auto; padding: 1em; }
+    .hidden { display:none; }
+    #result span { display:block; margin-top:.4em; }
+    label   { display:block; margin-top:1em; }
   </style>
 </head>
 <body>
-  <h2>Address → Coordinates (D° MM.mmm)</h2>
+  <h2>Address → Coordinates (+ QTH)</h2>
 
   <label for="address">Enter address:</label>
   <input type="text" id="address"
-         placeholder="e.g. 1600 Amphitheatre Parkway, Mountain View, CA" />
+         placeholder="e.g. 1600 Amphitheatre Parkway, Mountain View, CA">
 
-  <button id="go">Convert &amp; Copy</button>
+  <label for="format">Output format:</label>
+  <select id="format">
+    <option value="dmm">D° MM.mmm (N / S E / W)</option>
+    <option value="dec">Decimal (lat, lon) – 6 dec</option>
+    <option value="decShort">Decimal (lat, lon) – 3 + 4 dec</option>
+  </select>
+
+  <button id="go">Convert & Copy</button>
   <div id="result" class="hidden"></div>
 
   <script>
-    // Convert decimal degrees to "D° MM.mmm" string
+    /* ---------- helpers ---------- */
+
     function toDegMin(dd, isLat) {
-      const prefix = isLat
-        ? (dd >= 0 ? 'N' : 'S')
-        : (dd >= 0 ? 'E' : 'W');
-      const absDeg = Math.abs(dd);
-      const deg = Math.floor(absDeg);
-      const min = (absDeg - deg) * 60;
-      const degStr = deg.toString().padStart(isLat ? 2 : 3, '0');
-      const minStr = min.toFixed(3).padStart(6, '0');
-      return `${prefix} ${degStr}° ${minStr}`;
+      const hemi = isLat ? (dd >= 0 ? 'N' : 'S') : (dd >= 0 ? 'E' : 'W');
+      const abs  = Math.abs(dd);
+      const deg  = Math.floor(abs);
+      const min  = (abs - deg) * 60;
+      return `${hemi} ${deg.toString().padStart(isLat ? 2 : 3,'0')}° ${min.toFixed(3).padStart(6,'0')}`;
     }
 
-    // Cross-browser copy-to-clipboard
-    function copyToClipboard(text) {
-      // Try the modern API first
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        return navigator.clipboard.writeText(text)
-          .catch(() => fallbackCopy(text));
-      }
-      // Fallback
-      return fallbackCopy(text);
+    const toDecimal = (lat, lon, latDec = 6, lonDec = 6) =>
+      `${lat.toFixed(latDec)}, ${lon.toFixed(lonDec)}`;
+
+    function toMaidenhead(lat, lon) {
+      lon += 180; lat += 90;
+      const fLon = Math.floor(lon/20), fLat = Math.floor(lat/10);
+      const sLon = Math.floor((lon%20)/2), sLat = Math.floor(lat%10);
+      const ssLon= Math.floor(((lon%2)*12)), ssLat= Math.floor(((lat%1)*24));
+      return String.fromCharCode(65+fLon) + String.fromCharCode(65+fLat) +
+             sLon + sLat +
+             String.fromCharCode(65+ssLon) + String.fromCharCode(65+ssLat);
     }
 
-    function fallbackCopy(text) {
-      return new Promise((resolve, reject) => {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        // Prevent scrolling to bottom on iOS
-        ta.style.position = 'fixed';
-        ta.style.top = '0';
-        ta.style.left = '0';
-        ta.style.width = '1px';
-        ta.style.height = '1px';
-        ta.style.padding = '0';
-        ta.style.border = 'none';
-        ta.style.outline = 'none';
-        ta.style.boxShadow = 'none';
-        ta.style.background = 'transparent';
+    const copyText = txt =>
+      navigator.clipboard?.writeText(txt) ??
+      (document.execCommand('copy', true, txt), Promise.resolve());
 
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
+    /* ---------- main ---------- */
 
-        try {
-          const ok = document.execCommand('copy');
-          document.body.removeChild(ta);
-          ok ? resolve() : reject();
-        } catch (err) {
-          document.body.removeChild(ta);
-          reject(err);
-        }
-      });
-    }
-
-    document.getElementById('go').addEventListener('click', () => {
+    document.getElementById('go').addEventListener('click', async () => {
       const addr = document.getElementById('address').value.trim();
-      if (!addr) {
-        alert('Please enter an address first.');
-        return;
+      if (!addr) { alert('Please enter an address first.'); return; }
+
+      const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' +
+                  encodeURIComponent(addr);
+
+      try {
+        const [hit] = await (await fetch(url, { headers:{'Accept-Language':'en'} })).json();
+        if (!hit) throw new Error('No results found.');
+
+        const lat = parseFloat(hit.lat), lon = parseFloat(hit.lon);
+        const qth = toMaidenhead(lat, lon);
+
+        const mode = document.getElementById('format').value;
+        let coordStr;
+
+        switch (mode) {
+          case 'dec':      coordStr = toDecimal(lat, lon, 6, 6); break;
+          case 'decShort': coordStr = toDecimal(lat, lon, 3, 4); break;
+          default:         coordStr = `${toDegMin(lat,true)} ${toDegMin(lon,false)}`;
+        }
+
+        // show
+        const out = document.getElementById('result');
+        out.innerHTML = `<span>${coordStr}</span><span>QTH Locator: <strong>${qth}</strong></span>`;
+        out.classList.remove('hidden');
+
+        // copy
+        await copyText(`${coordStr}  |  ${qth}`);
+        out.lastElementChild.innerHTML += '  (Copied!)';
+
+      } catch(e) {
+        alert('Error: ' + e.message);
       }
-
-      const url = 'https://nominatim.openstreetmap.org/search'
-                + '?format=json&limit=1&q='
-                + encodeURIComponent(addr);
-
-      fetch(url, { headers: { 'Accept-Language': 'en' } })
-        .then(res => res.json())
-        .then(data => {
-          if (!data.length) throw new Error('No results found');
-          const lat = parseFloat(data[0].lat);
-          const lon = parseFloat(data[0].lon);
-          const formatted = `${toDegMin(lat, true)} ${toDegMin(lon, false)}`;
-
-          // Show it
-          const resultDiv = document.getElementById('result');
-          resultDiv.textContent = formatted;
-          resultDiv.classList.remove('hidden');
-
-          // Copy it
-          copyToClipboard(formatted)
-            .then(() => {
-              resultDiv.textContent += '  (Copied!)';
-            })
-            .catch(() => {
-              alert('Coordinates: ' + formatted + '\n\n(Copy failed.)');
-            });
-        })
-        .catch(err => {
-          alert('Error: ' + err.message);
-        });
     });
   </script>
 </body>
