@@ -27,26 +27,30 @@
     .summary-box {
       margin-top: 1.5em;
       padding: 0.9em 1em;
-      background: #fafbfc;
+      background: #232323;
       border-radius: 7px;
-      border: 1px solid #e4e4e7;
+      border: 1px solid #333;
+      color: #eaeaea;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     .tiers {
       margin-top: 1em;
+      width: 100%;
+      color: #eaeaea;
     }
     .tiers td {
       padding: 0.2em 0.5em;
     }
     .break-even {
-      color: #17a300;
+      color: #40e0a0;
       font-weight: bold;
     }
     .loss {
-      color: #c30017;
+      color: #ff5e5e;
       font-weight: bold;
     }
     .profit {
-      color: #0058b1;
+      color: #60aaff;
       font-weight: bold;
     }
     .currency-group {
@@ -54,6 +58,26 @@
       gap: 0.5em;
       margin-bottom: 1em;
       align-items: center;
+    }
+    footer {
+      text-align: center;
+      margin-top: 3em;
+      color: #888;
+      font-size: 0.96em;
+      letter-spacing: 0.01em;
+      padding-bottom: 1em;
+    }
+    .footer-heart {
+      color: #ff4e4e;
+      font-size: 1.1em;
+      vertical-align: middle;
+      animation: softPulse 2s infinite;
+      display: inline-block;
+      margin: 0 0.2em;
+    }
+    @media (max-width: 600px) {
+      body { padding: 0.5em; }
+      .summary-box { padding: 0.7em 0.6em; }
     }
   </style>
 </head>
@@ -112,6 +136,10 @@
   <button onclick="calculatePrice()">Calculate</button>
 
   <div class="result" id="result"></div>
+
+  <footer>
+    made with <span class="footer-heart">❤️</span> by <a href="https://thefilip.com" target="_blank">thefilip</a>
+  </footer>
 
   <script>
     function val(id, fallback=undefined) {
@@ -197,13 +225,13 @@
           </tr>
           ${competitorHTML}
         </table>
-        <div class="summary-box">
+        <div class="summary-box" style="margin-top:1.2em;">
           <b>Profit per Piece:</b><br>
           ${price30.toFixed(2)} ${currency()} price = ${(price30-costPerPiece).toFixed(2)} ${currency()} profit<br>
           ${price50.toFixed(2)} ${currency()} price = ${(price50-costPerPiece).toFixed(2)} ${currency()} profit<br>
           ${price100.toFixed(2)} ${currency()} price = ${(price100-costPerPiece).toFixed(2)} ${currency()} profit
         </div>
-        <div style="margin-top:1em; font-size:0.95em; color:#666;">
+        <div style="margin-top:1em; font-size:0.97em; color:#b0b0b0;">
           <b>Tip:</b> Adjust batch size to split fixed costs across many items.<br>
           For best results, experiment with profit margins and competitor pricing!
         </div>
