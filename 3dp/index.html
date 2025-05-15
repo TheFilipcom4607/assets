@@ -14,70 +14,61 @@
       display: block;
       width: 100%;
       margin-bottom: 0.6em;
+      color: #eaeaea;
+    }
+    input::placeholder {
+      color: #888;
+    }
+    button {
+      margin-top: 1em;
     }
     .result {
       margin-top: 1.5em;
       font-size: 1.1em;
     }
-    summary {
-      cursor: pointer;
-      margin-bottom: 0.7em;
-      font-weight: 500;
-    }
     .summary-box {
       margin-top: 1.5em;
-      padding: 0.9em 1em;
+      padding: 1em;
       background: #232323;
-      border-radius: 7px;
       border: 1px solid #333;
+      border-radius: 6px;
       color: #eaeaea;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     .tiers {
-      margin-top: 1em;
       width: 100%;
+      margin-top: 1em;
       color: #eaeaea;
     }
     .tiers td {
-      padding: 0.2em 0.5em;
+      padding: 0.3em 0.5em;
     }
     .break-even {
       color: #40e0a0;
-      font-weight: bold;
-    }
-    .loss {
-      color: #ff5e5e;
       font-weight: bold;
     }
     .profit {
       color: #60aaff;
       font-weight: bold;
     }
+    .loss {
+      color: #ff5e5e;
+      font-weight: bold;
+    }
     .currency-group {
       display: flex;
       gap: 0.5em;
-      margin-bottom: 1em;
       align-items: center;
+      margin-bottom: 1em;
     }
     footer {
       text-align: center;
-      margin-top: 3em;
+      margin-top: 2.5em;
       color: #888;
-      font-size: 0.96em;
-      letter-spacing: 0.01em;
-      padding-bottom: 1em;
+      font-size: 0.9em;
     }
     .footer-heart {
       color: #ff4e4e;
-      font-size: 1.1em;
-      vertical-align: middle;
       animation: softPulse 2s infinite;
-      display: inline-block;
-      margin: 0 0.2em;
-    }
-    @media (max-width: 600px) {
-      body { padding: 0.5em; }
-      .summary-box { padding: 0.7em 0.6em; }
     }
   </style>
 </head>
@@ -85,7 +76,7 @@
   <h2>3D Print Price Calculator</h2>
 
   <div class="currency-group">
-    <label for="currency" style="width: auto;">Currency:</label>
+    <label for="currency" style="width:auto;">Currency Symbol:</label>
     <select id="currency" style="width:auto;">
       <option value="zł">zł</option>
       <option value="€">€</option>
@@ -94,32 +85,33 @@
     </select>
   </div>
 
-  <label for="weight">Model Weight (g):</label>
-  <input type="number" id="weight" min="0" step="0.01">
+  <label for="weight">Model Weight (g per model):</label>
+  <input type="number" id="weight" min="0" step="0.01" placeholder="e.g. 42">
 
-  <label for="hours">Print Time (h):</label>
-  <input type="number" id="hours" min="0" step="0.01">
+  <label for="batch">Models per Batch (quantity):</label>
+  <input type="number" id="batch" min="1" step="1" placeholder="e.g. 3">
 
-  <label for="filamentPrice">Filament Price (per kg):</label>
-  <input type="number" id="filamentPrice" min="0" step="0.01">
+  <label for="hours">Print Time (hours per batch):</label>
+  <input type="number" id="hours" min="0" step="0.01" placeholder="e.g. 9">
 
-  <label for="electricityPrice">Electricity Price (per kWh):</label>
-  <input type="number" id="electricityPrice" min="0" step="0.01">
+  <label for="filamentPrice">Filament Price (zł per kg):</label>
+  <input type="number" id="filamentPrice" min="0" step="0.01" placeholder="e.g. 129">
+
+  <label for="electricityPrice">Electricity Price (zł per kWh):</label>
+  <input type="number" id="electricityPrice" min="0" step="0.01" placeholder="e.g. 0.90">
 
   <label for="power">Printer Power Usage (W):</label>
-  <input type="number" id="power" min="0" step="1">
+  <input type="number" id="power" min="0" step="1" placeholder="e.g. 100">
 
-  <label for="maintenance">Maintenance & Wear (per hour):</label>
-  <input type="number" id="maintenance" min="0" step="0.01">
+  <label for="maintenance">Maintenance & Wear (zł per hour):</label>
+  <input type="number" id="maintenance" min="0" step="0.01" placeholder="e.g. 0.75">
 
-  <label for="handling">Handling & Prep (per batch):</label>
-  <input type="number" id="handling" min="0" step="0.01">
-
-  <label for="batch">Number of Models per Batch:</label>
-  <input type="number" id="batch" min="1" step="1" value="1">
+  <label for="handling">Handling & Prep (zł per batch):</label>
+  <input type="number" id="handling" min="0" step="0.01" placeholder="e.g. 6">
 
   <details>
-    <summary>Advanced</summary>
+    <summary style="color:#eaeaea;">Advanced Options</summary>
+
     <label for="profit30">Profit Margin 1 (%):</label>
     <input type="number" id="profit30" min="0" step="1" placeholder="e.g. 30">
 
@@ -129,8 +121,8 @@
     <label for="profit100">Profit Margin 3 (%):</label>
     <input type="number" id="profit100" min="0" step="1" placeholder="e.g. 100">
 
-    <label for="competitor">Competitor's Price:</label>
-    <input type="number" id="competitor" min="0" step="0.01" placeholder="(Optional)">
+    <label for="competitor">Competitor's Price (same currency):</label>
+    <input type="number" id="competitor" min="0" step="0.01" placeholder="e.g. 50">
   </details>
 
   <button onclick="calculatePrice()">Calculate</button>
@@ -142,100 +134,85 @@
   </footer>
 
   <script>
-    function val(id, fallback=undefined) {
+    function val(id, def=0) {
       const v = document.getElementById(id).value;
-      return v === '' ? fallback : parseFloat(v);
+      return v === '' ? def : parseFloat(v);
     }
-
     function currency() {
       return document.getElementById('currency').value;
     }
 
     function calculatePrice() {
-      // Inputs
-      const weight = val('weight', 0);
-      const hours = val('hours', 0);
-      const filamentPrice = val('filamentPrice', 0);
-      const electricityPrice = val('electricityPrice', 0);
-      const power = val('power', 0);
-      const maintenance = val('maintenance', 0);
-      const handling = val('handling', 0);
-      const batch = Math.max(val('batch', 1), 1);
+      // inputs
+      const weight       = val('weight');
+      const batch        = Math.max(val('batch', 1), 1);
+      const hours        = val('hours');
+      const filamentKg   = val('filamentPrice');
+      const elecPrice    = val('electricityPrice');
+      const powerW       = val('power');
+      const maintPerHour = val('maintenance');
+      const handlingBatch= val('handling');
 
-      // Advanced/profit tiers
-      const profit30 = val('profit30', 30);
-      const profit50 = val('profit50', 50);
-      const profit100 = val('profit100', 100);
-      const competitor = val('competitor');
+      // advanced
+      const pm1    = val('profit30', 30);
+      const pm2    = val('profit50', 50);
+      const pm3    = val('profit100',100);
+      const comp   = val('competitor', 0);
 
-      // Per-batch costs
-      const materialCost = filamentPrice * (weight / 1000);
-      const electricityCost = (power * hours / 1000) * electricityPrice;
-      const maintenanceCost = maintenance * hours;
-      const totalCostBatch = materialCost + electricityCost + maintenanceCost + handling;
-      const costPerPiece = totalCostBatch / batch;
+      // costs PER BATCH
+      const materialCost   = filamentKg * ((weight/1000) * batch);
+      const electricityCost= (powerW * hours/1000) * elecPrice;
+      const maintenanceCost= maintPerHour * hours;
+      const totalBatchCost = materialCost + electricityCost + maintenanceCost + handlingBatch;
 
-      // Helper function
-      function priceWithProfit(cost, margin) {
-        return cost * (1 + margin / 100);
+      // cost per piece
+      const costPerPiece   = totalBatchCost / batch;
+
+      // price with profit
+      const price1 = costPerPiece * (1 + pm1/100);
+      const price2 = costPerPiece * (1 + pm2/100);
+      const price3 = costPerPiece * (1 + pm3/100);
+
+      // competitor profit
+      let compHTML = '';
+      if (comp > 0) {
+        const compProfit = comp - costPerPiece;
+        const compMargin = (compProfit / costPerPiece) * 100;
+        compHTML = `
+          <tr>
+            <td>Competitor Price (${comp.toFixed(2)} ${currency()}):</td>
+            <td>${compProfit < 0
+              ? `<span class="loss">LOSS</span> ${compProfit.toFixed(2)} ${currency()}`
+              : `<span class="profit">Profit</span> ${compProfit.toFixed(2)} ${currency()} (${compMargin.toFixed(0)}%)`
+            }</td>
+          </tr>`;
       }
 
-      // Price tiers
-      const price30 = priceWithProfit(costPerPiece, profit30);
-      const price50 = priceWithProfit(costPerPiece, profit50);
-      const price100 = priceWithProfit(costPerPiece, profit100);
-
-      // Competitor price/profit
-      let competitorHTML = '';
-      if (competitor && competitor > 0) {
-        const competitorProfit = competitor - costPerPiece;
-        const competitorMargin = (competitorProfit / costPerPiece) * 100;
-        competitorHTML = `<tr>
-          <td>Competitor Price (${competitor.toFixed(2)} ${currency()}):</td>
-          <td>${competitorProfit < 0
-            ? `<span class="loss">LOSS</span> (${competitorProfit.toFixed(2)} ${currency()})`
-            : `<span class="profit">Profit</span>: ${competitorProfit.toFixed(2)} ${currency()} (${competitorMargin.toFixed(0)}%)`
-          }</td>
-        </tr>`;
-      }
-
-      // Output
+      // render
       document.getElementById('result').innerHTML = `
         <div class="summary-box">
-          <b>Per Piece Cost Breakdown:</b><br>
-          Material: ${materialCost.toFixed(2)} ${currency()}<br>
-          Electricity: ${electricityCost.toFixed(2)} ${currency()}<br>
-          Maintenance: ${maintenanceCost.toFixed(2)} ${currency()}<br>
-          Handling: ${(handling / batch).toFixed(2)} ${currency()}<br>
+          <b>Cost per Batch:</b><br>
+          • Material: ${materialCost.toFixed(2)} ${currency()}<br>
+          • Electricity: ${electricityCost.toFixed(2)} ${currency()}<br>
+          • Maintenance: ${maintenanceCost.toFixed(2)} ${currency()}<br>
+          • Handling: ${handlingBatch.toFixed(2)} ${currency()}<br>
           <hr>
-          <b class="break-even">Break-even Price:</b> ${costPerPiece.toFixed(2)} ${currency()}
+          <b class="break-even">Break-even per Piece:</b> ${costPerPiece.toFixed(2)} ${currency()}
         </div>
+
         <table class="tiers">
-          <tr>
-            <td>Profit Margin ${profit30}%:</td>
-            <td>${price30.toFixed(2)} ${currency()}</td>
-          </tr>
-          <tr>
-            <td>Profit Margin ${profit50}%:</td>
-            <td>${price50.toFixed(2)} ${currency()}</td>
-          </tr>
-          <tr>
-            <td>Profit Margin ${profit100}%:</td>
-            <td>${price100.toFixed(2)} ${currency()}</td>
-          </tr>
-          ${competitorHTML}
+          <tr><td>${pm1}% Price:</td><td>${price1.toFixed(2)} ${currency()}</td></tr>
+          <tr><td>${pm2}% Price:</td><td>${price2.toFixed(2)} ${currency()}</td></tr>
+          <tr><td>${pm3}% Price:</td><td>${price3.toFixed(2)} ${currency()}</td></tr>
+          ${compHTML}
         </table>
-        <div class="summary-box" style="margin-top:1.2em;">
+
+        <div class="summary-box">
           <b>Profit per Piece:</b><br>
-          ${price30.toFixed(2)} ${currency()} price = ${(price30-costPerPiece).toFixed(2)} ${currency()} profit<br>
-          ${price50.toFixed(2)} ${currency()} price = ${(price50-costPerPiece).toFixed(2)} ${currency()} profit<br>
-          ${price100.toFixed(2)} ${currency()} price = ${(price100-costPerPiece).toFixed(2)} ${currency()} profit
-        </div>
-        <div style="margin-top:1em; font-size:0.97em; color:#b0b0b0;">
-          <b>Tip:</b> Adjust batch size to split fixed costs across many items.<br>
-          For best results, experiment with profit margins and competitor pricing!
-        </div>
-      `;
+          • At ${price1.toFixed(2)} ${currency()}: ${(price1-costPerPiece).toFixed(2)} ${currency()}<br>
+          • At ${price2.toFixed(2)} ${currency()}: ${(price2-costPerPiece).toFixed(2)} ${currency()}<br>
+          • At ${price3.toFixed(2)} ${currency()}: ${(price3-costPerPiece).toFixed(2)} ${currency()}
+        </div>`;
     }
   </script>
 </body>
