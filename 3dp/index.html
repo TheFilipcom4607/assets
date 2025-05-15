@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Print Price Calculator</title>
+  <link rel="stylesheet" href="https://assets.thefilip.com/style.css">
+  <style>
+    /* Minimal local tweaks, if needed */
+    body {
+      max-width: 450px;
+      margin: 2em auto;
+      padding: 1em;
+    }
+    label, input, select {
+      display: block;
+      width: 100%;
+      margin-bottom: 0.7em;
+    }
+    .result {
+      margin-top: 1.5em;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>3D Print Price Calculator</h2>
+  
+  <label for="weight">Model Weight (g):</label>
+  <input type="number" id="weight" value="42" min="0" step="0.01">
+
+  <label for="hours">Print Time (h):</label>
+  <input type="number" id="hours" value="9" min="0" step="0.1">
+
+  <label for="filamentPrice">Filament Price (zł/kg):</label>
+  <input type="number" id="filamentPrice" value="129" min="0" step="0.01">
+
+  <label for="electricityPrice">Electricity Price (zł/kWh):</label>
+  <input type="number" id="electricityPrice" value="0.90" min="0" step="0.01">
+
+  <label for="power">Printer Power Usage (W):</label>
+  <input type="number" id="power" value="100" min="0" step="1">
+
+  <label for="maintenance">Maintenance & Wear (zł/hour):</label>
+  <input type="number" id="maintenance" value="0.75" min="0" step="0.01">
+
+  <label for="handling">Handling & Prep (zł):</label>
+  <input type="number" id="handling" value="6" min="0" step="0.01">
+
+  <label for="profit">Profit Margin (%):</label>
+  <input type="number" id="profit" value="50" min="0" step="1">
+
+  <button onclick="calculatePrice()">Calculate</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function calculatePrice() {
+      // Inputs
+      const weight = parseFloat(document.getElementById('weight').value);
+      const hours = parseFloat(document.getElementById('hours').value);
+      const filamentPrice = parseFloat(document.getElementById('filamentPrice').value);
+      const electricityPrice = parseFloat(document.getElementById('electricityPrice').value);
+      const power = parseFloat(document.getElementById('power').value);
+      const maintenance = parseFloat(document.getElementById('maintenance').value);
+      const handling = parseFloat(document.getElementById('handling').value);
+      const profit = parseFloat(document.getElementById('profit').value);
+
+      // Calculations
+      const materialCost = filamentPrice * (weight / 1000);
+      const electricityCost = (power * hours / 1000) * electricityPrice;
+      const maintenanceCost = maintenance * hours;
+      const totalCost = materialCost + electricityCost + maintenanceCost + handling;
+      const finalPrice = totalCost * (1 + profit / 100);
+
+      // Output
+      document.getElementById('result').innerHTML =
+        `Material: <b>${materialCost.toFixed(2)} zł</b><br>
+         Electricity: <b>${electricityCost.toFixed(2)} zł</b><br>
+         Maintenance: <b>${maintenanceCost.toFixed(2)} zł</b><br>
+         Handling: <b>${handling.toFixed(2)} zł</b><br>
+         <hr>
+         <span>Total Cost: <b>${totalCost.toFixed(2)} zł</b></span><br>
+         <span>Final Price (with profit): <b>${finalPrice.toFixed(2)} zł</b></span>`;
+    }
+  </script>
+</body>
+</html>
