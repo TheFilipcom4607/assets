@@ -5,22 +5,24 @@
   <title>3D Print Price Calculator</title>
   <link rel="stylesheet" href="https://assets.thefilip.com/style.css">
   <style>
-    /* ---------- dark-theme form ---------- */
-    body{max-width:700px;margin:2em auto;padding:1em;color:#eaeaea}
+    body{max-width:700px;margin:2em auto;padding:1em;color:#eaeaea;font:15px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
     label{margin-top:.6em}
     input,select,button{width:100%;margin-bottom:.6em;font:inherit}
-    input,select{
-      background:#232323;border:1px solid #444;border-radius:5px;padding:8px;color:#eaeaea}
-    /* hide numeric spinners */
+    input,select{background:#232323;border:1px solid #444;border-radius:5px;padding:8px;color:#eaeaea}
     input[type=number]::-webkit-outer-spin-button,
-    input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none;margin:0}
-    input[type=number]{ -moz-appearance:textfield }
+    input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    input[type=number]{-moz-appearance:textfield}
     input:focus,select:focus{outline:2px solid #40E0D0;border-color:#40E0D0;background:#181818}
-    button{background:#232323;color:#eaeaea;border:1px solid #40E0D0;border-radius:5px;
-      padding:10px 20px;cursor:pointer;transition:all .2s;width:auto;margin-right:1em}
+    button{background:#232323;color:#eaeaea;border:1px solid #40E0D0;border-radius:5px;padding:10px 20px;cursor:pointer;transition:all .2s;width:auto;margin-right:1em}
     button:hover{background:#181818;color:#40E0D0}
     .flex{display:flex;gap:.6em;align-items:center}
     details summary{cursor:pointer;margin-top:.4em}
+    .box{background:#232323;border:1px solid #333;border-radius:6px;padding:1em;margin-top:1.2em}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:4px 6px}
+    .break-even{color:#40e0a0;font-weight:bold}
+    .profit{color:#60aaff;font-weight:bold}
+    .loss{color:#ff5e5e;font-weight:bold}
     footer{text-align:center;margin-top:2em;color:#888;font-size:.9em}
     .footer-heart{color:#ff4e4e;animation:softPulse 2s infinite}
   </style>
@@ -28,9 +30,9 @@
 <body>
   <h2>3D Print Price Calculator</h2>
 
-  <!-- BASIC INFO --------------------------------------------------------->
+  <!-- BASIC INFO -->
   <label for="itemName">Product / Model Name:</label>
-  <input id="itemName" type="text" placeholder="Phone holder">
+  <input id="itemName" placeholder="Phone holder">
 
   <div class="flex">
     <label for="currency" style="width:auto">Currency:</label>
@@ -40,12 +42,10 @@
   <label for="printerPreset">Printer:</label>
   <select id="printerPreset"><option value="">— select —</option><option value="p1p">Bambu P1P</option></select>
 
-  <!-- MODEL / RUN PARAMETERS ---------------------------------------------->
   <label for="weight">Model Weight (g each):</label><input id="weight" type="number" placeholder="42">
   <label for="batch">Quantity (batch size):</label><input id="batch" type="number" placeholder="3">
   <label for="hours">Print Time (h total):</label><input id="hours" type="number" placeholder="9">
 
-  <!-- COST PARAMETERS ----------------------------------------------------->
   <label for="filamentPrice">Filament Price (per kg):</label><input id="filamentPrice" type="number" placeholder="129">
   <label for="electricityPrice">Electricity (zł / kWh):</label><input id="electricityPrice" type="number" placeholder="0.90">
   <label for="power">Power Draw (W):</label><input id="power" type="number" placeholder="100">
@@ -54,7 +54,6 @@
 
   <div class="flex"><input id="vat" type="checkbox"><label for="vat" style="width:auto">Add VAT 23 %</label></div>
 
-  <!-- ADVANCED ------------------------------------------------------------>
   <details>
     <summary>Extras & Margins</summary>
     <label for="profit30">Margin 1 %:</label><input id="profit30" type="number" placeholder="30">
@@ -72,113 +71,109 @@
     <label for="shippingOrder">Shipping Cost (zł / order):</label><input id="shippingOrder" type="number" placeholder="10">
   </details>
 
-  <!-- ACTION BUTTONS ------------------------------------------------------->
-  <button onclick="calculatePrice()">Calculate</button>
+  <button onclick="calculate()">Calculate</button>
   <button onclick="printQuote()">Print Quote</button>
 
-  <!-- INTERNAL RESULT (you only) ----------------------------------------->
-  <div id="result" style="margin-top:1.5em"></div>
+  <!-- Internal breakdown -->
+  <div id="result"></div>
 
   <footer>made with <span class="footer-heart">❤️</span> by <a href="https://thefilip.com" target="_blank">thefilip</a></footer>
 
   <script>
-    /* ---------- printer presets ---------- */
+    /* ---------------- presets ---------------- */
     const presets={p1p:{power:100,maintenance:0.75,handling:6}};
-    document.getElementById('printerPreset').onchange=e=>{
+    printerPreset.onchange=e=>{
       const p=presets[e.target.value]||{};
-      ['power','maintenance','handling'].forEach(f=>document.getElementById(f).value=p[f]||'');
+      power.value=p.power||''; maintenance.value=p.maintenance||''; handling.value=p.handling||'';
     };
 
-    /* ---------- helpers ---------- */
-    const v=id=>parseFloat(document.getElementById(id).value||0),
-          c=()=>document.getElementById('currency').value;
+    /* ---------------- utils ------------------ */
+    const n=id=>parseFloat(document.getElementById(id).value||0),
+          cur=()=>currency.value;
+    let invoiceHTML='';
 
-    let buyerHTML='';   // stored for invoice popup
+    function calculate(){
+      /* inputs */
+      const name=itemName.value||'3D Print',
+            w=n('weight'), b=Math.max(n('batch')||1,1), h=n('hours'),
+            fk=n('filamentPrice'), ep=n('electricityPrice'), pw=n('power'),
+            mh=n('maintenance'), hb=n('handling'),
+            vat=vat.checked, VAT=0.23,
+            pp=n('postProcessPiece'), pkg=n('packageBatch'), ship=n('shippingOrder'),
+            m1=n('profit30')||30, m2=n('profit50')||50, m3=n('profit100')||100,
+            tier=parseInt(priceTier.value,10);
 
-    function calculatePrice(){
-      /* gather inputs */
-      const name=(document.getElementById('itemName').value||'3D Print'),
-            w=v('weight'), b=Math.max(v('batch')||1,1), h=v('hours'),
-            fk=v('filamentPrice'), el=v('electricityPrice'), pw=v('power'),
-            mh=v('maintenance'), hb=v('handling'),
-            vatOn=document.getElementById('vat').checked, VAT=0.23,
-            pp=v('postProcessPiece'), pkg=v('packageBatch'), ship=v('shippingOrder'),
-            m1=v('profit30')||30, m2=v('profit50')||50, m3=v('profit100')||100,
-            tier=parseInt(document.getElementById('priceTier').value,10),
-            comp=v('competitor');
-
-      /* cost calculation */
+      /* costs */
       const mat=fk*((w/1000)*b),
-            ele=(pw*h/1000)*el,
+            ele=(pw*h/1000)*ep,
             mnt=mh*h,
             extras=pkg+ship+(pp*b),
             batchTotal=mat+ele+mnt+hb+extras,
             costEach=batchTotal/b;
 
-      /* helper VAT */
-      const addVAT=x=>vatOn? x*(1+VAT): x;
+      const addVAT=x=>vat?x*(1+VAT):x,
+            pList=[
+              addVAT(costEach*(1+m1/100)),
+              addVAT(costEach*(1+m2/100)),
+              addVAT(costEach*(1+m3/100))
+            ],
+            unit=pList[tier-1],
+            grand=unit*b+ship;
 
-      /* price choices */
-      const priceList=[
-        addVAT(costEach*(1+m1/100)),
-        addVAT(costEach*(1+m2/100)),
-        addVAT(costEach*(1+m3/100))
-      ];
-      const unitPrice=priceList[tier-1],
-            lineTotal=unitPrice*b,
-            shippingRow=ship?`<tr><td>Shipping</td><td style="text-align:right">${ship.toFixed(2)} ${c()}</td></tr>`:'';
+      /* competitor row (internal) */
+      let compRow='';
+      const comp=n('competitor');
+      if(comp){
+        const cm=addVAT(comp)-costEach, pct=(cm/costEach)*100;
+        compRow=`<tr><td>Competitor (${addVAT(comp).toFixed(2)} ${cur()})</td><td class="${cm<0?'loss':'profit'}" style="text-align:right">${cm.toFixed(2)} ${cur()} (${pct.toFixed(0)}%)</td></tr>`;
+      }
 
-      /* ---------- BUYER-FACING HTML (stored for printing) ---------- */
-      buyerHTML=`<!DOCTYPE html><html><head><meta charset="utf-8">
-        <title>${name} – Quote</title>
-        <style>
-          @page{size:A4 portrait;margin:1.5cm}
-          body{font:10pt -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#000}
-          h2{margin:0 0 .3em 0;font-size:14pt}
-          table{border-collapse:collapse;width:100%}
-          th,td{padding:4px 6px}
-          th{background:#eee}
-          tr:nth-child(even) td{background:#f8f8f8}
-          header,footer{text-align:center}
-          footer{margin-top:1cm;font-size:9pt;color:#555}
-        </style></head><body>
-          <header>
-            <h2>${name}</h2>
-            <small>Quote date: ${new Date().toLocaleDateString()}</small>
-          </header>
+      /* -------- internal HTML -------- */
+      result.innerHTML=`
+        <div class="box">
+          <b>Cost per batch</b>
+          <table><tr><td>Material</td><td style="text-align:right">${mat.toFixed(2)} ${cur()}</td></tr>
+            <tr><td>Electricity</td><td style="text-align:right">${ele.toFixed(2)} ${cur()}</td></tr>
+            <tr><td>Maintenance</td><td style="text-align:right">${mnt.toFixed(2)} ${cur()}</td></tr>
+            <tr><td>Handling</td><td style="text-align:right">${hb.toFixed(2)} ${cur()}</td></tr>
+            <tr><td>Extras</td><td style="text-align:right">${extras.toFixed(2)} ${cur()}</td></tr>
+            <tr><td><b class="break-even">Break-even / piece</b></td><td style="text-align:right"><b>${costEach.toFixed(2)} ${cur()}</b></td></tr></table>
+        </div>
 
-          <table style="margin-top:1em">
-            <tr><th style="text-align:left">Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr>
-            <tr>
-              <td>${name}</td>
-              <td style="text-align:right">${b}</td>
-              <td style="text-align:right">${unitPrice.toFixed(2)} ${c()}</td>
-              <td style="text-align:right">${lineTotal.toFixed(2)} ${c()}</td>
-            </tr>
-            ${shippingRow}
-            <tr style="border-top:1px solid #000;font-weight:bold">
-              <td colspan="3" style="text-align:right">Grand Total</td>
-              <td style="text-align:right">${(lineTotal+ship).toFixed(2)} ${c()}</td>
-            </tr>
-          </table>
+        <div class="box">
+          <b>Unit prices (incl. chosen margin)</b>
+          <table><tr><td>${m1}% margin</td><td style="text-align:right">${pList[0].toFixed(2)} ${cur()}</td></tr>
+            <tr><td>${m2}% margin</td><td style="text-align:right">${pList[1].toFixed(2)} ${cur()}</td></tr>
+            <tr><td>${m3}% margin</td><td style="text-align:right">${pList[2].toFixed(2)} ${cur()}</td></tr>
+            ${compRow}</table>
+        </div>
 
-          ${vatOn?`<p style="margin-top:.8em;font-size:9pt">Unit price includes VAT ${(VAT*100).toFixed(0)} %</p>`:''}
+        <p><b>Quoted to buyer:</b> ${unit.toFixed(2)} ${cur()} each × ${b} = ${grand.toFixed(2)} ${cur()}${ship?` (incl. shipping)`:''}</p>`;
 
-          <footer>made with ❤️ by thefilip</footer>
-        </body></html>`;
-
-      /* ---------- INTERNAL VIEW (still shows your breakdown) -------- */
-      document.getElementById('result').innerHTML=`
-        <p><b>Unit price chosen for quote:</b> ${unitPrice.toFixed(2)} ${c()} &nbsp; (Margin tier ${tier})</p>
-        <p><i>Your internal break-even:</i> ${costEach.toFixed(2)} ${c()} (keep this private)</p>`;
+      /* -------- buyer facing invoice (A4) -------- */
+      const shippingRow=ship?`<tr><td>Shipping</td><td style="text-align:right">${ship.toFixed(2)} ${cur()}</td></tr>`:'';
+      invoiceHTML=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${name} Quote</title>
+      <style>@page{size:A4 portrait;margin:1.5cm}
+      body{font:10pt -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+      h2{margin:0 0 .4em 0;font-size:14pt}
+      table{border-collapse:collapse;width:100%}th,td{padding:4px 6px}
+      th{background:#eaeaea}tr:nth-child(even) td{background:#f5f5f5}
+      footer{text-align:center;margin-top:1cm;font-size:9pt;color:#555}</style></head><body>
+      <header style="text-align:center"><h2>${name}</h2><small>Quote date: ${new Date().toLocaleDateString()}</small></header>
+      <table style="margin-top:1em">
+      <tr><th style="text-align:left">Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr>
+      <tr><td>${name}</td><td style="text-align:right">${b}</td><td style="text-align:right">${unit.toFixed(2)} ${cur()}</td><td style="text-align:right">${(unit*b).toFixed(2)} ${cur()}</td></tr>
+      ${shippingRow}
+      <tr style="border-top:1px solid #000;font-weight:bold"><td colspan="3" style="text-align:right">Grand Total</td><td style="text-align:right">${grand.toFixed(2)} ${cur()}</td></tr>
+      </table>
+      ${vat?`<p style="margin-top:.8em;font-size:9pt">Unit price includes VAT ${(VAT*100).toFixed(0)} %</p>`:''}
+      <footer>made with ❤️ by thefilip</footer></body></html>`;
     }
 
-    /* ---------- dedicated pop-up print ---------- */
     function printQuote(){
-      if(!buyerHTML){alert('Calculate first!');return;}
-      const win=window.open('','quoteWin','width=800,height=1100');
-      win.document.write(buyerHTML); win.document.close();
-      win.focus(); win.print();
+      if(!invoiceHTML){alert('Calculate first!');return;}
+      const w=window.open('','inv','width=800,height=1100');
+      w.document.write(invoiceHTML);w.document.close();w.focus();w.print();
     }
   </script>
 </body>
