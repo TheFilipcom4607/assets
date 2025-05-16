@@ -36,11 +36,12 @@
     }
     .tiers {
       width: 100%;
-      margin-top: 1em;
+      margin-top: 1.5em;
       color: #eaeaea;
+      border-collapse: collapse;
     }
-    .tiers td {
-      padding: 0.3em 0.5em;
+    .tiers th, .tiers td {
+      padding: 0.35em 0.7em;
     }
     .break-even {
       color: #40e0a0;
@@ -173,13 +174,13 @@
   <details>
     <summary>Advanced Options</summary>
 
-    <label for="profit30">Profit Margin 1 (<b>%</b>):</label>
+    <label for="profit30">Margin 1 (<b>%</b>):</label>
     <input type="number" id="profit30" min="0" step="1" placeholder="e.g. 30">
 
-    <label for="profit50">Profit Margin 2 (<b>%</b>):</label>
+    <label for="profit50">Margin 2 (<b>%</b>):</label>
     <input type="number" id="profit50" min="0" step="1" placeholder="e.g. 50">
 
-    <label for="profit100">Profit Margin 3 (<b>%</b>):</label>
+    <label for="profit100">Margin 3 (<b>%</b>):</label>
     <input type="number" id="profit100" min="0" step="1" placeholder="e.g. 100">
 
     <label for="competitor">Competitor's Price (same currency):</label>
@@ -250,23 +251,23 @@
       // cost per piece
       const costPerPiece   = totalBatchCost / batch;
 
-      // price with profit
+      // price with margin
       function addVAT(p) { return includeVAT ? p * (1 + VAT) : p; }
       const price1 = addVAT(costPerPiece * (1 + pm1/100));
       const price2 = addVAT(costPerPiece * (1 + pm2/100));
       const price3 = addVAT(costPerPiece * (1 + pm3/100));
 
-      // competitor profit
+      // competitor margin
       let compHTML = '';
       if (comp > 0) {
-        const compProfit = addVAT(comp) - costPerPiece;
-        const compMargin = (compProfit / costPerPiece) * 100;
+        const compMarginAmount = addVAT(comp) - costPerPiece;
+        const compMargin = (compMarginAmount / costPerPiece) * 100;
         compHTML = `
           <tr>
             <td>Competitor Price (${addVAT(comp).toFixed(2)} ${currency()}):</td>
-            <td>${compProfit < 0
-              ? `<span class="loss">LOSS</span> ${compProfit.toFixed(2)} ${currency()}`
-              : `<span class="profit">Profit</span> ${compProfit.toFixed(2)} ${currency()} (${compMargin.toFixed(0)}%)`
+            <td>${compMarginAmount < 0
+              ? `<span class="loss">LOSS</span> ${compMarginAmount.toFixed(2)} ${currency()}`
+              : `<span class="profit">Margin</span> ${compMarginAmount.toFixed(2)} ${currency()} (${compMargin.toFixed(0)}%)`
             }</td>
           </tr>`;
       }
@@ -285,18 +286,47 @@
         </div>
 
         <table class="tiers">
-          <tr><td>${pm1}% Price:</td><td>${price1.toFixed(2)} ${currency()}</td></tr>
-          <tr><td>${pm2}% Price:</td><td>${price2.toFixed(2)} ${currency()}</td></tr>
-          <tr><td>${pm3}% Price:</td><td>${price3.toFixed(2)} ${currency()}</td></tr>
+          <tr>
+            <th style="text-align:left; padding-right:1em;">Sale Price (Margin %)</th>
+            <th style="text-align:right;">Amount</th>
+          </tr>
+          <tr>
+            <td>Sale Price (${pm1}% margin)</td>
+            <td style="text-align:right;">${price1.toFixed(2)} ${currency()}</td>
+          </tr>
+          <tr>
+            <td>Sale Price (${pm2}% margin)</td>
+            <td style="text-align:right;">${price2.toFixed(2)} ${currency()}</td>
+          </tr>
+          <tr>
+            <td>Sale Price (${pm3}% margin)</td>
+            <td style="text-align:right;">${price3.toFixed(2)} ${currency()}</td>
+          </tr>
           ${compHTML}
         </table>
 
-        <div class="summary-box">
-          <b>Profit per Piece:</b><br>
-          • At ${price1.toFixed(2)} ${currency()}: ${(price1-costPerPiece).toFixed(2)} ${currency()}<br>
-          • At ${price2.toFixed(2)} ${currency()}: ${(price2-costPerPiece).toFixed(2)} ${currency()}<br>
-          • At ${price3.toFixed(2)} ${currency()}: ${(price3-costPerPiece).toFixed(2)} ${currency()}
-        </div>`;
+        <div class="summary-box" style="margin-top:1.5em;">
+          <b>Margin per Piece (at each sale price):</b>
+          <table style="width:100%; margin-top:0.7em; border-collapse: collapse;">
+            <tr>
+              <th style="text-align:left; padding-right:1em;">Sale Price</th>
+              <th style="text-align:right;">Margin per Piece</th>
+            </tr>
+            <tr>
+              <td>${price1.toFixed(2)} ${currency()}</td>
+              <td style="text-align:right;">${(price1-costPerPiece).toFixed(2)} ${currency()}</td>
+            </tr>
+            <tr>
+              <td>${price2.toFixed(2)} ${currency()}</td>
+              <td style="text-align:right;">${(price2-costPerPiece).toFixed(2)} ${currency()}</td>
+            </tr>
+            <tr>
+              <td>${price3.toFixed(2)} ${currency()}</td>
+              <td style="text-align:right;">${(price3-costPerPiece).toFixed(2)} ${currency()}</td>
+            </tr>
+          </table>
+        </div>
+      `;
     }
   </script>
 </body>
