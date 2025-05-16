@@ -6,125 +6,79 @@
   <link rel="stylesheet" href="https://assets.thefilip.com/style.css">
   <style>
     body {
-      max-width: 500px;
+      max-width: 700px;
       margin: 2em auto;
       padding: 1em;
     }
-    label, input, select {
-      display: block;
-      width: 100%;
-      margin-bottom: 0.6em;
+    label, input, select, button, details {
       color: #eaeaea;
     }
-    input::placeholder {
-      color: #888;
-    }
-    button {
-      margin-top: 1em;
-    }
-    .result {
-      margin-top: 1.5em;
-      font-size: 1.1em;
-    }
-    .summary-box {
-      margin-top: 1.5em;
-      padding: 1em;
+    input, select {
+      width:100%;
+      margin-bottom:0.6em;
       background: #232323;
-      border: 1px solid #333;
-      border-radius: 6px;
-      color: #eaeaea;
+      border:1px solid #444;
+      border-radius:5px;
+      padding:8px;
+      color:#eaeaea;
+    }
+    input::placeholder { color: #888; }
+    input:focus, select:focus { outline:2px solid #40E0D0; border-color:#40E0D0; }
+    select { margin-bottom:1em; }
+    button {
+      background:#232323; color:#eaeaea;
+      border:1px solid #40E0D0; border-radius:5px;
+      padding:10px 20px; cursor:pointer;
+      transition:all .2s; margin-right:1em;
+    }
+    button:hover { background:#181818; color:#40E0D0; border-color:#40E0D0; }
+    details summary { cursor:pointer; margin-bottom:.3em; }
+    .currency-group, .vat-row { display:flex; align-items:center; gap:.5em; margin-bottom:1em; }
+    .summary-box {
+      background:#232323; border:1px solid #333;
+      border-radius:6px; padding:1em; color:#eaeaea;
+      margin-top:1.5em; page-break-inside: avoid;
     }
     .tiers {
-      width: 100%;
-      margin-top: 1.5em;
-      color: #eaeaea;
-      border-collapse: collapse;
+      width:100%; margin-top:1.5em;
+      border-collapse:collapse; color:#eaeaea;
+      page-break-inside: avoid;
     }
-    .tiers th, .tiers td {
-      padding: 0.35em 0.7em;
-    }
-    .break-even {
-      color: #40e0a0;
-      font-weight: bold;
-    }
-    .profit {
-      color: #60aaff;
-      font-weight: bold;
-    }
-    .loss {
-      color: #ff5e5e;
-      font-weight: bold;
-    }
-    .currency-group, .vat-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      margin-bottom: 1em;
-    }
-    details summary {
-      color: #eaeaea;
-      cursor: pointer;
-      margin-bottom: 0.3em;
-    }
-    input[type="number"], input[type="text"], select {
-      background: #232323;
-      color: #eaeaea;
-      border: 1px solid #444;
-      border-radius: 5px;
-      padding: 8px;
-    }
-    input:focus, select:focus {
-      outline: 2px solid #40E0D0;
-      border-color: #40E0D0;
-      background: #181818;
-    }
-    button {
-      background: #232323;
-      color: #eaeaea;
-      border: 1px solid #40E0D0;
-      border-radius: 5px;
-      padding: 10px 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    button:hover {
-      background: #181818;
-      color: #40E0D0;
-      border-color: #40E0D0;
-    }
+    .tiers th, .tiers td { padding:.35em .7em; }
+    .break-even { color:#40e0a0; font-weight:bold; }
+    .profit { color:#60aaff; font-weight:bold; }
+    .loss { color:#ff5e5e; font-weight:bold; }
+    footer { text-align:center; margin-top:2.5em; color:#888; font-size:.9em; }
+    .footer-heart { color:#ff4e4e; animation:softPulse 2s infinite; }
 
-    footer {
-      text-align: center;
-      margin-top: 2.5em;
-      color: #888;
-      font-size: 0.9em;
-    }
-    .footer-heart {
-      color: #ff4e4e;
-      animation: softPulse 2s infinite;
-    }
-
-    /* Print styling: show only header, results, footer */
+    /* PRINT STYLES */
     @media print {
+      /* hide everything */
       body * { visibility: hidden; }
+      /* show only these */
       #quoteHeader, #quoteHeader *,
       #result, #result *,
       #quoteFooter, #quoteFooter * {
         visibility: visible;
       }
+      /* position them normally */
       #quoteHeader, #result, #quoteFooter {
-        position: relative;
-        margin: 0;
+        position: static; margin:0; padding:0;
       }
+      /* expand to full width */
+      #quoteHeader, #result, #quoteFooter { width: 100%; }
+      /* remove page margins for print */
+      @page { margin: 1cm; }
     }
   </style>
 </head>
 <body>
-  <h2 id="quoteHeader">3D Print Price Calculator</h2>
+  <h2 id="quoteHeader">3D Print Price Quote</h2>
 
+  <!-- CONTROLS (hidden in print) -->
   <div class="currency-group">
-    <label for="currency" style="width:auto;">Currency Symbol:</label>
-    <select id="currency" style="width:auto;">
+    <label for="currency">Currency:</label>
+    <select id="currency">
       <option value="zł">zł</option>
       <option value="€">€</option>
       <option value="$">$</option>
@@ -132,71 +86,65 @@
     </select>
   </div>
 
-  <label for="printerPreset">Printer Preset:</label>
+  <label for="printerPreset">Printer:</label>
   <select id="printerPreset">
-    <option value="">— Select printer —</option>
+    <option value="">— select —</option>
     <option value="p1p">Bambu P1P</option>
   </select>
 
-  <label for="weight">Model Weight (<b>g per model</b>):</label>
-  <input type="number" id="weight" min="0" step="0.01" placeholder="e.g. 42">
+  <label for="weight">Model Weight (g each):</label>
+  <input id="weight" type="number" placeholder="e.g. 42">
 
-  <label for="batch">Models per Batch (<b>quantity</b>):</label>
-  <input type="number" id="batch" min="1" step="1" placeholder="e.g. 3">
+  <label for="batch">Quantity (batch size):</label>
+  <input id="batch" type="number" placeholder="e.g. 3">
 
-  <label for="hours">Print Time (<b>hours per batch</b>):</label>
-  <input type="number" id="hours" min="0" step="0.01" placeholder="e.g. 9">
+  <label for="hours">Print Time (h total):</label>
+  <input id="hours" type="number" placeholder="e.g. 9">
 
-  <label for="filamentPrice">Filament Price (<b>zł per kg</b>):</label>
-  <input type="number" id="filamentPrice" min="0" step="0.01" placeholder="e.g. 129">
+  <label for="filamentPrice">Filament Price (zł/kg):</label>
+  <input id="filamentPrice" type="number" placeholder="e.g. 129">
 
-  <label for="electricityPrice">Electricity Price (<b>zł per kWh</b>):</label>
-  <input type="number" id="electricityPrice" min="0" step="0.01" placeholder="e.g. 0.90">
+  <label for="electricityPrice">Electricity (zł/kWh):</label>
+  <input id="electricityPrice" type="number" placeholder="e.g. 0.90">
 
-  <label for="power">Printer Power Usage (<b>W</b>):</label>
-  <input type="number" id="power" min="0" step="1" placeholder="e.g. 100">
+  <label for="power">Power (W):</label>
+  <input id="power" type="number" placeholder="e.g. 100">
 
-  <label for="maintenance">Maintenance & Wear (<b>zł per hour</b>):</label>
-  <input type="number" id="maintenance" min="0" step="0.01" placeholder="e.g. 0.75">
+  <label for="maintenance">Maintenance (zł/h):</label>
+  <input id="maintenance" type="number" placeholder="e.g. 0.75">
 
-  <label for="handling">Handling & Prep (<b>zł per batch</b>):</label>
-  <input type="number" id="handling" min="0" step="0.01" placeholder="e.g. 6">
+  <label for="handling">Handling (zł/batch):</label>
+  <input id="handling" type="number" placeholder="e.g. 6">
 
   <div class="vat-row">
-    <input type="checkbox" id="vat" style="margin-bottom:0;">
-    <label for="vat" style="margin-bottom:0;">Include VAT (23%)</label>
+    <input id="vat" type="checkbox"><label for="vat">Add VAT (23%)</label>
   </div>
 
   <details>
-    <summary>Advanced Options</summary>
-
-    <label for="profit30">Margin 1 (<b>%</b>):</label>
-    <input type="number" id="profit30" min="0" step="1" placeholder="e.g. 30">
-
-    <label for="profit50">Margin 2 (<b>%</b>):</label>
-    <input type="number" id="profit50" min="0" step="1" placeholder="e.g. 50">
-
-    <label for="profit100">Margin 3 (<b>%</b>):</label>
-    <input type="number" id="profit100" min="0" step="1" placeholder="e.g. 100">
-
-    <label for="competitor">Competitor's Price (same currency):</label>
-    <input type="number" id="competitor" min="0" step="0.01" placeholder="e.g. 50">
+    <summary>Extras & Margins</summary>
+    <label for="profit30">Margin 1 (%):</label>
+    <input id="profit30" type="number" placeholder="e.g. 30">
+    <label for="profit50">Margin 2 (%):</label>
+    <input id="profit50" type="number" placeholder="e.g. 50">
+    <label for="profit100">Margin 3 (%):</label>
+    <input id="profit100" type="number" placeholder="e.g. 100">
+    <label for="competitor">Competitor Price:</label>
+    <input id="competitor" type="number" placeholder="e.g. 50">
 
     <hr style="border-color:#444; margin:1em 0;">
 
-    <label for="postProcessPiece">Post-processing Cost (<b>zł per piece</b>):</label>
-    <input type="number" id="postProcessPiece" min="0" step="0.01" placeholder="e.g. 2">
-
-    <label for="packageBatch">Packaging Cost (<b>zł per batch</b>):</label>
-    <input type="number" id="packageBatch" min="0" step="0.01" placeholder="e.g. 5">
-
-    <label for="shippingOrder">Shipping Cost (<b>zł per order</b>):</label>
-    <input type="number" id="shippingOrder" min="0" step="0.01" placeholder="e.g. 10">
+    <label for="postProcessPiece">Post-process (zł each):</label>
+    <input id="postProcessPiece" type="number" placeholder="e.g. 2">
+    <label for="packageBatch">Packaging (zł/batch):</label>
+    <input id="packageBatch" type="number" placeholder="e.g. 5">
+    <label for="shippingOrder">Shipping (zł/order):</label>
+    <input id="shippingOrder" type="number" placeholder="e.g. 10">
   </details>
 
   <button onclick="calculatePrice()">Calculate</button>
   <button onclick="window.print()">Print Quote</button>
 
+  <!-- QUOTE CONTENT -->
   <div class="result" id="result"></div>
 
   <footer id="quoteFooter">
@@ -204,111 +152,85 @@
   </footer>
 
   <script>
-    // Printer presets
     const presets = {
       p1p: { power:100, maintenance:0.75, handling:6 }
     };
-    document.getElementById('printerPreset').addEventListener('change', e => {
+    document.getElementById('printerPreset').onchange = e => {
       const p = presets[e.target.value]||{};
-      document.getElementById('power').value = p.power||'';
-      document.getElementById('maintenance').value = p.maintenance||'';
-      document.getElementById('handling').value = p.handling||'';
-    });
+      ['power','maintenance','handling'].forEach(f => {
+        document.getElementById(f).value = p[f]||''
+      });
+    };
 
-    function val(id, def=0) {
+    function val(id, d=0) {
       const v = document.getElementById(id).value;
-      return v==='' ? def : parseFloat(v);
+      return v===''?d:parseFloat(v);
     }
-    function currency() {
-      return document.getElementById('currency').value;
-    }
+    function currency(){ return document.getElementById('currency').value; }
 
-    function calculatePrice() {
-      // Basic inputs
-      const weight       = val('weight');
-      const batch        = Math.max(val('batch',1),1);
-      const hours        = val('hours');
-      const filamentKg   = val('filamentPrice');
-      const elecPrice    = val('electricityPrice');
-      const powerW       = val('power');
-      const maintPerHour = val('maintenance');
-      const handlingBatch= val('handling');
-      const includeVAT   = document.getElementById('vat').checked;
-      const VAT          = 0.23;
+    function calculatePrice(){
+      const weight=val('weight'), batch=Math.max(val('batch',1),1),
+            hours=val('hours'), fg=val('filamentPrice'),
+            el=val('electricityPrice'), pw=val('power'),
+            mh=val('maintenance'), hb=val('handling'),
+            vatChk=document.getElementById('vat').checked, VAT=0.23;
+      const pm1=val('profit30',30), pm2=val('profit50',50), pm3=val('profit100',100),
+            cp=val('competitor',0);
+      const pp=val('postProcessPiece',0), pkg=val('packageBatch',0), ship=val('shippingOrder',0);
 
-      // Advanced inputs
-      const pm1    = val('profit30',30),
-            pm2    = val('profit50',50),
-            pm3    = val('profit100',100),
-            comp   = val('competitor',0);
+      const mat=fg*((weight/1000)*batch),
+            ele=(pw*hours/1000)*el,
+            mnt=mh*hours,
+            extras=pkg+ship+(pp*batch),
+            bat=mat+ele+mnt+hb+extras,
+            cpu=bat/batch;
 
-      // Custom extras
-      const postProcessPiece = val('postProcessPiece',0),
-            packageBatch     = val('packageBatch',0),
-            shippingOrder    = val('shippingOrder',0);
+      const addVAT=x=> vatChk? x*(1+VAT): x;
+      const pr1=addVAT(cpu*(1+pm1/100)),
+            pr2=addVAT(cpu*(1+pm2/100)),
+            pr3=addVAT(cpu*(1+pm3/100));
 
-      // Costs per batch
-      const materialCost    = filamentKg * ((weight/1000)*batch);
-      const electricityCost = (powerW*hours/1000)*elecPrice;
-      const maintenanceCost = maintPerHour*hours;
-      const extrasBatch     = packageBatch + shippingOrder + (postProcessPiece*batch);
-      const totalBatchCost  = materialCost + electricityCost + maintenanceCost + handlingBatch + extrasBatch;
-
-      // Cost per piece
-      const costPerPiece    = totalBatchCost / batch;
-
-      // Helper to apply VAT
-      const applyVAT = x => includeVAT ? x*(1+VAT) : x;
-
-      // Sale prices
-      const price1 = applyVAT(costPerPiece*(1+pm1/100)),
-            price2 = applyVAT(costPerPiece*(1+pm2/100)),
-            price3 = applyVAT(costPerPiece*(1+pm3/100));
-
-      // Competitor margin row
-      let compRow = '';
-      if(comp>0){
-        const cMarginAmt = applyVAT(comp)-costPerPiece;
-        const cMarginPct = (cMarginAmt/costPerPiece)*100;
-        compRow = `
-          <tr>
-            <td>Competitor Price (${applyVAT(comp).toFixed(2)} ${currency()}):</td>
-            <td>${cMarginAmt<0
-              ? `<span class="loss">LOSS</span> ${cMarginAmt.toFixed(2)} ${currency()}`
-              : `<span class="profit">Margin</span> ${cMarginAmt.toFixed(2)} ${currency()} (${cMarginPct.toFixed(0)}%)`
-            }</td>
-          </tr>`;
+      let compRow='';
+      if(cp>0){
+        const cmAmt=addVAT(cp)-cpu,
+              cmPct=(cmAmt/cpu)*100;
+        compRow=`<tr>
+          <td>Competitor Price (${addVAT(cp).toFixed(2)} ${currency()}):</td>
+          <td>${cmAmt<0
+            ? `<span class="loss">LOSS</span> ${cmAmt.toFixed(2)} ${currency()}`
+            : `<span class="profit">Margin</span> ${cmAmt.toFixed(2)} ${currency()} (${cmPct.toFixed(0)}%)`
+          }</td>
+        </tr>`;
       }
 
-      // Render
-      document.getElementById('result').innerHTML = `
+      document.getElementById('result').innerHTML=`
         <div class="summary-box">
-          <b>Cost Breakdown (per batch):</b><br>
-          • Material: ${materialCost.toFixed(2)} ${currency()}<br>
-          • Electricity: ${electricityCost.toFixed(2)} ${currency()}<br>
-          • Maintenance: ${maintenanceCost.toFixed(2)} ${currency()}<br>
-          • Handling: ${handlingBatch.toFixed(2)} ${currency()}<br>
-          • Extras: ${extrasBatch.toFixed(2)} ${currency()}<br>
+          <b>Cost per Batch:</b><br>
+          • Material: ${mat.toFixed(2)} ${currency()}<br>
+          • Electricity: ${ele.toFixed(2)} ${currency()}<br>
+          • Maintenance: ${mnt.toFixed(2)} ${currency()}<br>
+          • Handling: ${hb.toFixed(2)} ${currency()}<br>
+          • Extras: ${extras.toFixed(2)} ${currency()}<br>
           <hr>
-          <b class="break-even">Break-even per Piece:</b> ${costPerPiece.toFixed(2)} ${currency()}
-          ${includeVAT?`<br><span style="color:#40e0a0">*All prices include VAT (${(VAT*100).toFixed(0)}%)</span>`:''}
+          <b class="break-even">Break-even per Piece:</b> ${cpu.toFixed(2)} ${currency()}
+          ${vatChk? `<br><span style="color:#40e0a0">*Includes VAT (${(VAT*100).toFixed(0)}%)</span>`: ''}
         </div>
 
         <table class="tiers">
-          <tr><th style="text-align:left; padding-right:1em;">Sale Price (Margin %)</th><th style="text-align:right;">Amount</th></tr>
-          <tr><td>Sale Price (${pm1}% margin)</td><td style="text-align:right;">${price1.toFixed(2)} ${currency()}</td></tr>
-          <tr><td>Sale Price (${pm2}% margin)</td><td style="text-align:right;">${price2.toFixed(2)} ${currency()}</td></tr>
-          <tr><td>Sale Price (${pm3}% margin)</td><td style="text-align:right;">${price3.toFixed(2)} ${currency()}</td></tr>
+          <tr><th style="text-align:left;">Sale Price (Margin)</th><th style="text-align:right;">Amount</th></tr>
+          <tr><td>${pm1}%</td><td style="text-align:right;">${pr1.toFixed(2)} ${currency()}</td></tr>
+          <tr><td>${pm2}%</td><td style="text-align:right;">${pr2.toFixed(2)} ${currency()}</td></tr>
+          <tr><td>${pm3}%</td><td style="text-align:right;">${pr3.toFixed(2)} ${currency()}</td></tr>
           ${compRow}
         </table>
 
         <div class="summary-box" style="margin-top:1.5em;">
           <b>Margin per Piece:</b>
-          <table style="width:100%; margin-top:0.7em; border-collapse: collapse;">
-            <tr><th style="text-align:left; padding-right:1em;">Sale Price</th><th style="text-align:right;">Margin</th></tr>
-            <tr><td>${price1.toFixed(2)} ${currency()}</td><td style="text-align:right;">${(price1-costPerPiece).toFixed(2)} ${currency()}</td></tr>
-            <tr><td>${price2.toFixed(2)} ${currency()}</td><td style="text-align:right;">${(price2-costPerPiece).toFixed(2)} ${currency()}</td></tr>
-            <tr><td>${price3.toFixed(2)} ${currency()}</td><td style="text-align:right;">${(price3-costPerPiece).toFixed(2)} ${currency()}</td></tr>
+          <table style="width:100%; margin-top:.7em; border-collapse:collapse;">
+            <tr><th style="text-align:left;">Sale Price</th><th style="text-align:right;">Margin</th></tr>
+            <tr><td>${pr1.toFixed(2)} ${currency()}</td><td style="text-align:right;">${(pr1-cpu).toFixed(2)} ${currency()}</td></tr>
+            <tr><td>${pr2.toFixed(2)} ${currency()}</td><td style="text-align:right;">${(pr2-cpu).toFixed(2)} ${currency()}</td></tr>
+            <tr><td>${pr3.toFixed(2)} ${currency()}</td><td style="text-align:right;">${(pr3-cpu).toFixed(2)} ${currency()}</td></tr>
           </table>
         </div>`;
     }
