@@ -5,290 +5,180 @@
   <title>3D Print Price Calculator</title>
   <link rel="stylesheet" href="https://assets.thefilip.com/style.css">
   <style>
-    body {
-      max-width: 700px;
-      margin: 2em auto;
-      padding: 1em;
-      color: #eaeaea;
-    }
-    label, input, select, button {
-      font-family: inherit;
-      display: block;
-      width: 100%;
-      margin-bottom: 0.6em;
-      color: #eaeaea;
-    }
-    input, select {
-      background: #232323;
-      border: 1px solid #444;
-      border-radius: 5px;
-      padding: 8px;
-      color: #eaeaea;
-      -moz-appearance: textfield;
-    }
-    /* hide number input spinners */
-    input::-webkit-inner-spin-button,
-    input::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input:focus, select:focus {
-      outline: 2px solid #40E0D0;
-      border-color: #40E0D0;
-      background: #181818;
-    }
-    button {
-      background: #232323;
-      color: #eaeaea;
-      border: 1px solid #40E0D0;
-      border-radius: 5px;
-      padding: 10px 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      width: auto;
-      margin-right: 1em;
-    }
-    button:hover {
-      background: #181818;
-      color: #40E0D0;
-    }
-    .currency-group, .vat-row {
-      display: flex;
-      gap: 0.5em;
-      align-items: center;
-      margin-bottom: 1em;
-    }
-    details summary {
-      cursor: pointer;
-      margin-bottom: 0.3em;
-      color: #eaeaea;
-    }
-    footer {
-      text-align: center;
-      margin-top: 2.5em;
-      color: #888;
-      font-size: 0.9em;
-    }
-    .footer-heart {
-      color: #ff4e4e;
-      animation: softPulse 2s infinite;
-    }
-    /* On-screen result formatting */
-    #result > header,
-    #result table,
-    #result section {
-      background: #232323;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 1em;
-      margin-top: 1em;
-    }
-    #result table {
-      width: 100%;
-      border-collapse: collapse;
-      color: #eaeaea;
-    }
-    #result th, #result td {
-      padding: 0.4em 0.7em;
-    }
-    #result th {
-      background: #2a2a2a;
-    }
-    .break-even { color: #40e0a0; }
-    .profit { color: #60aaff; }
-    .loss { color: #ff5e5e; }
-
-    @media print {
-      /* hide main page */
-      body * { display: none; }
-      /* show only invoice */
-      #invoiceWindow, #invoiceWindow * { display: block !important; }
-      @page { size: A4 portrait; margin: 1.5cm; }
-    }
+    /* ---------- dark-theme form ---------- */
+    body{max-width:700px;margin:2em auto;padding:1em;color:#eaeaea}
+    label{margin-top:.6em}
+    input,select,button{width:100%;margin-bottom:.6em;font:inherit}
+    input,select{
+      background:#232323;border:1px solid #444;border-radius:5px;padding:8px;color:#eaeaea}
+    /* hide numeric spinners */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none;margin:0}
+    input[type=number]{ -moz-appearance:textfield }
+    input:focus,select:focus{outline:2px solid #40E0D0;border-color:#40E0D0;background:#181818}
+    button{background:#232323;color:#eaeaea;border:1px solid #40E0D0;border-radius:5px;
+      padding:10px 20px;cursor:pointer;transition:all .2s;width:auto;margin-right:1em}
+    button:hover{background:#181818;color:#40E0D0}
+    .flex{display:flex;gap:.6em;align-items:center}
+    details summary{cursor:pointer;margin-top:.4em}
+    footer{text-align:center;margin-top:2em;color:#888;font-size:.9em}
+    .footer-heart{color:#ff4e4e;animation:softPulse 2s infinite}
   </style>
 </head>
 <body>
   <h2>3D Print Price Calculator</h2>
 
-  <label for="clientName">Client Name:</label>
-  <input id="clientName" type="text" placeholder="e.g. Jane Doe">
+  <!-- BASIC INFO --------------------------------------------------------->
+  <label for="itemName">Product / Model Name:</label>
+  <input id="itemName" type="text" placeholder="Phone holder">
 
-  <div class="currency-group">
-    <label for="currency" style="width:auto;">Currency:</label>
-    <select id="currency" style="width:auto;">
-      <option value="zł">zł</option>
-      <option value="€">€</option>
-      <option value="$">$</option>
-      <option value="£">£</option>
-    </select>
+  <div class="flex">
+    <label for="currency" style="width:auto">Currency:</label>
+    <select id="currency" style="width:auto"><option value="zł">zł</option><option value="€">€</option><option value="$">$</option><option value="£">£</option></select>
   </div>
 
   <label for="printerPreset">Printer:</label>
-  <select id="printerPreset">
-    <option value="">— select —</option>
-    <option value="p1p">Bambu P1P</option>
-  </select>
+  <select id="printerPreset"><option value="">— select —</option><option value="p1p">Bambu P1P</option></select>
 
-  <label for="weight">Model Weight (g each):</label>
-  <input id="weight" type="number" placeholder="42">
+  <!-- MODEL / RUN PARAMETERS ---------------------------------------------->
+  <label for="weight">Model Weight (g each):</label><input id="weight" type="number" placeholder="42">
+  <label for="batch">Quantity (batch size):</label><input id="batch" type="number" placeholder="3">
+  <label for="hours">Print Time (h total):</label><input id="hours" type="number" placeholder="9">
 
-  <label for="batch">Quantity (batch size):</label>
-  <input id="batch" type="number" placeholder="3">
+  <!-- COST PARAMETERS ----------------------------------------------------->
+  <label for="filamentPrice">Filament Price (per kg):</label><input id="filamentPrice" type="number" placeholder="129">
+  <label for="electricityPrice">Electricity (zł / kWh):</label><input id="electricityPrice" type="number" placeholder="0.90">
+  <label for="power">Power Draw (W):</label><input id="power" type="number" placeholder="100">
+  <label for="maintenance">Maintenance (zł / h):</label><input id="maintenance" type="number" placeholder="0.75">
+  <label for="handling">Handling (zł / batch):</label><input id="handling" type="number" placeholder="6">
 
-  <label for="hours">Print Time (h total):</label>
-  <input id="hours" type="number" placeholder="9">
+  <div class="flex"><input id="vat" type="checkbox"><label for="vat" style="width:auto">Add VAT 23 %</label></div>
 
-  <label for="filamentPrice">Filament Price (zł / kg):</label>
-  <input id="filamentPrice" type="number" placeholder="129">
-
-  <label for="electricityPrice">Electricity (zł / kWh):</label>
-  <input id="electricityPrice" type="number" placeholder="0.90">
-
-  <label for="power">Power (W):</label>
-  <input id="power" type="number" placeholder="100">
-
-  <label for="maintenance">Maintenance (zł / h):</label>
-  <input id="maintenance" type="number" placeholder="0.75">
-
-  <label for="handling">Handling (zł / batch):</label>
-  <input id="handling" type="number" placeholder="6">
-
-  <div class="vat-row">
-    <input id="vat" type="checkbox">
-    <label for="vat" style="width:auto">Add VAT (23%)</label>
-  </div>
-
+  <!-- ADVANCED ------------------------------------------------------------>
   <details>
     <summary>Extras & Margins</summary>
-    <label for="profit30">Margin 1 (%):</label>
-    <input id="profit30" type="number" placeholder="30">
-    <label for="profit50">Margin 2 (%):</label>
-    <input id="profit50" type="number" placeholder="50">
-    <label for="profit100">Margin 3 (%):</label>
-    <input id="profit100" type="number" placeholder="100">
-    <label for="competitor">Competitor Price:</label>
-    <input id="competitor" type="number" placeholder="50">
+    <label for="profit30">Margin 1 %:</label><input id="profit30" type="number" placeholder="30">
+    <label for="profit50">Margin 2 %:</label><input id="profit50" type="number" placeholder="50">
+    <label for="profit100">Margin 3 %:</label><input id="profit100" type="number" placeholder="100">
+
+    <label for="priceTier">Price to Quote:</label>
+    <select id="priceTier"><option value="1">Use Margin 1</option><option value="2">Use Margin 2</option><option value="3">Use Margin 3</option></select>
+
+    <label for="competitor">Competitor Price:</label><input id="competitor" type="number" placeholder="50">
+
     <hr style="border-color:#444;margin:1em 0">
-    <label for="postProcessPiece">Post-process (zł / piece):</label>
-    <input id="postProcessPiece" type="number" placeholder="2">
-    <label for="packageBatch">Packaging (zł / batch):</label>
-    <input id="packageBatch" type="number" placeholder="5">
-    <label for="shippingOrder">Shipping (zł / order):</label>
-    <input id="shippingOrder" type="number" placeholder="10">
+    <label for="postProcessPiece">Post-process (zł / piece):</label><input id="postProcessPiece" type="number" placeholder="2">
+    <label for="packageBatch">Packaging (zł / batch):</label><input id="packageBatch" type="number" placeholder="5">
+    <label for="shippingOrder">Shipping Cost (zł / order):</label><input id="shippingOrder" type="number" placeholder="10">
   </details>
 
+  <!-- ACTION BUTTONS ------------------------------------------------------->
   <button onclick="calculatePrice()">Calculate</button>
   <button onclick="printQuote()">Print Quote</button>
 
-  <!-- on-screen result (for your reference) -->
-  <div id="result"></div>
+  <!-- INTERNAL RESULT (you only) ----------------------------------------->
+  <div id="result" style="margin-top:1.5em"></div>
 
-  <footer>
-    made with <span class="footer-heart">❤️</span> by <a href="https://thefilip.com" target="_blank">thefilip</a>
-  </footer>
+  <footer>made with <span class="footer-heart">❤️</span> by <a href="https://thefilip.com" target="_blank">thefilip</a></footer>
 
   <script>
-    // Printer presets
-    const presets = { p1p:{ power:100, maintenance:0.75, handling:6 } };
-    document.getElementById('printerPreset').onchange = e => {
-      const p = presets[e.target.value] || {};
-      ['power','maintenance','handling'].forEach(f => document.getElementById(f).value = p[f] || '');
+    /* ---------- printer presets ---------- */
+    const presets={p1p:{power:100,maintenance:0.75,handling:6}};
+    document.getElementById('printerPreset').onchange=e=>{
+      const p=presets[e.target.value]||{};
+      ['power','maintenance','handling'].forEach(f=>document.getElementById(f).value=p[f]||'');
     };
 
-    function v(id, def=0) {
-      const val = document.getElementById(id).value;
-      return val === '' ? def : parseFloat(val);
-    }
-    function cur() { return document.getElementById('currency').value; }
+    /* ---------- helpers ---------- */
+    const v=id=>parseFloat(document.getElementById(id).value||0),
+          c=()=>document.getElementById('currency').value;
 
-    // store last calc for invoice
-    let invoiceData = {};
+    let buyerHTML='';   // stored for invoice popup
 
-    function calculatePrice() {
-      const w = v('weight'), b = Math.max(v('batch',1),1), h = v('hours'),
-            fg = v('filamentPrice'), el = v('electricityPrice'),
-            pw = v('power'), mh = v('maintenance'), hb = v('handling'),
-            vatOn = document.getElementById('vat').checked, VAT = 0.23,
-            pp = v('postProcessPiece'), pkg = v('packageBatch'), ship = v('shippingOrder'),
-            m1 = v('profit30')||30, m2 = v('profit50')||50, m3 = v('profit100')||100, comp = v('competitor');
+    function calculatePrice(){
+      /* gather inputs */
+      const name=(document.getElementById('itemName').value||'3D Print'),
+            w=v('weight'), b=Math.max(v('batch')||1,1), h=v('hours'),
+            fk=v('filamentPrice'), el=v('electricityPrice'), pw=v('power'),
+            mh=v('maintenance'), hb=v('handling'),
+            vatOn=document.getElementById('vat').checked, VAT=0.23,
+            pp=v('postProcessPiece'), pkg=v('packageBatch'), ship=v('shippingOrder'),
+            m1=v('profit30')||30, m2=v('profit50')||50, m3=v('profit100')||100,
+            tier=parseInt(document.getElementById('priceTier').value,10),
+            comp=v('competitor');
 
-      // costs
-      const mat = fg*((w/1000)*b),
-            ele = (pw*h/1000)*el,
-            mnt = mh*h,
-            extras = pkg+ship+(pp*b),
-            totalBatch = mat+ele+mnt+hb+extras,
-            unitCost = totalBatch/b;
+      /* cost calculation */
+      const mat=fk*((w/1000)*b),
+            ele=(pw*h/1000)*el,
+            mnt=mh*h,
+            extras=pkg+ship+(pp*b),
+            batchTotal=mat+ele+mnt+hb+extras,
+            costEach=batchTotal/b;
 
-      const applyVAT = x => vatOn?x*(1+VAT):x;
-      // choose margin2 for quote (50%)
-      const unitPrice = applyVAT(unitCost*(1 + m2/100)),
-            totalPrice = unitPrice * b;
+      /* helper VAT */
+      const addVAT=x=>vatOn? x*(1+VAT): x;
 
-      // save for invoice
-      invoiceData = {
-        client: document.getElementById('clientName').value || 'Client',
-        date: new Date().toLocaleDateString(),
-        qty: b,
-        unitPrice, totalPrice, currency: cur()
-      };
+      /* price choices */
+      const priceList=[
+        addVAT(costEach*(1+m1/100)),
+        addVAT(costEach*(1+m2/100)),
+        addVAT(costEach*(1+m3/100))
+      ];
+      const unitPrice=priceList[tier-1],
+            lineTotal=unitPrice*b,
+            shippingRow=ship?`<tr><td>Shipping</td><td style="text-align:right">${ship.toFixed(2)} ${c()}</td></tr>`:'';
 
-      // show on screen for you
-      document.getElementById('result').innerHTML = `
-        <header>
-          <h3>Internal Preview</h3>
-        </header>
-        <section>
-          <p>Unit Cost: ${unitCost.toFixed(2)} ${cur()}</p>
-          <p>Quote Price (50% margin): ${unitPrice.toFixed(2)} ${cur()}</p>
-          <p>Quantity: ${b}</p>
-          <p><strong>Total: ${totalPrice.toFixed(2)} ${cur()}</strong></p>
-        </section>`;
-    }
-
-    function printQuote() {
-      if (!invoiceData.unitPrice) {
-        alert('Please Calculate first.');
-        return;
-      }
-      const w = window.open('','_blank','width=800,height=1100');
-      w.document.write(`
-        <!DOCTYPE html><html><head><meta charset="utf-8">
-        <title>Quote for ${invoiceData.client}</title>
+      /* ---------- BUYER-FACING HTML (stored for printing) ---------- */
+      buyerHTML=`<!DOCTYPE html><html><head><meta charset="utf-8">
+        <title>${name} – Quote</title>
         <style>
           @page{size:A4 portrait;margin:1.5cm}
           body{font:10pt -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#000}
+          h2{margin:0 0 .3em 0;font-size:14pt}
+          table{border-collapse:collapse;width:100%}
+          th,td{padding:4px 6px}
+          th{background:#eee}
+          tr:nth-child(even) td{background:#f8f8f8}
           header,footer{text-align:center}
-          header h2{margin:0}
-          table{width:100%;border-collapse:collapse;margin-top:1em}
-          th,td{padding:6px;border-bottom:1px solid #ddd}
-          th{background:#f5f5f5;text-align:left}
-          section p{margin:4px 0}
           footer{margin-top:1cm;font-size:9pt;color:#555}
-        </style>
-        </head><body>
+        </style></head><body>
           <header>
-            <h2>Quote for ${invoiceData.client}</h2>
-            <p>${invoiceData.date}</p>
+            <h2>${name}</h2>
+            <small>Quote date: ${new Date().toLocaleDateString()}</small>
           </header>
-          <section>
-            <table>
-              <tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
-              <tr>
-                <td>3D Printed Model</td>
-                <td>${invoiceData.qty}</td>
-                <td>${invoiceData.unitPrice.toFixed(2)} ${invoiceData.currency}</td>
-                <td>${invoiceData.totalPrice.toFixed(2)} ${invoiceData.currency}</td>
-              </tr>
-            </table>
-          </section>
-          <footer>
-            made with ❤️ by thefilip
-          </footer>
-        </body></html>`);
-      w.document.close();
-      w.focus();
-      w.print();
+
+          <table style="margin-top:1em">
+            <tr><th style="text-align:left">Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr>
+            <tr>
+              <td>${name}</td>
+              <td style="text-align:right">${b}</td>
+              <td style="text-align:right">${unitPrice.toFixed(2)} ${c()}</td>
+              <td style="text-align:right">${lineTotal.toFixed(2)} ${c()}</td>
+            </tr>
+            ${shippingRow}
+            <tr style="border-top:1px solid #000;font-weight:bold">
+              <td colspan="3" style="text-align:right">Grand Total</td>
+              <td style="text-align:right">${(lineTotal+ship).toFixed(2)} ${c()}</td>
+            </tr>
+          </table>
+
+          ${vatOn?`<p style="margin-top:.8em;font-size:9pt">Unit price includes VAT ${(VAT*100).toFixed(0)} %</p>`:''}
+
+          <footer>made with ❤️ by thefilip</footer>
+        </body></html>`;
+
+      /* ---------- INTERNAL VIEW (still shows your breakdown) -------- */
+      document.getElementById('result').innerHTML=`
+        <p><b>Unit price chosen for quote:</b> ${unitPrice.toFixed(2)} ${c()} &nbsp; (Margin tier ${tier})</p>
+        <p><i>Your internal break-even:</i> ${costEach.toFixed(2)} ${c()} (keep this private)</p>`;
+    }
+
+    /* ---------- dedicated pop-up print ---------- */
+    function printQuote(){
+      if(!buyerHTML){alert('Calculate first!');return;}
+      const win=window.open('','quoteWin','width=800,height=1100');
+      win.document.write(buyerHTML); win.document.close();
+      win.focus(); win.print();
     }
   </script>
 </body>
