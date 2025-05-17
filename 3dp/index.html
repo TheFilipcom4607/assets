@@ -395,12 +395,22 @@
       }
 
       invoiceHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>3D Print Quote</title>
-      <style>@page{size:A4 portrait;margin:1.5cm}
+      <style>
+      /* Force background colors to print */
+      @media print {
+        * {
+          -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
+          color-adjust: exact !important;                 /* Firefox */
+          print-color-adjust: exact !important;           /* Future standard */
+        }
+      }
+      @page{size:A4 portrait;margin:1.5cm}
       body{font:10pt -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
       h2{margin:0 0 .4em 0;font-size:14pt}
       table{border-collapse:collapse;width:100%}th,td{padding:4px 6px}
       th{background:#eaeaea}tr:nth-child(even) td{background:#f5f5f5}
-      footer{text-align:center;margin-top:1cm;font-size:9pt;color:#555}</style></head><body>
+      footer{text-align:center;margin-top:1cm;font-size:9pt;color:#555}
+      </style></head><body>
       <header style="text-align:center"><h2>3D Print Quote</h2><small>Quote date: ${new Date().toLocaleDateString()}</small></header>
       <table style="margin-top:1em">
       <tr><th style="text-align:left">Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr>
