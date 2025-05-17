@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>3D Print Price Calculator</title>
   <style>
-    body{max-width:700px;margin:2em auto;padding:1em;color:#eaeaea;font:15px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-    label{margin-top:.6em}
+    body{max-width:700px;margin:2em auto;padding:1em;color:#eaeaea;font:15px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#121212}
+    label{margin-top:.6em;display:block}
     input,select,button{width:100%;margin-bottom:.6em;font:inherit}
     input,select{background:#232323;border:1px solid #444;border-radius:5px;padding:8px;color:#eaeaea}
     input[type=number]::-webkit-outer-spin-button,
@@ -24,6 +24,9 @@
     .loss{color:#ff5e5e;font-weight:bold}
     footer{text-align:center;margin-top:2em;color:#888;font-size:.9em}
     .footer-heart{color:#ff4e4e;animation:softPulse 2s infinite}
+    @keyframes softPulse{0%{opacity:0.7}50%{opacity:1}100%{opacity:0.7}}
+    a{color:#40E0D0;text-decoration:none}
+    a:hover{text-decoration:underline}
   </style>
 </head>
 <body>
@@ -70,8 +73,8 @@
     <label for="shippingOrder">Shipping Cost (zł / order):</label><input id="shippingOrder" type="number" placeholder="10">
   </details>
 
-  <button id="calculateBtn">Calculate</button>
-  <button id="printQuoteBtn">Print Quote</button>
+  <button onclick="calculate()">Calculate</button>
+  <button onclick="printQuote()">Print Quote</button>
 
   <!-- Internal breakdown -->
   <div id="result"></div>
@@ -81,77 +84,54 @@
   <script>
     /* ---------------- presets ---------------- */
     const presets={p1p:{power:100,maintenance:0.75,handling:6}};
-    document.getElementById('printerPreset').onchange = function(e) {
+    printerPreset.onchange=e=>{
       const p=presets[e.target.value]||{};
-      document.getElementById('power').value = p.power || '';
-      document.getElementById('maintenance').value = p.maintenance || '';
-      document.getElementById('handling').value = p.handling || '';
+      power.value=p.power||''; maintenance.value=p.maintenance||''; handling.value=p.handling||'';
     };
 
     /* ---------------- utils ------------------ */
-    const n = function(id) {
-      return parseFloat(document.getElementById(id).value || 0);
-    };
-    
-    const cur = function() {
-      return document.getElementById('currency').value;
-    };
-    
-    let invoiceHTML = '';
+    const n=id=>parseFloat(document.getElementById(id).value||0),
+          cur=()=>currency.value;
+    let invoiceHTML='';
 
-    function calculate() {
+    function calculate(){
       /* inputs */
-      const name = document.getElementById('itemName').value || '3D Print',
-            w = n('weight'), 
-            b = Math.max(n('batch') || 1, 1), 
-            h = n('hours'),
-            fk = n('filamentPrice'), 
-            ep = n('electricityPrice'), 
-            pw = n('power'),
-            mh = n('maintenance'), 
-            hb = n('handling'),
-            vat = document.getElementById('vat').checked, 
-            VAT = 0.23,
-            pp = n('postProcessPiece'), 
-            pkg = n('packageBatch'), 
-            ship = n('shippingOrder'),
-            m1 = n('profit30') || 30, 
-            m2 = n('profit50') || 50, 
-            m3 = n('profit100') || 100,
-            tier = parseInt(document.getElementById('priceTier').value, 10);
+      const name=itemName.value||'3D Print',
+            w=n('weight'), b=Math.max(n('batch')||1,1), h=n('hours'),
+            fk=n('filamentPrice'), ep=n('electricityPrice'), pw=n('power'),
+            mh=n('maintenance'), hb=n('handling'),
+            vat=document.getElementById('vat').checked, VAT=0.23,
+            pp=n('postProcessPiece'), pkg=n('packageBatch'), ship=n('shippingOrder'),
+            m1=n('profit30')||30, m2=n('profit50')||50, m3=n('profit100')||100,
+            tier=parseInt(priceTier.value,10);
 
       /* costs */
-      const mat = fk * ((w / 1000) * b),
-            ele = (pw * h / 1000) * ep,
-            mnt = mh * h,
-            extras = pkg + ship + (pp * b),
-            batchTotal = mat + ele + mnt + hb + extras,
-            costEach = batchTotal / b;
+      const mat=fk*((w/1000)*b),
+            ele=(pw*h/1000)*ep,
+            mnt=mh*h,
+            extras=pkg+ship+(pp*b),
+            batchTotal=mat+ele+mnt+hb+extras,
+            costEach=batchTotal/b;
 
-      const addVAT = function(x) {
-        return vat ? x * (1 + VAT) : x;
-      };
-      
-      const pList = [
-        addVAT(costEach * (1 + m1 / 100)),
-        addVAT(costEach * (1 + m2 / 100)),
-        addVAT(costEach * (1 + m3 / 100))
-      ];
-      
-      const unit = pList[tier - 1],
-            grand = unit * b + ship;
+      const addVAT=x=>vat?x*(1+VAT):x,
+            pList=[
+              addVAT(costEach*(1+m1/100)),
+              addVAT(costEach*(1+m2/100)),
+              addVAT(costEach*(1+m3/100))
+            ],
+            unit=pList[tier-1],
+            grand=unit*b+ship;
 
       /* competitor row (internal) */
-      let compRow = '';
-      const comp = n('competitor');
-      if (comp) {
-        const cm = addVAT(comp) - costEach, 
-              pct = (cm / costEach) * 100;
-        compRow = `<tr><td>Competitor (${addVAT(comp).toFixed(2)} ${cur()})</td><td class="${cm < 0 ? 'loss' : 'profit'}" style="text-align:right">${cm.toFixed(2)} ${cur()} (${pct.toFixed(0)}%)</td></tr>`;
+      let compRow='';
+      const comp=n('competitor');
+      if(comp){
+        const cm=addVAT(comp)-costEach, pct=(cm/costEach)*100;
+        compRow=`<tr><td>Competitor (${addVAT(comp).toFixed(2)} ${cur()})</td><td class="${cm<0?'loss':'profit'}" style="text-align:right">${cm.toFixed(2)} ${cur()} (${pct.toFixed(0)}%)</td></tr>`;
       }
 
       /* -------- internal HTML -------- */
-      document.getElementById('result').innerHTML = `
+      result.innerHTML=`
         <div class="box">
           <b>Cost per batch</b>
           <table><tr><td>Material</td><td style="text-align:right">${mat.toFixed(2)} ${cur()}</td></tr>
@@ -192,21 +172,11 @@
       <footer>made with ❤️ by thefilip</footer></body></html>`;
     }
 
-    function printQuote() {
-      if (!invoiceHTML) {
-        alert('Calculate first!');
-        return;
-      }
-      const w = window.open('', 'inv', 'width=800,height=1100');
-      w.document.write(invoiceHTML);
-      w.document.close();
-      w.focus();
-      w.print();
+    function printQuote(){
+      if(!invoiceHTML){alert('Calculate first!');return;}
+      const w=window.open('','inv','width=800,height=1100');
+      w.document.write(invoiceHTML);w.document.close();w.focus();w.print();
     }
-
-    // Add event listeners to buttons
-    document.getElementById('calculateBtn').addEventListener('click', calculate);
-    document.getElementById('printQuoteBtn').addEventListener('click', printQuote);
   </script>
 </body>
 </html>
