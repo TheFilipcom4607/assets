@@ -48,6 +48,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="part-settings">Part Settings</div>
     <div class="tab" data-tab="quote-list">Quote List</div>
+    <div class="tab" data-tab="notes">Notes</div>
   </div>
 
   <div id="part-settings" class="tab-content active">
@@ -103,13 +104,41 @@
     <div id="partsList"></div>
     
     <div class="box" id="shipOrderWide">
-      <label for="shippingOrder">Shipping Cost (total):</label>
-      <input id="shippingOrder" type="number" placeholder="10">
+      <div class="flex">
+        <div style="flex: 1;">
+          <label for="shippingOrder">Shipping Cost (total):</label>
+          <input id="shippingOrder" type="number" placeholder="10">
+        </div>
+        <div style="flex: 1;">
+          <label for="shippingMethod">Shipping Method:</label>
+          <select id="shippingMethod">
+            <option value="">— select or type —</option>
+            <option value="DHL">DHL</option>
+            <option value="UPS">UPS</option>
+            <option value="FedEx">FedEx</option>
+            <option value="Local Pickup">Local Pickup</option>
+          </select>
+        </div>
+      </div>
       <p id="totalQuote">Total Quote: 0.00 zł</p>
     </div>
     
     <button onclick="printMultiPartQuote()">Generate Quote</button>
     <button onclick="clearParts()">Clear All Parts</button>
+  </div>
+
+  <div id="notes" class="tab-content">
+    <h3>Additional Notes</h3>
+    <p>Add custom notes to appear on your quote:</p>
+    
+    <label for="customerInfo">Customer Information:</label>
+    <textarea id="customerInfo" rows="3" placeholder="Customer name, contact info, etc." style="width:100%;background:#232323;border:1px solid #444;border-radius:5px;padding:8px;color:#eaeaea;resize:vertical;"></textarea>
+    
+    <label for="paymentTerms">Payment Terms:</label>
+    <textarea id="paymentTerms" rows="2" placeholder="Payment due within 14 days" style="width:100%;background:#232323;border:1px solid #444;border-radius:5px;padding:8px;color:#eaeaea;resize:vertical;"></textarea>
+    
+    <label for="additionalNotes">Additional Notes:</label>
+    <textarea id="additionalNotes" rows="5" placeholder="Enter any additional information, terms, or special instructions..." style="width:100%;background:#232323;border:1px solid #444;border-radius:5px;padding:8px;color:#eaeaea;resize:vertical;"></textarea>
   </div>
 
   <footer>made with <span class="footer-heart">❤️</span> by <a href="https://thefilip.com" target="_blank">thefilip</a></footer>
@@ -139,6 +168,29 @@
         document.getElementById(tab.dataset.tab).classList.add('active');
         
         updateTotalQuote();
+      });
+    });
+
+    // Make shipping method editable
+    document.addEventListener('DOMContentLoaded', function() {
+      const shippingMethodSelect = document.getElementById('shippingMethod');
+      shippingMethodSelect.addEventListener('change', function(e) {
+        const value = e.target.value;
+        if (!value) {
+          // If empty selection, make it editable
+          setTimeout(() => {
+            const newMethod = prompt("Enter custom shipping method:", "");
+            if (newMethod) {
+              // Add new option
+              const option = document.createElement('option');
+              option.value = newMethod;
+              option.text = newMethod;
+              shippingMethodSelect.add(option);
+              // Select it
+              shippingMethodSelect.value = newMethod;
+            }
+          }, 100);
+        }
       });
     });
 
@@ -296,10 +348,16 @@
       }
 
       const shipping = n('shippingOrder');
+      const shippingMethod = document.getElementById('shippingMethod').value;
       const subtotal = parts.reduce((sum, part) => sum + part.total, 0);
       const total = subtotal + shipping;
       const hasVAT = parts.some(part => part.vat);
       const VAT = hasVAT ? parts[0].VAT : 0;
+      
+      // Get notes
+      const customerInfo = document.getElementById('customerInfo').value;
+      const paymentTerms = document.getElementById('paymentTerms').value;
+      const additionalNotes = document.getElementById('additionalNotes').value;
 
       // Generate invoice HTML
       let partsHTML = '';
@@ -314,7 +372,27 @@
         `;
       });
 
-      const shippingRow = shipping ? `<tr><td>Shipping</td><td></td><td></td><td style="text-align:right">${shipping.toFixed(2)} ${cur()}</td></tr>` : '';
+      const shippingRow = shipping ? `<tr><td>Shipping${shippingMethod ? ` (${shippingMethod})` : ''}</td><td></td><td></td><td style="text-align:right">${shipping.toFixed(2)} ${cur()}</td></tr>` : '';
+      
+      // Add notes section if any notes exist
+      let notesSection = '';
+      if (customerInfo || paymentTerms || additionalNotes) {
+        notesSection = `<div style="margin-top:2em;border-top:1px solid #ccc;padding-top:1em">`;
+        
+        if (customerInfo) {
+          notesSection += `<div style="margin-bottom:1em"><strong>Customer:</strong><br>${customerInfo.replace(/\n/g, '<br>')}</div>`;
+        }
+        
+        if (paymentTerms) {
+          notesSection += `<div style="margin-bottom:1em"><strong>Payment Terms:</strong><br>${paymentTerms.replace(/\n/g, '<br>')}</div>`;
+        }
+        
+        if (additionalNotes) {
+          notesSection += `<div><strong>Notes:</strong><br>${additionalNotes.replace(/\n/g, '<br>')}</div>`;
+        }
+        
+        notesSection += `</div>`;
+      }
 
       invoiceHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>3D Print Quote</title>
       <style>@page{size:A4 portrait;margin:1.5cm}
@@ -331,6 +409,7 @@
       <tr style="border-top:1px solid #000;font-weight:bold"><td colspan="3" style="text-align:right">Grand Total</td><td style="text-align:right">${total.toFixed(2)} ${cur()}</td></tr>
       </table>
       ${hasVAT ? `<p style="margin-top:.8em;font-size:9pt">Prices include VAT ${(VAT * 100).toFixed(0)} %</p>` : ''}
+      ${notesSection}
       <footer>made with ❤️ by thefilip</footer></body></html>`;
 
       const w = window.open('', 'inv', 'width=800,height=1100');
