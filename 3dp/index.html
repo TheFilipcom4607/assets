@@ -175,7 +175,12 @@
     function printQuote(){
       if(!invoiceHTML){alert('Calculate first!');return;}
       const w=window.open('','inv','width=800,height=1100');
-      w.document.write(invoiceHTML);w.document.close();w.focus();w.print();
+      w.document.write(invoiceHTML);
+      w.document.close();
+      setTimeout(() => {
+        w.focus();
+        w.print();
+      }, 300);
     }
   </script>
 </body>
