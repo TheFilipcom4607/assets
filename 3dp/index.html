@@ -419,7 +419,8 @@
       <tr style="border-top:1px solid #000;font-weight:bold"><td colspan="3" style="text-align:right">Grand Total</td><td style="text-align:right">${total.toFixed(2)} ${cur()}</td></tr>
       </table>
       ${hasVAT ? `<p style="margin-top:.8em;font-size:9pt">Prices include VAT ${(VAT * 100).toFixed(0)} %</p>` : ''}
-      ${notesSection};
+      ${notesSection}
+      <footer>made with ❤️ by thefilip</footer></body></html>`;
 
       const w = window.open('', 'inv', 'width=800,height=1100');
       w.document.write(invoiceHTML);
