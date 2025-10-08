@@ -121,6 +121,8 @@
         #generateQuoteBtn:hover { background: #6EE7B7; border-color: #6EE7B7; }
         #clearPartsBtn { border-color: #EF4444; color: #EF4444; background: transparent; } /* Red for Clear */
         #clearPartsBtn:hover { background: #EF4444; color: #121212; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(239, 68, 68, 0.25); }
+        #clearFormBtn { border-color: #f59e0b; color: #f59e0b; background: transparent; } /* Amber for Clear Form */
+        #clearFormBtn:hover { background: #f59e0b; color: #121212; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(245, 158, 11, 0.25); }
 
 
         /* Layout Utilities */
@@ -326,6 +328,9 @@
         #modal-confirm:hover { background: #90FFEF; border-color: #90FFEF; }
         #modal-cancel { background: #444; color: #eaeaea; border-color: #444; }
         #modal-cancel:hover { background: #555; border-color: #555; }
+        
+        /* Utility */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -334,13 +339,13 @@
         <p>A tool to accurately quote your 3D printing jobs.</p>
     </header>
 
-    <!-- Tabs --><div class="tabs" id="tabs">
+    <div class="tabs" id="tabs">
         <button data-tab="part-settings" class="tab active">Part Settings</button>
         <button data-tab="quote-list" class="tab">Quote List</button>
         <button data-tab="notes" class="tab">Notes</button>
     </div>
 
-    <!-- Part Settings Tab --><div id="part-settings" class="tab-content active">
+    <div id="part-settings" class="tab-content active">
         <div class="grid-2">
             <div>
                 <label for="itemName">Product / Model Name</label>
@@ -409,7 +414,7 @@
             </div>
         </div>
 
-        <!-- Extras & Margins --><details>
+        <details>
             <summary>Extras & Margins</summary>
             <div class="grid-2">
                 <div>
@@ -440,15 +445,16 @@
             </div>
         </details>
 
-        <!-- Action Buttons --><div style="margin-top: 2em;">
+        <div style="margin-top: 2em;">
             <button id="calculateBtn">Calculate</button>
             <button id="addToQuoteBtn">Add to Quote</button>
+            <button id="clearFormBtn">Clear Form</button>
         </div>
         
-        <!-- Result Display --><div id="result"></div>
+        <div id="result"></div>
     </div>
 
-    <!-- Quote List Tab --><div id="quote-list" class="tab-content">
+    <div id="quote-list" class="tab-content">
         <h2>Quote Items</h2>
         <div id="partsList"></div>
         
@@ -459,14 +465,15 @@
                      <input id="shippingCost" type="number" placeholder="10">
                 </div>
                 <div>
-                    <label for="shippingMethod">Shipping Method</label>
-                    <input id="shippingMethod" list="shippingOptions" placeholder="e.g., DHL">
-                    <datalist id="shippingOptions">
-                        <option value="DHL"></option>
-                        <option value="Pocztex"></option>
-                        <option value="Inpost"></option>
-                        <option value="Local Pickup"></option>
-                    </datalist>
+                    <label for="shippingMethodSelect">Shipping Method</label>
+                    <select id="shippingMethodSelect">
+                        <option value="DHL">DHL</option>
+                        <option value="Pocztex">Pocztex</option>
+                        <option value="Inpost">Inpost</option>
+                        <option value="Local Pickup">Local Pickup</option>
+                        <option value="custom">Custom...</option>
+                    </select>
+                    <input id="shippingMethodCustom" type="text" placeholder="Enter custom method" class="hidden" style="margin-top: 0.5em;">
                 </div>
              </div>
              <p id="totalQuote">Total Quote: 0.00 zł</p>
@@ -477,7 +484,7 @@
         </div>
     </div>
 
-    <!-- Notes Tab --><div id="notes" class="tab-content">
+    <div id="notes" class="tab-content">
          <h2>Additional Notes</h2>
          <p>Add custom information and terms to appear on your final quote.</p>
          <div>
@@ -498,7 +505,7 @@
         Made with <span class="heart">❤️</span> by <a href="https://thefilip.com" target="_blank">thefilip</a>
     </footer>
 
-    <!-- Modal --><div id="modal-backdrop" class="modal-backdrop hidden">
+    <div id="modal-backdrop" class="modal-backdrop hidden">
         <div id="modal-content" class="modal-content">
             <p id="modal-message"></p>
             <div class="modal-buttons">
@@ -518,10 +525,13 @@
             addToQuoteBtn: document.getElementById('addToQuoteBtn'),
             generateQuoteBtn: document.getElementById('generateQuoteBtn'),
             clearPartsBtn: document.getElementById('clearPartsBtn'),
+            clearFormBtn: document.getElementById('clearFormBtn'),
             resultContainer: document.getElementById('result'),
             partsListContainer: document.getElementById('partsList'),
             totalQuoteContainer: document.getElementById('totalQuote'),
             shippingCostInput: document.getElementById('shippingCost'),
+            shippingMethodSelect: document.getElementById('shippingMethodSelect'),
+            shippingMethodCustom: document.getElementById('shippingMethodCustom'),
             printerPreset: document.getElementById('printerPreset'),
             modal: {
                 backdrop: document.getElementById('modal-backdrop'),
@@ -553,7 +563,6 @@
             D.modal.cancel.style.display = (type === 'alert') ? 'none' : 'inline-block';
             D.modal.confirm.textContent = (type === 'alert') ? 'OK' : 'Confirm';
             
-            // Clone and replace the confirm button to remove old event listeners
             const newConfirm = D.modal.confirm.cloneNode(true);
             D.modal.confirm.parentNode.replaceChild(newConfirm, D.modal.confirm);
             D.modal.confirm = newConfirm;
@@ -564,7 +573,6 @@
             });
         };
         const hideModal = () => D.modal.backdrop.classList.add('hidden');
-
 
         // --- Core Logic ---
         const calculate = () => {
@@ -698,13 +706,20 @@
             });
         };
         
+        const getShippingMethod = () => {
+            if (D.shippingMethodSelect.value === 'custom') {
+                return D.shippingMethodCustom.value || 'Custom';
+            }
+            return D.shippingMethodSelect.value;
+        };
+
         const handleGenerateQuote = () => {
             if (parts.length === 0) {
                 showModal("Please add at least one part to the quote first!", 'alert');
                 return;
             }
             const shipping = getNum('shippingCost');
-            const shippingMethod = getVal('shippingMethod');
+            const shippingMethod = getShippingMethod();
             const total = parts.reduce((sum, p) => sum + p.total, 0) + shipping;
             const hasVAT = parts.some(p => p.vat);
             const c = getCurrency();
@@ -747,17 +762,37 @@
              if (targetTabId === 'quote-list') updateTotalQuote();
         };
 
+        const handleClearForm = () => {
+            const formIdsToClear = [
+                'itemName', 'weight', 'hours', 'filamentPrice', 'electricityPrice',
+                'power', 'maintenance', 'handling', 'competitor', 'postProcessPiece', 'packageBatch'
+            ];
+            formIdsToClear.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            document.getElementById('batch').value = '1';
+            document.getElementById('vat').checked = false;
+            document.getElementById('priceTier').selectedIndex = 0;
+            D.resultContainer.innerHTML = '';
+        };
+
         // --- Event Listeners ---
         D.calculateBtn.addEventListener('click', calculate);
         D.addToQuoteBtn.addEventListener('click', handleAddToQuote);
         D.generateQuoteBtn.addEventListener('click', handleGenerateQuote);
         D.clearPartsBtn.addEventListener('click', handleClearParts);
+        D.clearFormBtn.addEventListener('click', handleClearForm);
         D.shippingCostInput.addEventListener('input', updateTotalQuote);
         D.partsListContainer.addEventListener('click', handleRemovePart);
         D.printerPreset.addEventListener('change', applyPreset);
         D.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
         D.modal.backdrop.addEventListener('click', (e) => { if(e.target === D.modal.backdrop) hideModal(); });
         D.modal.cancel.addEventListener('click', hideModal);
+        D.shippingMethodSelect.addEventListener('change', () => {
+            D.shippingMethodCustom.classList.toggle('hidden', D.shippingMethodSelect.value !== 'custom');
+        });
+
 
         // --- Initialization ---
         renderPartsList();
