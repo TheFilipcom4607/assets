@@ -1,0 +1,259 @@
+import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const SurveyDashboard = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const csvData = await window.fs.readFile('FDM 3D Printing Community Survey.csv', { encoding: 'utf8' });
+        const Papa = await import('https://cdn.jsdelivr.net/npm/papaparse@5.4.1/+esm');
+        const parsed = Papa.parse(csvData, { header: true, skipEmptyLines: true });
+        setData(parsed.data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error loading data:', err);
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading survey data...</div>;
+  if (!data || data.length === 0) return <div className="p-8 text-center">No data available</div>;
+
+  // Data processing functions
+  const countOccurrences = (field) => {
+    const counts = {};
+    data.forEach(row => {
+      const value = row[field];
+      if (value) {
+        counts[value] = (counts[value] || 0) + 1;
+      }
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  };
+
+  const countMultiSelect = (field) => {
+    const counts = {};
+    data.forEach(row => {
+      const value = row[field];
+      if (value) {
+        const items = value.split(',').map(item => item.trim());
+        items.forEach(item => {
+          counts[item] = (counts[item] || 0) + 1;
+        });
+      }
+    });
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  };
+
+  const getBrandRatings = () => {
+    const brands = ['Prusa', 'Bambu Lab', 'Creality', 'AnkerMake', 'Elegoo', 'Artillery', 'Sovol', 'QiDi', 'Voron/DIY kits'];
+    const ratings = {};
+    
+    brands.forEach(brand => {
+      const fieldName = `Rate the following brands (if you have experience with them)  [${brand}]`;
+      const brandRatings = data.map(row => row[fieldName]).filter(r => r && r !== 'No Experience');
+      
+      if (brandRatings.length > 0) {
+        const ratingMap = { 'Excellent': 5, 'Good': 4, 'Average': 3, 'Poor': 2, 'Very Poor': 1 };
+        const avg = brandRatings.reduce((sum, r) => sum + (ratingMap[r] || 0), 0) / brandRatings.length;
+        ratings[brand] = { avg: avg.toFixed(2), count: brandRatings.length };
+      }
+    });
+    
+    return Object.entries(ratings)
+      .map(([name, data]) => ({ name: `${name} (n=${data.count})`, value: parseFloat(data.avg) }))
+      .sort((a, b) => b.value - a.value);
+  };
+
+  // Process data
+  const experienceData = countOccurrences(' How long have you been 3D printing?');
+  const printerCountData = countOccurrences('How many FDM printers do you currently own? ');
+  const satisfactionData = countOccurrences('Overall, how satisfied are you with your main printer? ');
+  const successRateData = countOccurrences('What percentage of your prints succeed without issues? ');
+  const maintenanceFreqData = countOccurrences('How often do you perform maintenance tasks? ');
+  const brandRatings = getBrandRatings();
+  const filamentTypes = countMultiSelect('What filament types do you regularly use? ');
+  const printerBrands = countMultiSelect('What printer brand(s) do you own? ');
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c'];
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">FDM 3D Printer Survey Results</h1>
+          <p className="text-gray-600 text-lg">Total Responses: {data.length}</p>
+          <p className="text-gray-500 text-sm mt-2">Community survey by a fellow hobbyist • Not affiliated with any brand</p>
+        </div>
+
+        {/* Experience Level */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Community Experience</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={experienceData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#0088FE" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Printer Brands Owned */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Printer Brands Owned (Multi-select)</h2>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={printerBrands.slice(0, 10)} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" />
+              <YAxis dataKey="name" type="category" width={150} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#00C49F" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Brand Satisfaction Ratings */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Brand Satisfaction Ratings (Average)</h2>
+          <p className="text-sm text-gray-600 mb-4">Scale: 5 = Excellent, 4 = Good, 3 = Average, 2 = Poor, 1 = Very Poor</p>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={brandRatings} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" domain={[0, 5]} />
+              <YAxis dataKey="name" type="category" width={180} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#FFBB28" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Success Rate */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Print Success Rate</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={successRateData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {successRateData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Number of Printers Owned</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={printerCountData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {printerCountData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Filament Usage */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Filament Types Used (Multi-select)</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={filamentTypes}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#FF8042" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Maintenance Frequency */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Maintenance Frequency</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={maintenanceFreqData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Key Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500">
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Most Popular Brand</h3>
+            <p className="text-3xl font-bold text-blue-600">{printerBrands[0]?.name || 'N/A'}</p>
+            <p className="text-sm text-gray-600">{printerBrands[0]?.value || 0} users</p>
+          </div>
+          
+          <div className="bg-green-50 rounded-lg p-6 border-l-4 border-green-500">
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Most Used Filament</h3>
+            <p className="text-3xl font-bold text-green-600">{filamentTypes[0]?.name || 'N/A'}</p>
+            <p className="text-sm text-gray-600">{filamentTypes[0]?.value || 0} users</p>
+          </div>
+          
+          <div className="bg-purple-50 rounded-lg p-6 border-l-4 border-purple-500">
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Avg Printers Owned</h3>
+            <p className="text-3xl font-bold text-purple-600">
+              {(data.reduce((sum, row) => {
+                const count = row['How many FDM printers do you currently own? '];
+                if (count === '5+') return sum + 5;
+                if (count === '3-4') return sum + 3.5;
+                return sum + (parseInt(count) || 0);
+              }, 0) / data.length).toFixed(1)}
+            </p>
+            <p className="text-sm text-gray-600">per respondent</p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+          <p className="text-gray-600">
+            This dashboard was created from community survey responses. 
+            Data collected and analyzed by a hobbyist for the 3D printing community.
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Want to see the raw data or have questions? Feel free to reach out!
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SurveyDashboard;
