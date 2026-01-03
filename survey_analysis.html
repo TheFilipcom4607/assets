@@ -1,259 +1,438 @@
-import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FDM 3D Printer Survey Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .header .subtitle {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .chart-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .chart-section h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .chart-section p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+        
+        .chart-container-small {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #0088FE;
+        }
+        
+        .stat-card.green {
+            border-left-color: #00C49F;
+        }
+        
+        .stat-card.purple {
+            border-left-color: #8884d8;
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .footer {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            color: #666;
+        }
+        
+        .footer p:last-child {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        #loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading">Loading survey data...</div>
+        <div id="content" style="display: none;">
+            <div class="header">
+                <h1>FDM 3D Printer Survey Results</h1>
+                <p id="totalResponses">Total Responses: 0</p>
+                <p class="subtitle">Community survey by a fellow hobbyist • Not affiliated with any brand</p>
+            </div>
 
-const SurveyDashboard = () => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Most Popular Brand</h3>
+                    <div class="value" id="topBrand">-</div>
+                    <div class="label" id="topBrandCount">0 users</div>
+                </div>
+                <div class="stat-card green">
+                    <h3>Most Used Filament</h3>
+                    <div class="value" id="topFilament">-</div>
+                    <div class="label" id="topFilamentCount">0 users</div>
+                </div>
+                <div class="stat-card purple">
+                    <h3>Avg Printers Owned</h3>
+                    <div class="value" id="avgPrinters">0</div>
+                    <div class="label">per respondent</div>
+                </div>
+            </div>
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const csvData = await window.fs.readFile('FDM 3D Printing Community Survey.csv', { encoding: 'utf8' });
-        const Papa = await import('https://cdn.jsdelivr.net/npm/papaparse@5.4.1/+esm');
-        const parsed = Papa.parse(csvData, { header: true, skipEmptyLines: true });
-        setData(parsed.data);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error loading data:', err);
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
+            <div class="chart-section">
+                <h2>Community Experience</h2>
+                <div class="chart-container">
+                    <canvas id="experienceChart"></canvas>
+                </div>
+            </div>
 
-  if (loading) return <div className="p-8 text-center">Loading survey data...</div>;
-  if (!data || data.length === 0) return <div className="p-8 text-center">No data available</div>;
+            <div class="chart-section">
+                <h2>Printer Brands Owned (Multi-select)</h2>
+                <div class="chart-container">
+                    <canvas id="brandsChart"></canvas>
+                </div>
+            </div>
 
-  // Data processing functions
-  const countOccurrences = (field) => {
-    const counts = {};
-    data.forEach(row => {
-      const value = row[field];
-      if (value) {
-        counts[value] = (counts[value] || 0) + 1;
-      }
-    });
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  };
+            <div class="chart-section">
+                <h2>Brand Satisfaction Ratings (Average)</h2>
+                <p>Scale: 5 = Excellent, 4 = Good, 3 = Average, 2 = Poor, 1 = Very Poor</p>
+                <div class="chart-container">
+                    <canvas id="ratingsChart"></canvas>
+                </div>
+            </div>
 
-  const countMultiSelect = (field) => {
-    const counts = {};
-    data.forEach(row => {
-      const value = row[field];
-      if (value) {
-        const items = value.split(',').map(item => item.trim());
-        items.forEach(item => {
-          counts[item] = (counts[item] || 0) + 1;
-        });
-      }
-    });
-    return Object.entries(counts)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-  };
+            <div class="stats-grid">
+                <div class="chart-section">
+                    <h2>Print Success Rate</h2>
+                    <div class="chart-container-small">
+                        <canvas id="successChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-section">
+                    <h2>Number of Printers Owned</h2>
+                    <div class="chart-container-small">
+                        <canvas id="printerCountChart"></canvas>
+                    </div>
+                </div>
+            </div>
 
-  const getBrandRatings = () => {
-    const brands = ['Prusa', 'Bambu Lab', 'Creality', 'AnkerMake', 'Elegoo', 'Artillery', 'Sovol', 'QiDi', 'Voron/DIY kits'];
-    const ratings = {};
-    
-    brands.forEach(brand => {
-      const fieldName = `Rate the following brands (if you have experience with them)  [${brand}]`;
-      const brandRatings = data.map(row => row[fieldName]).filter(r => r && r !== 'No Experience');
-      
-      if (brandRatings.length > 0) {
-        const ratingMap = { 'Excellent': 5, 'Good': 4, 'Average': 3, 'Poor': 2, 'Very Poor': 1 };
-        const avg = brandRatings.reduce((sum, r) => sum + (ratingMap[r] || 0), 0) / brandRatings.length;
-        ratings[brand] = { avg: avg.toFixed(2), count: brandRatings.length };
-      }
-    });
-    
-    return Object.entries(ratings)
-      .map(([name, data]) => ({ name: `${name} (n=${data.count})`, value: parseFloat(data.avg) }))
-      .sort((a, b) => b.value - a.value);
-  };
+            <div class="chart-section">
+                <h2>Filament Types Used (Multi-select)</h2>
+                <div class="chart-container">
+                    <canvas id="filamentChart"></canvas>
+                </div>
+            </div>
 
-  // Process data
-  const experienceData = countOccurrences(' How long have you been 3D printing?');
-  const printerCountData = countOccurrences('How many FDM printers do you currently own? ');
-  const satisfactionData = countOccurrences('Overall, how satisfied are you with your main printer? ');
-  const successRateData = countOccurrences('What percentage of your prints succeed without issues? ');
-  const maintenanceFreqData = countOccurrences('How often do you perform maintenance tasks? ');
-  const brandRatings = getBrandRatings();
-  const filamentTypes = countMultiSelect('What filament types do you regularly use? ');
-  const printerBrands = countMultiSelect('What printer brand(s) do you own? ');
+            <div class="chart-section">
+                <h2>Maintenance Frequency</h2>
+                <div class="chart-container">
+                    <canvas id="maintenanceChart"></canvas>
+                </div>
+            </div>
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c'];
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">FDM 3D Printer Survey Results</h1>
-          <p className="text-gray-600 text-lg">Total Responses: {data.length}</p>
-          <p className="text-gray-500 text-sm mt-2">Community survey by a fellow hobbyist • Not affiliated with any brand</p>
+            <div class="footer">
+                <p>This dashboard was created from community survey responses.</p>
+                <p>Data collected and analyzed by a hobbyist for the 3D printing community.</p>
+                <p>Want to see the raw data or have questions? Feel free to reach out!</p>
+            </div>
         </div>
+    </div>
 
-        {/* Experience Level */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Community Experience</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={experienceData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#0088FE" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+    <script>
+        // Load and parse CSV
+        async function loadData() {
+            try {
+                const response = await fetch('FDM 3D Printing Community Survey.csv');
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        processData(results.data);
+                    },
+                    error: function(error) {
+                        console.error('Error parsing CSV:', error);
+                        document.getElementById('loading').textContent = 'Error loading data. Please make sure the CSV file is in the same directory.';
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching CSV:', error);
+                document.getElementById('loading').textContent = 'Error loading data. Please make sure the CSV file is in the same directory.';
+            }
+        }
 
-        {/* Printer Brands Owned */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Printer Brands Owned (Multi-select)</h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={printerBrands.slice(0, 10)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" width={150} />
-              <Tooltip />
-              <Bar dataKey="value" fill="#00C49F" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        function countOccurrences(data, field) {
+            const counts = {};
+            data.forEach(row => {
+                const value = row[field];
+                if (value && value.trim()) {
+                    counts[value] = (counts[value] || 0) + 1;
+                }
+            });
+            return Object.entries(counts).map(([name, value]) => ({ name, value }));
+        }
 
-        {/* Brand Satisfaction Ratings */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Brand Satisfaction Ratings (Average)</h2>
-          <p className="text-sm text-gray-600 mb-4">Scale: 5 = Excellent, 4 = Good, 3 = Average, 2 = Poor, 1 = Very Poor</p>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={brandRatings} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" domain={[0, 5]} />
-              <YAxis dataKey="name" type="category" width={180} />
-              <Tooltip />
-              <Bar dataKey="value" fill="#FFBB28" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        function countMultiSelect(data, field) {
+            const counts = {};
+            data.forEach(row => {
+                const value = row[field];
+                if (value && value.trim()) {
+                    const items = value.split(',').map(item => item.trim());
+                    items.forEach(item => {
+                        if (item) counts[item] = (counts[item] || 0) + 1;
+                    });
+                }
+            });
+            return Object.entries(counts)
+                .map(([name, value]) => ({ name, value }))
+                .sort((a, b) => b.value - a.value);
+        }
 
-        {/* Success Rate */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Print Success Rate</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={successRateData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {successRateData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+        function getBrandRatings(data) {
+            const brands = ['Prusa', 'Bambu Lab', 'Creality', 'AnkerMake', 'Elegoo', 'Artillery', 'Sovol', 'QiDi', 'Voron/DIY kits'];
+            const ratings = {};
+            
+            brands.forEach(brand => {
+                const fieldName = `Rate the following brands (if you have experience with them)  [${brand}]`;
+                const brandRatings = data.map(row => row[fieldName]).filter(r => r && r !== 'No Experience');
+                
+                if (brandRatings.length > 0) {
+                    const ratingMap = { 'Excellent': 5, 'Good': 4, 'Average': 3, 'Poor': 2, 'Very Poor': 1 };
+                    const avg = brandRatings.reduce((sum, r) => sum + (ratingMap[r] || 0), 0) / brandRatings.length;
+                    ratings[brand] = { avg: avg.toFixed(2), count: brandRatings.length };
+                }
+            });
+            
+            return Object.entries(ratings)
+                .map(([name, data]) => ({ name: `${name} (n=${data.count})`, value: parseFloat(data.avg) }))
+                .sort((a, b) => b.value - a.value);
+        }
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Number of Printers Owned</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={printerCountData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {printerCountData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Filament Usage */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Filament Types Used (Multi-select)</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={filamentTypes}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#FF8042" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Maintenance Frequency */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Maintenance Frequency</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={maintenanceFreqData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Key Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500">
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Most Popular Brand</h3>
-            <p className="text-3xl font-bold text-blue-600">{printerBrands[0]?.name || 'N/A'}</p>
-            <p className="text-sm text-gray-600">{printerBrands[0]?.value || 0} users</p>
-          </div>
-          
-          <div className="bg-green-50 rounded-lg p-6 border-l-4 border-green-500">
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Most Used Filament</h3>
-            <p className="text-3xl font-bold text-green-600">{filamentTypes[0]?.name || 'N/A'}</p>
-            <p className="text-sm text-gray-600">{filamentTypes[0]?.value || 0} users</p>
-          </div>
-          
-          <div className="bg-purple-50 rounded-lg p-6 border-l-4 border-purple-500">
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Avg Printers Owned</h3>
-            <p className="text-3xl font-bold text-purple-600">
-              {(data.reduce((sum, row) => {
+        function processData(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            
+            // Update total responses
+            document.getElementById('totalResponses').textContent = `Total Responses: ${data.length}`;
+            
+            // Process all data
+            const experienceData = countOccurrences(data, ' How long have you been 3D printing?');
+            const printerCountData = countOccurrences(data, 'How many FDM printers do you currently own? ');
+            const successRateData = countOccurrences(data, 'What percentage of your prints succeed without issues? ');
+            const maintenanceFreqData = countOccurrences(data, 'How often do you perform maintenance tasks? ');
+            const brandRatings = getBrandRatings(data);
+            const filamentTypes = countMultiSelect(data, 'What filament types do you regularly use? ');
+            const printerBrands = countMultiSelect(data, 'What printer brand(s) do you own? ');
+            
+            // Update stats cards
+            if (printerBrands.length > 0) {
+                document.getElementById('topBrand').textContent = printerBrands[0].name;
+                document.getElementById('topBrandCount').textContent = `${printerBrands[0].value} users`;
+            }
+            
+            if (filamentTypes.length > 0) {
+                document.getElementById('topFilament').textContent = filamentTypes[0].name;
+                document.getElementById('topFilamentCount').textContent = `${filamentTypes[0].value} users`;
+            }
+            
+            // Calculate average printers owned
+            const avgPrinters = data.reduce((sum, row) => {
                 const count = row['How many FDM printers do you currently own? '];
                 if (count === '5+') return sum + 5;
                 if (count === '3-4') return sum + 3.5;
                 return sum + (parseInt(count) || 0);
-              }, 0) / data.length).toFixed(1)}
-            </p>
-            <p className="text-sm text-gray-600">per respondent</p>
-          </div>
-        </div>
+            }, 0) / data.length;
+            document.getElementById('avgPrinters').textContent = avgPrinters.toFixed(1);
+            
+            // Create charts
+            createBarChart('experienceChart', experienceData, 'Experience Level', '#0088FE');
+            createHorizontalBarChart('brandsChart', printerBrands.slice(0, 10), 'Number of Users', '#00C49F');
+            createHorizontalBarChart('ratingsChart', brandRatings, 'Average Rating (out of 5)', '#FFBB28');
+            createPieChart('successChart', successRateData);
+            createPieChart('printerCountChart', printerCountData);
+            createBarChart('filamentChart', filamentTypes, 'Number of Users', '#FF8042');
+            createBarChart('maintenanceChart', maintenanceFreqData, 'Number of Users', '#8884d8');
+        }
 
-        {/* Footer */}
-        <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-          <p className="text-gray-600">
-            This dashboard was created from community survey responses. 
-            Data collected and analyzed by a hobbyist for the 3D printing community.
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Want to see the raw data or have questions? Feel free to reach out!
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
+        function createBarChart(canvasId, data, label, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: label,
+                        data: data.map(d => d.value),
+                        backgroundColor: color,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
 
-export default SurveyDashboard;
+        function createHorizontalBarChart(canvasId, data, label, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: label,
+                        data: data.map(d => d.value),
+                        backgroundColor: color,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createPieChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const colors = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c'];
+            
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        data: data.map(d => d.value),
+                        backgroundColor: colors.slice(0, data.length),
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load data when page loads
+        loadData();
+    </script>
+</body>
+</html>
