@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flipper IR → UIFlow2 Converter</title>
+<style>
+/* ── Base theme — matched to assets.thefilip.com/style.css ── */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #eaeaea;
+    background-color: #121212;
+}
+
+h1, h2 {
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.3em;
+    animation: slideInFromTop 0.5s ease-out;
+    font-weight: 600;
+}
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.3rem; margin-bottom: 0; }
+
+p { margin: 0.4em 0; }
+.sub { color: #9aa2ac; }
+
+code, pre {
+    background-color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    overflow-x: auto;
+    color: #eaeaea;
+    line-height: 1.4;
+    word-break: break-word;
+}
+code { display: inline-block; vertical-align: middle; }
+
+a { color: #40E0D0; text-decoration: none; transition: color 0.3s ease, border-color 0.3s ease; }
+a:hover { color: #90FFEF; text-decoration: underline; }
+
+/* ── Layout ── */
+.block { margin: 1.8em 0; }
+label.field { display: block; font-weight: 600; margin-bottom: 0.5em; }
+
+/* ── Inputs ── */
+input[type=text], textarea {
+    font-family: inherit;
+    width: 100%;
+    background: #1c1c1c;
+    color: #eaeaea;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    outline: none;
+}
+input[type=text]:focus, textarea:focus {
+    border-color: #40E0D0;
+    box-shadow: 0 0 0 3px rgba(64, 224, 208, 0.15);
+}
+input::placeholder, textarea::placeholder { color: #666; }
+
+textarea {
+    font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+/* ── Drop zone ── */
+.drop-zone {
+    border: 2px dashed #444;
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+.drop-zone:hover, .drop-zone.over {
+    border-color: #40E0D0;
+    background: rgba(64, 224, 208, 0.04);
+    transform: translateY(-2px);
+}
+.drop-zone .main { font-size: 1rem; }
+.drop-zone .hint { color: #9aa2ac; font-size: 0.88rem; margin-top: 4px; }
+.drop-zone.loaded .main { color: #40E0D0; }
+#fileInput { display: none; }
+
+.or {
+    display: flex; align-items: center; gap: 14px;
+    color: #666; font-size: 0.85rem; margin: 18px 0;
+}
+.or::before, .or::after { content: ''; flex: 1; border-top: 1px solid #333; }
+
+.protos { color: #9aa2ac; font-size: 0.88rem; margin-top: 10px; }
+.protos b { color: #eaeaea; font-weight: 600; }
+
+/* ── Buttons (match site) ── */
+.actions { display: flex; gap: 14px; flex-wrap: wrap; }
+button {
+    font-family: inherit;
+    background: #121212;
+    color: #eaeaea;
+    border: 1px solid #eaeaea;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+button:hover {
+    background: #eaeaea;
+    color: #121212;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(234, 234, 234, 0.2);
+}
+button:active { transform: translateY(0); box-shadow: none; }
+
+button.accent { border-color: #40E0D0; color: #40E0D0; }
+button.accent:hover { background: #40E0D0; color: #121212; box-shadow: 0 4px 12px rgba(64, 224, 208, 0.25); }
+
+button.mini { padding: 5px 14px; font-size: 0.82rem; margin-top: 0; }
+
+#status { font-size: 0.9rem; margin-top: 14px; min-height: 1.2em; }
+#status.error { color: #ff6b6b; }
+#status.warn { color: #ffd700; }
+
+/* ── Output ── */
+#output-card { display: none; animation: slideInFromTop 0.4s ease-out; }
+.out-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.stats { color: #40E0D0; font-size: 0.9rem; }
+.stats .skip { color: #ffd700; }
+
+.out-wrap { position: relative; margin-top: 14px; }
+.copy-btn { position: absolute; top: 10px; right: 10px; }
+
+.note {
+    margin-top: 16px; color: #9aa2ac; font-size: 0.9rem;
+    border-left: 3px solid #333; padding: 4px 0 4px 14px; line-height: 1.7;
+}
+.note .flag { color: #ffd700; }
+
+.warnings { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.warn-item {
+    font-size: 0.88rem; color: #ffd700;
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    border-radius: 6px; padding: 8px 12px;
+}
+
+footer { text-align: center; padding: 28px 20px 8px; color: #666; font-size: 0.85rem; }
+.heart { color: #ff0000; display: inline-block; animation: softPulse 2s infinite; }
+
+@keyframes softPulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+@keyframes slideInFromTop { 0% { transform: translateY(-10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+    body { padding: 16px; line-height: 1.5; }
+    h1 { font-size: 1.45rem; }
+    h2 { font-size: 1.2rem; }
+    .block { margin: 1.4em 0; }
+
+    /* 16px inputs stop iOS Safari from auto-zooming on focus */
+    input[type=text], textarea, button { font-size: 16px; }
+    textarea { font-size: 13px; }   /* code stays compact; not focus-zoom critical */
+
+    .drop-zone { padding: 24px 14px; }
+
+    /* full-width, thumb-friendly primary actions */
+    .actions { flex-direction: column; gap: 10px; }
+    .actions button { width: 100%; margin-top: 0; padding: 13px 20px; }
+    .actions button:hover { transform: none; box-shadow: none; }  /* no lift on touch */
+    .block:nth-of-type(3) .actions { margin-top: 18px; }
+
+    /* copy button moves out of the textarea so it can't cover the code */
+    .copy-btn { position: static; display: block; width: 100%; margin: 0 0 10px; padding: 11px; }
+    .out-wrap { margin-top: 10px; }
+    .out-head { gap: 4px; }
+
+    .or { margin: 14px 0; }
+    footer { padding: 22px 12px 4px; }
+}
+
+/* Devices without genuine hover (phones/tablets): kill hover transforms entirely */
+@media (hover: none) {
+    button:hover { transform: none; box-shadow: none; }
+    .drop-zone:hover { transform: none; background: transparent; border-color: #444; }
+}
+</style>
+</head>
+<body>
+
+    <h1>Flipper IR → UIFlow2 Converter</h1>
+    <p class="sub">Turns a Flipper <code>.ir</code> remote into a paste-ready group for the Super Remote.</p>
+
+    <div class="block">
+        <label class="field" for="groupName">Group name</label>
+        <input type="text" id="groupName" placeholder="My Remote" spellcheck="false" autocomplete="off">
+    </div>
+
+    <div class="block">
+        <label class="field">Remote file</label>
+        <div class="drop-zone" id="dropZone">
+            <div class="main" id="dropMain">Drop a .ir file here</div>
+            <div class="hint">or click to browse</div>
+        </div>
+        <input type="file" id="fileInput" accept=".ir,.txt">
+
+        <div class="or">or paste below</div>
+
+        <textarea id="irText" rows="9" placeholder="Paste .ir file contents here..."></textarea>
+        <div class="protos">
+            Supported: <b>NEC</b>, <b>NECext</b>, <b>NEC42</b>, <b>Samsung32</b>, <b>RCA</b>,
+            <b>SIRC / SIRC15 / SIRC20</b>, <b>RC5 / RC5X</b>, <b>RC6</b>.
+            Unsupported or raw signals are skipped with a note.
+        </div>
+
+        <div class="actions">
+            <button class="accent" id="convertBtn">Convert</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+        <div id="status"></div>
+    </div>
+
+    <div class="block" id="output-card">
+        <div class="out-head">
+            <h2>Output</h2>
+            <span class="stats" id="stats"></span>
+        </div>
+        <div class="out-wrap">
+            <button class="mini copy-btn" id="copyBtn">Copy</button>
+            <textarea id="output" rows="12" readonly spellcheck="false"></textarea>
+        </div>
+        <div class="note">
+            Paste this inside <code>GROUPS = [</code> in your Python file.
+            <span class="flag">Everything except plain NEC sends only in EXT IR mode</span> — the Stick's
+            internal diode is NEC-only, so switch EXT IR on for other protocols.
+        </div>
+        <div class="warnings" id="warnings"></div>
+    </div>
+
+    <footer>made for the Super Remote <span class="heart">&hearts;</span></footer>
+
+<script>
+const dropZone    = document.getElementById('dropZone');
+const dropMain    = document.getElementById('dropMain');
+const fileInput   = document.getElementById('fileInput');
+const groupNameIn = document.getElementById('groupName');
+const irText      = document.getElementById('irText');
+const convertBtn  = document.getElementById('convertBtn');
+const clearBtn    = document.getElementById('clearBtn');
+const copyBtn     = document.getElementById('copyBtn');
+const outputCard  = document.getElementById('output-card');
+const outputArea  = document.getElementById('output');
+const warningsDiv = document.getElementById('warnings');
+const statsDiv    = document.getElementById('stats');
+const statusDiv   = document.getElementById('status');
+
+const PROTO_MAP = {
+    'NEC': 'NEC', 'NECEXT': 'NECEXT', 'NEC42': 'NEC42',
+    'SAMSUNG32': 'SAMSUNG32',
+    'RCA': 'RCA',
+    'SIRC': 'SIRC', 'SIRC15': 'SIRC15', 'SIRC20': 'SIRC20',
+    'RC5': 'RC5', 'RC5X': 'RC5X', 'RC6': 'RC6'
+};
+const ADDR_BYTES = { 'NECEXT': 2, 'NEC42': 2, 'SIRC20': 2 };
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('over');
+    const f = e.dataTransfer.files[0]; if (f) loadFile(f);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); });
+
+function loadFile(file) {
+    const base = file.name.replace(/\.ir$/i, '').replace(/[_-]/g, ' ');
+    if (!groupNameIn.value) groupNameIn.value = base;
+    dropMain.textContent = '✓  ' + file.name;
+    dropZone.classList.add('loaded');
+    const r = new FileReader();
+    r.onload = e => { irText.value = e.target.result; };
+    r.readAsText(file);
+}
+
+function leBytes(field, n) {
+    const parts = (field || '').trim().split(/\s+/).map(h => parseInt(h, 16));
+    let val = 0;
+    for (let i = 0; i < n; i++) {
+        const b = parts[i]; if (isNaN(b)) return NaN;
+        val |= (b << (8 * i));
+    }
+    return val >>> 0;
+}
+
+function parseIRFile(text) {
+    const valid = [], warnings = [];
+    let cur = null;
+    function finalize(e) {
+        if (!e || !e.name) return;
+        if (e.type !== 'parsed') {
+            warnings.push(`"${e.name}": ${e.type || 'unknown'} type — only parsed signals supported, skipped`);
+            return;
+        }
+        const raw = (e.protocol || '').toUpperCase();
+        const code = PROTO_MAP[raw];
+        if (!code) {
+            warnings.push(`"${e.name}": protocol "${e.protocol || '?'}" not supported, skipped`);
+            return;
+        }
+        const aBytes = ADDR_BYTES[code] || 1;
+        const addr = leBytes(e.address, aBytes);
+        const cmd  = leBytes(e.command, 1);
+        if (isNaN(addr) || isNaN(cmd)) {
+            warnings.push(`"${e.name}": couldn't read address/command, skipped`);
+            return;
+        }
+        valid.push({ name: e.name, proto: code, addr, cmd });
+    }
+    for (const rawLine of text.split('\n')) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) continue;
+        const ci = line.indexOf(':');
+        if (ci === -1) continue;
+        const k = line.slice(0, ci).trim().toLowerCase();
+        const v = line.slice(ci + 1).trim();
+        if (k === 'name') { finalize(cur); cur = { name: v }; }
+        else if (cur) cur[k] = v;
+    }
+    finalize(cur);
+    return { valid, warnings };
+}
+
+function formatPython(group, entries) {
+    const maxName  = Math.max(...entries.map(e => e.name.length));
+    const maxProto = Math.max(...entries.map(e => e.proto.length));
+    const rows = entries.map(e => {
+        const np = ' '.repeat(maxName - e.name.length + 1);
+        const ps = (`"${e.proto}",`).padEnd(maxProto + 3);
+        const a  = String(e.addr).padStart(5);
+        const c  = String(e.cmd).padStart(3);
+        return `        ("${e.name}",${np}${ps} ${a}, ${c}),`;
+    }).join('\n');
+    return `    ("${group}", [\n${rows}\n    ]),`;
+}
+
+convertBtn.addEventListener('click', () => {
+    const text = irText.value.trim();
+    if (!text) { setStatus('Nothing to convert — drop a file or paste contents.', 'warn'); return; }
+    const name = groupNameIn.value.trim() || 'My Remote';
+    const { valid, warnings } = parseIRFile(text);
+    if (!valid.length) {
+        setStatus('No supported signals found in that file.', 'error');
+        outputCard.style.display = 'none';
+        return;
+    }
+    outputArea.value = formatPython(name, valid);
+    const skip = warnings.length;
+    statsDiv.innerHTML = `${valid.length} button${valid.length !== 1 ? 's' : ''} converted` +
+        (skip ? ` &middot; <span class="skip">${skip} skipped</span>` : '');
+    warningsDiv.innerHTML = warnings.map(w => `<div class="warn-item">${esc(w)}</div>`).join('');
+    outputCard.style.display = 'block';
+    setStatus('');
+    setTimeout(() => outputCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 40);
+});
+
+const IS_TOUCH = window.matchMedia('(hover: none)').matches;
+const DROP_DEFAULT = IS_TOUCH ? 'Tap to choose a .ir file' : 'Drop a .ir file here';
+
+clearBtn.addEventListener('click', () => {
+    irText.value = ''; groupNameIn.value = '';
+    outputCard.style.display = 'none';
+    dropMain.textContent = DROP_DEFAULT;
+    dropZone.classList.remove('loaded');
+    fileInput.value = ''; setStatus('');
+});
+
+copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(outputArea.value).then(flash).catch(() => {
+        outputArea.select(); document.execCommand('copy'); flash();
+    });
+});
+function flash() { copyBtn.textContent = 'Copied'; setTimeout(() => copyBtn.textContent = 'Copy', 1500); }
+function setStatus(msg, type) { statusDiv.textContent = msg; statusDiv.className = type || ''; }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+irText.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) convertBtn.click(); });
+
+// On touch devices there's no drag-drop — adjust the prompt wording.
+if (IS_TOUCH) {
+    dropMain.textContent = DROP_DEFAULT;
+    document.querySelector('.drop-zone .hint').textContent = 'opens your file browser';
+}
+</script>
+</body>
+</html>
