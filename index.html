@@ -1,15 +1,636 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assets</title>
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css"
-    />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filament Swatch Label Generator</title>
+<script src="qrcode.min.js"></script>
+<style>
+  :root{
+    --ink:#1b1b1f; --muted:#6b6b76; --line:#d9d9e0; --accent:#3b6ef5; --bg:#f4f4f7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  .app{display:grid;grid-template-columns:380px 1fr;gap:0;height:100vh}
+  .controls{overflow:auto;padding:16px;background:#fff;border-right:1px solid var(--line)}
+  .stage{overflow:auto;padding:24px;display:flex;justify-content:center;align-items:flex-start}
+  h1{font-size:16px;margin:0 0 2px}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+    margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+  .sub{color:var(--muted);font-size:12px;margin:0 0 8px}
+  label{font-size:12px;color:var(--muted)}
+  input,button,select{font:inherit}
+  input[type=text],input[type=url],input[type=number]{
+    width:100%;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+  input[type=number]{width:100%}
+  .row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .row > *{flex:1}
+  .row.tight{gap:6px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;
+    border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font-size:13px}
+  .btn:hover{border-color:#b9b9c4}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.sm{padding:3px 7px;font-size:12px;border-radius:6px}
+  .btn.danger:hover{border-color:#e0564b;color:#e0564b}
+  .checks label{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:13px;margin-bottom:6px;cursor:pointer}
+  .checks input{flex:none}
+  /* filament table */
+  .fil{border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:8px;background:#fafafc}
+  .fil .line{display:flex;gap:6px;margin-bottom:6px}
+  .fil .line:last-child{margin-bottom:0}
+  .fil input[type=color]{width:34px;height:30px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff;flex:none}
+  .fil .tools{display:flex;gap:4px;flex:none}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .field{display:flex;flex-direction:column;gap:3px}
+  .note{font-size:12px;color:var(--muted);background:#fffbe9;border:1px solid #f0e3a8;
+    border-radius:8px;padding:8px 10px;margin-top:8px}
+  .count{font-size:12px;color:var(--muted)}
+  .warn{color:#c0392b}
+
+  /* ===== SHEET (screen + print share mm geometry) ===== */
+  .sheet{position:relative;width:210mm;height:297mm;background:#fff;
+    box-shadow:0 1px 6px rgba(0,0,0,.18);overflow:hidden}
+  .sheet-inner{position:absolute;left:0;top:0;width:210mm;height:297mm;transform-origin:0 0}
+  .sticker{position:absolute;overflow:hidden}
+  .mini{position:absolute;overflow:hidden;display:flex;align-items:center}
+  .chip{flex:none;height:100%}
+  .qr{flex:none;height:100%;display:flex;align-items:center;justify-content:center}
+  .qr svg{display:block}
+  .txt{flex:1;min-width:0;padding:0 .4mm;overflow:hidden}
+  .txt .brand{font-weight:700;white-space:nowrap;line-height:1.05}
+  .txt .desc{white-space:nowrap;line-height:1.05;color:#222}
+  .tick{position:absolute;background:#7a7a7a}
+  .secline{position:absolute;background:#9a9a9a}
+  /* calibration pattern */
+  .calib-box{box-sizing:border-box;border:0.12mm solid #888}
+  .cutline{position:absolute;background:#c4c4c4}
+  .cutline.v{top:0;width:0.1mm;height:100%}
+  .cutline.h{left:0;height:0.1mm;width:100%}
+  .calib-num{position:absolute;left:0.4mm;top:0.2mm;font-size:4px;color:#bdbdbd;line-height:1}
+  .regmark{position:absolute;background:#111}
+  .scalebar{position:absolute;background:#111}
+  .scalelab{position:absolute;font-size:5px;color:#111;line-height:1;white-space:nowrap}
+  /* screen-only clickable start-position overlay */
+  .overlay{position:absolute;left:0;top:0;width:210mm;height:297mm;z-index:5}
+  .ov-st{position:absolute;outline:1px dashed rgba(120,120,140,.35)}
+  .ov-mini{position:absolute;cursor:pointer}
+  .ov-mini:hover{background:rgba(59,110,245,.12)}
+  .ov-mini.start{background:rgba(59,110,245,.28);outline:1px solid var(--accent)}
+
+  @media print{
+    html,body{background:#fff}
+    .app{display:block;height:auto}
+    .controls,.stage-hint{display:none !important}
+    .stage{padding:0;display:block;overflow:visible}
+    .sheet{box-shadow:none;width:210mm;height:297mm;margin:0}
+    .overlay{display:none !important}
+    @page{size:A4;margin:0}
+  }
+</style>
 </head>
 <body>
-    <h1>assets</h1>
+<div class="app">
+  <!-- ===================== CONTROLS ===================== -->
+  <div class="controls">
+    <h1>Filament Swatch Labels</h1>
+    <p class="sub" id="sheetSummary">Any precut A4 sticker sheet. Set your sheet in Advanced geometry.</p>
+
+    <div class="row">
+      <button class="btn primary" id="printBtn">🖨 Print</button>
+      <button class="btn" id="addBtn">+ Add filament</button>
+    </div>
+    <div class="count" id="count"></div>
+
+    <h2>Display</h2>
+    <div class="checks">
+      <label><input type="checkbox" id="optChip"> Color swatch bar (uses ink; printed color is approximate)</label>
+      <label><input type="checkbox" id="optQR"> QR code from URL</label>
+    </div>
+    <div class="row tight" id="qrSizeRow" style="align-items:center">
+      <label style="flex:none">QR size</label>
+      <input type="range" id="qrSizeRange" min="3.5" max="8.4" step="0.1" style="flex:1">
+      <input type="number" id="qrSize" min="3.5" max="8.4" step="0.1" style="flex:none;width:64px">
+      <span class="count" style="flex:none">mm</span>
+    </div>
+    <div class="checks">
+      <label><input type="checkbox" id="optTicks"> Cut ticks (edge marks at each cut)</label>
+      <label><input type="checkbox" id="optSections"> Section outlines (full box around each of the 6 minis)</label>
+      <label><input type="checkbox" id="optGuidesAll"> Show guides on all stickers (else only used ones)</label>
+      <label><input type="checkbox" id="optCalib"> <b>Test pattern</b> — sticker grid + 100&nbsp;mm measuring bars (hides labels)</label>
+    </div>
+    <p class="sub" id="calibHint" style="display:none">Print on plain paper at 100% (no borderless,
+    minimum margins). 1) Measure a <b>100&nbsp;mm</b> bar — if it’s not 100, enter what you got in
+    Calibration → <i>Measured 100&nbsp;mm bar</i>. 2) Lay it over your real sticker sheet against a
+    light: the boxes should sit on the precut stickers — if shifted, nudge Offset&nbsp;X/Y.</p>
+
+    <h2>Start position <span class="count">(reuse a part-used sheet)</span></h2>
+    <div class="grid2">
+      <div class="field"><label id="startStickerLabel">Start sticker</label><input type="number" id="startSticker" min="1" value="1"></div>
+      <div class="field"><label>Start mini (1–6)</label><input type="number" id="startMini" min="1" max="6" value="1"></div>
+    </div>
+    <p class="sub">Tip: click any mini in the preview to set the start here.</p>
+
+    <h2>Filaments</h2>
+    <div id="filList"></div>
+    <button class="btn" id="addBtn2" style="width:100%">+ Add filament</button>
+
+    <h2>Calibration <span class="count">(print at 100% / “Actual size”)</span></h2>
+    <div class="grid2">
+      <div class="field"><label>Offset X (mm)</label><input type="number" id="offsetX" step="0.1" value="0"></div>
+      <div class="field"><label>Offset Y (mm)</label><input type="number" id="offsetY" step="0.1" value="0"></div>
+    </div>
+    <div class="grid2" style="margin-top:8px">
+      <div class="field"><label>Measured 100&nbsp;mm bar (mm)</label><input type="number" id="measured" step="0.1" value="100"></div>
+      <div class="field"><label>→ Scale applied</label><input type="text" id="scaleOut" value="100.0%" readonly></div>
+    </div>
+    <p class="sub">Tick <b>Test pattern</b> above, print at 100% (Fit-to-page OFF), then measure a
+    “100&nbsp;mm” bar end-to-end and type what you got. If it’s 100 you’re perfect. The scale here
+    pre-shrinks everything around the page centre to cancel any printer zoom.</p>
+    <details>
+      <summary class="sub" style="cursor:pointer">Advanced sheet geometry</summary>
+      <div class="grid2" style="margin-top:8px">
+        <div class="field"><label>Columns</label><input type="number" id="cols" step="1" value="4"></div>
+        <div class="field"><label>Rows</label><input type="number" id="rows" step="1" value="11"></div>
+        <div class="field"><label>Label W (mm)</label><input type="number" id="labelW" step="0.1" value="48.5"></div>
+        <div class="field"><label>Label H (mm)</label><input type="number" id="labelH" step="0.1" value="25.4"></div>
+        <div class="field"><label>Margin left (mm)</label><input type="number" id="marginLeft" step="0.1" value="8"></div>
+        <div class="field"><label>Margin top (mm)</label><input type="number" id="marginTop" step="0.1" value="8.8"></div>
+        <div class="field"><label>Col gap (mm)</label><input type="number" id="colGap" step="0.1" value="0"></div>
+        <div class="field"><label>Row gap (mm)</label><input type="number" id="rowGap" step="0.1" value="0"></div>
+      </div>
+    </details>
+
+    <h2>Library</h2>
+    <div class="row">
+      <button class="btn sm" id="exportBtn">Export JSON</button>
+      <button class="btn sm" id="importBtn">Import JSON</button>
+      <button class="btn sm danger" id="resetBtn">Reset</button>
+    </div>
+    <input type="file" id="importFile" accept="application/json" style="display:none">
+
+    <p class="note">Calibration: print one sheet on plain paper, overlay it on your real sticker
+    sheet against a light. If it’s shifted, nudge Offset X/Y and reprint. Always print at 100% /
+    “Actual size” with “Fit to page” OFF.</p>
+
+    <p class="sub" style="margin-top:14px;text-align:center;font-size:11px;opacity:.7">
+      <a href="https://github.com/thefilipcom4607/labeler" target="_blank" rel="noopener"
+         style="color:inherit;text-decoration:none">github.com/thefilipcom4607/labeler</a>
+    </p>
+  </div>
+
+  <!-- ===================== PREVIEW ===================== -->
+  <div class="stage">
+    <div class="sheet" id="sheet">
+      <div class="sheet-inner" id="sheetInner"></div>
+      <div class="overlay" id="overlay"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const MM = 3.7795275591; // CSS px per mm at 96dpi (consistent screen & print)
+const LS_KEY = "filament-swatch-labels-v1";
+const REF_H = 100;  // horizontal reference-bar length in the test pattern (ties to "measured" field)
+const REF_V = 100;  // vertical reference-bar length (visual scale check)
+
+const defaultState = () => ({
+  filaments: [
+    {brand:"Prusament", material:"PLA", color:"Galaxy Black", hex:"#1b1b1f", url:""},
+    {brand:"Prusament", material:"R-PLA", color:"Rice", hex:"#efe7d4", url:""},
+    {brand:"Polymaker", material:"PETG", color:"Teal", hex:"#0f7d7d", url:""}
+  ],
+  opts:{chip:false, qr:false, qrSize:6, ticks:true, sections:false, guidesAll:false,
+        calib:false, startSticker:1, startMini:1},
+  geom:{cols:4, rows:11, labelW:48.5, labelH:25.4, marginLeft:8, marginTop:8.8,
+        colGap:0, rowGap:0, offsetX:0, offsetY:0, scale:1}
+});
+
+let state = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const s = JSON.parse(raw); return Object.assign(defaultState(), s,
+      {opts:Object.assign(defaultState().opts, s.opts),
+       geom:Object.assign(defaultState().geom, s.geom)}); }
+  }catch(e){}
+  return defaultState();
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+/* ---------- bind simple inputs ---------- */
+function bindNum(id, obj, key){
+  const el = document.getElementById(id);
+  el.value = obj[key];
+  el.addEventListener("input", ()=>{ obj[key] = parseFloat(el.value)||0; save(); render(); });
+}
+function bindCheck(id, obj, key){
+  const el = document.getElementById(id);
+  el.checked = !!obj[key];
+  el.addEventListener("change", ()=>{ obj[key] = el.checked; save(); render(); });
+}
+
+["chip:optChip","qr:optQR","ticks:optTicks","sections:optSections","guidesAll:optGuidesAll","calib:optCalib"]
+  .forEach(p=>{ const [k,id]=p.split(":"); bindCheck(id, state.opts, k); });
+function syncCalibHint(){ document.getElementById("calibHint").style.display = state.opts.calib ? "" : "none"; }
+document.getElementById("optCalib").addEventListener("change", syncCalibHint);
+syncCalibHint();
+
+// QR size: keep range + number in sync, toggle visibility with the QR checkbox
+const qrRange = document.getElementById("qrSizeRange");
+const qrNum = document.getElementById("qrSize");
+function setQrSize(v){ v = Math.min(8.4, Math.max(3.5, parseFloat(v)||6));
+  state.opts.qrSize = v; qrRange.value = v; qrNum.value = v; save(); render(); }
+qrRange.addEventListener("input", ()=>setQrSize(qrRange.value));
+qrNum.addEventListener("input", ()=>setQrSize(qrNum.value));
+function syncQrRow(){ document.getElementById("qrSizeRow").style.display = state.opts.qr ? "flex" : "none"; }
+document.getElementById("optQR").addEventListener("change", syncQrRow);
+qrRange.value = qrNum.value = state.opts.qrSize; syncQrRow();
+bindNum("startSticker", state.opts, "startSticker");
+bindNum("startMini", state.opts, "startMini");
+["offsetX","offsetY","cols","rows","labelW","labelH","marginLeft","marginTop","colGap","rowGap"]
+  .forEach(k=> bindNum(k, state.geom, k));
+
+// scale compensation: user types the measured length of a 100 mm bar
+const measuredEl = document.getElementById("measured");
+const scaleOutEl = document.getElementById("scaleOut");
+function syncMeasured(){
+  measuredEl.value = (REF_H/(state.geom.scale||1)).toFixed(1);
+  scaleOutEl.value = ((state.geom.scale||1)*100).toFixed(1)+"%";
+}
+measuredEl.addEventListener("input", ()=>{
+  const m = parseFloat(measuredEl.value)||REF_H;
+  state.geom.scale = m>0 ? REF_H/m : 1;
+  scaleOutEl.value = (state.geom.scale*100).toFixed(1)+"%";
+  save(); render();
+});
+syncMeasured();
+
+document.getElementById("addBtn").onclick = addFilament;
+document.getElementById("addBtn2").onclick = addFilament;
+document.getElementById("printBtn").onclick = ()=>window.print();
+document.getElementById("resetBtn").onclick = ()=>{ if(confirm("Reset everything to defaults?")){ state=defaultState(); save(); rebind(); render(); } };
+document.getElementById("exportBtn").onclick = exportJSON;
+document.getElementById("importBtn").onclick = ()=>document.getElementById("importFile").click();
+document.getElementById("importFile").addEventListener("change", importJSON);
+
+function rebind(){
+  // refresh all bound input values after a wholesale state replace
+  ["startSticker:opts","startMini:opts"].forEach(p=>{const[id]=p.split(":");document.getElementById(id).value=state.opts[id];});
+  ["offsetX","offsetY","cols","rows","labelW","labelH","marginLeft","marginTop","colGap","rowGap"]
+    .forEach(k=>document.getElementById(k).value=state.geom[k]);
+  syncMeasured();
+  document.getElementById("optChip").checked=state.opts.chip;
+  document.getElementById("optQR").checked=state.opts.qr;
+  qrRange.value = qrNum.value = state.opts.qrSize; syncQrRow();
+  document.getElementById("optTicks").checked=state.opts.ticks;
+  document.getElementById("optSections").checked=state.opts.sections;
+  document.getElementById("optGuidesAll").checked=state.opts.guidesAll;
+  document.getElementById("optCalib").checked=state.opts.calib;
+  syncCalibHint();
+}
+
+/* ---------- filament library editor ---------- */
+function addFilament(){
+  state.filaments.push({brand:"", material:"", color:"", hex:"#cccccc", url:""});
+  save(); renderFilList(); render();
+}
+function renderFilList(){
+  const host = document.getElementById("filList");
+  host.innerHTML = "";
+  state.filaments.forEach((f,i)=>{
+    const box = document.createElement("div"); box.className="fil";
+    box.innerHTML = `
+      <div class="line">
+        <input type="color" data-k="hex" value="${f.hex||'#cccccc'}" title="Color swatch">
+        <input type="text" data-k="brand" placeholder="Brand (e.g. Prusament)" value="${esc(f.brand)}">
+        <div class="tools">
+          <button class="btn sm" data-act="dup" title="Duplicate">⧉</button>
+          <button class="btn sm" data-act="up" title="Move up">↑</button>
+          <button class="btn sm" data-act="down" title="Move down">↓</button>
+          <button class="btn sm danger" data-act="del" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="line">
+        <input type="text" data-k="material" placeholder="Material (PLA)" value="${esc(f.material)}">
+        <input type="text" data-k="color" placeholder="Color name (Rice)" value="${esc(f.color)}">
+      </div>
+      <div class="line">
+        <input type="url" data-k="url" placeholder="Manufacturer URL (for QR, optional)" value="${esc(f.url)}">
+      </div>`;
+    box.querySelectorAll("[data-k]").forEach(inp=>{
+      inp.addEventListener("input", ()=>{ f[inp.dataset.k]=inp.value; save(); render(); });
+    });
+    box.querySelector('[data-act=dup]').onclick=()=>{
+      state.filaments.splice(i+1, 0, Object.assign({}, f)); save(); renderFilList(); render(); };
+    box.querySelector('[data-act=del]').onclick=()=>{ state.filaments.splice(i,1); save(); renderFilList(); render(); };
+    box.querySelector('[data-act=up]').onclick=()=>{ if(i>0){ swap(i,i-1); } };
+    box.querySelector('[data-act=down]').onclick=()=>{ if(i<state.filaments.length-1){ swap(i,i+1); } };
+    host.appendChild(box);
+  });
+}
+function swap(a,b){ const t=state.filaments[a]; state.filaments[a]=state.filaments[b]; state.filaments[b]=t; save(); renderFilList(); render(); }
+function esc(s){ return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+/* ---------- import / export ---------- */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "filament-labels.json"; a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importJSON(e){
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ()=>{ try{ const s=JSON.parse(r.result); state=Object.assign(defaultState(),s);
+    save(); rebind(); renderFilList(); render(); }catch(err){ alert("Bad JSON: "+err.message);} };
+  r.readAsText(file); e.target.value="";
+}
+
+/* ---------- QR rendering (vendored qrcode-generator) ---------- */
+function qrSvg(text, sizeMm){
+  try{
+    const qr = qrcode(0, "M");     // 0 = auto-pick smallest type
+    qr.addData(text); qr.make();
+    const n = qr.getModuleCount();
+    const px = (sizeMm*MM).toFixed(2);
+    let rects = "";
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(qr.isDark(r,c))
+      rects += `<rect x="${c}" y="${r}" width="1" height="1"/>`;
+    return `<svg width="${px}" height="${px}" viewBox="0 0 ${n} ${n}"
+      shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <rect width="${n}" height="${n}" fill="#fff"/><g fill="#000">${rects}</g></svg>`;
+  }catch(e){ return ""; }
+}
+
+/* ---------- main render ---------- */
+function render(){
+  const g = state.geom, o = state.opts;
+  const inner = document.getElementById("sheetInner");
+  const overlay = document.getElementById("overlay");
+  // scale compensation is applied around the page centre, so it cancels the printer's
+  // borderless zoom (which also scales around centre)
+  const xform = `translate(${g.offsetX}mm, ${g.offsetY}mm) scale(${g.scale||1})`;
+  inner.style.transformOrigin = overlay.style.transformOrigin = "105mm 148.5mm";
+  inner.style.transform = overlay.style.transform = xform;   // keep the screen overlay in sync
+  inner.innerHTML = ""; overlay.innerHTML = "";
+
+  const cols = Math.max(1, g.cols|0), rows = Math.max(1, g.rows|0);
+  const total = cols*rows;
+  const miniW = g.labelW/2, miniH = g.labelH/3;
+
+  // live summary + bounds that follow the configured sheet geometry
+  const r1 = n => (Math.round(n*100)/100);
+  document.getElementById("sheetSummary").textContent =
+    `${total} labels (${cols}×${rows}), ${r1(g.labelW)}×${r1(g.labelH)} mm each, cut into 6 of `
+    + `${r1(miniW)}×${r1(miniH)} mm.`;
+  document.getElementById("startStickerLabel").textContent = `Start sticker (1–${total})`;
+  const ss = document.getElementById("startSticker"); ss.max = total;
+
+  // flatten filaments -> one entry each (copies removed; 1 mini per filament)
+  const entries = state.filaments.filter(f=> f.brand||f.material||f.color||f.url);
+
+  // starting linear mini slot
+  const startSlot = ((Math.min(Math.max(o.startSticker,1),total)-1)*6)
+                  + (Math.min(Math.max(o.startMini,1),6)-1);
+
+  // map: slot -> entry
+  const placed = {};       // slot -> entry
+  const usedSticker = {};  // stickerIndex0 -> true
+  let overflow = 0;
+  entries.forEach((entry,k)=>{
+    const slot = startSlot + k;
+    const st = Math.floor(slot/6);
+    if(st >= total){ overflow++; return; }
+    placed[slot] = entry; usedSticker[st] = true;
+  });
+
+  // helper to position a sticker box
+  const stickerLeft = col => g.marginLeft + col*(g.labelW + g.colGap);
+  const stickerTop  = row => g.marginTop  + row*(g.labelH + g.rowGap);
+
+  if(o.calib){
+    // no screen overlay here — the calibration boxes ARE the grid (kept in sync with scale)
+    renderCalibration(inner, g, cols, rows, total, miniW, miniH, stickerLeft, stickerTop);
+    document.getElementById("count").textContent = "Test pattern — print at 100% scale, then measure the labelled bars";
+    return;
+  }
+
+  const anyGuide = o.ticks || o.sections;
+  for(let st=0; st<total; st++){
+    const col = st % cols, row = (st/cols)|0;
+    const showGuides = anyGuide && (o.guidesAll || usedSticker[st]);
+    const hasContent = usedSticker[st];
+    if(!showGuides && !hasContent) continue;
+
+    const box = document.createElement("div");
+    box.className = "sticker";
+    box.style.left = stickerLeft(col)+"mm";
+    box.style.top  = stickerTop(row)+"mm";
+    box.style.width = g.labelW+"mm";
+    box.style.height = g.labelH+"mm";
+
+    // minis with content
+    for(let m=0;m<6;m++){
+      const entry = placed[st*6+m];
+      if(!entry) continue;
+      const mr = (m/2)|0, mc = m%2;
+      const mini = document.createElement("div");
+      mini.className = "mini";
+      mini.style.left = (mc*miniW)+"mm";
+      mini.style.top  = (mr*miniH)+"mm";
+      mini.style.width = miniW+"mm";
+      mini.style.height = miniH+"mm";
+      mini.appendChild(buildMini(entry, miniW, miniH));
+      box.appendChild(mini);
+    }
+
+    // cutting guides
+    if(showGuides && o.sections) addSectionGrid(box, g.labelW, g.labelH, miniW, miniH);
+    if(showGuides && o.ticks)    addTicks(box, g.labelW, g.labelH, miniW, miniH);
+
+    inner.appendChild(box);
+  }
+
+  // screen-only clickable overlay to set start position
+  renderOverlay(overlay, g, cols, rows, total, miniW, miniH, stickerLeft, stickerTop, o);
+
+  // counts
+  const placedCount = Object.keys(placed).length;
+  const c = document.getElementById("count");
+  c.innerHTML = `${entries.length} filament(s) · ${placedCount} placed`
+    + (overflow? ` · <span class="warn">${overflow} didn’t fit this sheet</span>`:"");
+}
+
+function renderOverlay(overlay, g, cols, rows, total, miniW, miniH, stickerLeft, stickerTop, o){
+  for(let st=0; st<total; st++){
+    const col = st % cols, row = (st/cols)|0;
+    const ov = document.createElement("div");
+    ov.className = "ov-st";
+    ov.style.left = stickerLeft(col)+"mm"; ov.style.top = stickerTop(row)+"mm";
+    ov.style.width = g.labelW+"mm"; ov.style.height = g.labelH+"mm";
+    for(let m=0;m<6;m++){
+      const mr=(m/2)|0, mc=m%2;
+      const cell=document.createElement("div");
+      cell.className="ov-mini";
+      cell.style.left=(mc*miniW)+"mm"; cell.style.top=(mr*miniH)+"mm";
+      cell.style.width=miniW+"mm"; cell.style.height=miniH+"mm";
+      if(st===(o.startSticker-1) && m===(o.startMini-1)) cell.classList.add("start");
+      cell.onclick=()=>{
+        o.startSticker = st+1; o.startMini = m+1;
+        document.getElementById("startSticker").value=o.startSticker;
+        document.getElementById("startMini").value=o.startMini;
+        save(); render();
+      };
+      ov.appendChild(cell);
+    }
+    overlay.appendChild(ov);
+  }
+}
+
+/* ---------- calibration pattern ---------- */
+function renderCalibration(inner, g, cols, rows, total, miniW, miniH, stickerLeft, stickerTop){
+  for(let st=0; st<total; st++){
+    const col = st % cols, row = (st/cols)|0;
+    const box = document.createElement("div");
+    box.className = "sticker calib-box";
+    box.style.left = stickerLeft(col)+"mm";
+    box.style.top  = stickerTop(row)+"mm";
+    box.style.width = g.labelW+"mm";
+    box.style.height = g.labelH+"mm";
+    // full interior cut lines (the 6-up grid)
+    const vL = document.createElement("div"); vL.className="cutline v";
+    vL.style.left=miniW+"mm"; box.appendChild(vL);
+    [miniH, 2*miniH].forEach(y=>{ const h=document.createElement("div");
+      h.className="cutline h"; h.style.top=y+"mm"; box.appendChild(h); });
+    // sticker number
+    const num = document.createElement("div"); num.className="calib-num";
+    num.textContent = (st+1); box.appendChild(num);
+    inner.appendChild(box);
+  }
+
+  // outer registration corner marks at the label-grid bounding box
+  const gx = g.marginLeft, gy = g.marginTop;
+  const gw = cols*g.labelW + (cols-1)*g.colGap;
+  const gh = rows*g.labelH + (rows-1)*g.rowGap;
+  const L = 5; // arm length mm
+  const corner = (x,y,dx,dy)=>{
+    const a=document.createElement("div"); a.className="regmark";
+    a.style.left=x+"mm"; a.style.top=(y-0.1)+"mm"; a.style.width=L+"mm"; a.style.height="0.2mm";
+    if(dx<0) a.style.left=(x-L)+"mm";
+    inner.appendChild(a);
+    const b=document.createElement("div"); b.className="regmark";
+    b.style.left=(x-0.1)+"mm"; b.style.top=y+"mm"; b.style.width="0.2mm"; b.style.height=L+"mm";
+    if(dy<0) b.style.top=(y-L)+"mm";
+    inner.appendChild(b);
+  };
+  corner(gx, gy, 1, 1); corner(gx+gw, gy, -1, 1);
+  corner(gx, gy+gh, 1, -1); corner(gx+gw, gy+gh, -1, -1);
+
+  // Long centred reference bars to measure with a ruler. They cross at the page centre,
+  // well away from the edges so the printer's own margin can't clip them.
+  const cx = 105, cy = 148.5;
+  scaleBar(inner, cx-REF_H/2, cy, REF_H, "horizontal", REF_H+" mm  ← measure this");
+  scaleBar(inner, cx, cy-REF_V/2, REF_V, "vertical", REF_V+" mm");
+}
+
+function scaleBar(inner, x, y, lenMm, dir, labelText){
+  const horiz = dir==="horizontal";
+  const add = (l,t,w,h)=>{ const d=document.createElement("div"); d.className="scalebar";
+    d.style.left=l+"mm"; d.style.top=t+"mm"; d.style.width=w+"mm"; d.style.height=h+"mm"; inner.appendChild(d); };
+  // main line
+  if(horiz) add(x, y-0.125, lenMm, 0.25); else add(x-0.125, y, 0.25, lenMm);
+  // ticks every 10 mm (taller every 50 mm), plus end caps
+  for(let p=0; p<=lenMm; p+=10){
+    const big = (p%50===0) || p===0 || p===lenMm;
+    const t = big ? 3 : 1.6;
+    if(horiz) add(x+p-0.1, y-t/2, 0.2, t); else add(x-t/2, y+p-0.1, t, 0.2);
+  }
+  // label
+  const lab=document.createElement("div"); lab.className="scalelab"; lab.textContent=labelText;
+  if(horiz){ lab.style.left=(x+lenMm/2-9)+"mm"; lab.style.top=(y-4)+"mm"; }
+  else { lab.style.left=(x+1.2)+"mm"; lab.style.top=(y+lenMm/2-1.5)+"mm"; }
+  inner.appendChild(lab);
+}
+
+function buildMini(entry, miniW, miniH){
+  const wrap = document.createElement("div");
+  wrap.style.display="flex"; wrap.style.alignItems="center";
+  wrap.style.width="100%"; wrap.style.height="100%"; wrap.style.gap="0";
+
+  if(state.opts.chip){
+    const chip = document.createElement("div");
+    chip.className="chip"; chip.style.width="1.6mm"; chip.style.background=entry.hex||"#ccc";
+    wrap.appendChild(chip);
+  }
+  if(state.opts.qr && entry.url){
+    const q = document.createElement("div");
+    q.className="qr";
+    const qrSize = Math.min(state.opts.qrSize||6, miniH-0.2); // mm, square, capped to label height
+    q.style.width=(qrSize+0.6)+"mm";
+    q.innerHTML = qrSvg(entry.url, qrSize);
+    wrap.appendChild(q);
+  }
+  const txt = document.createElement("div");
+  txt.className="txt";
+  const brand = document.createElement("div"); brand.className="brand"; brand.textContent = entry.brand||"";
+  const desc  = document.createElement("div"); desc.className="desc";
+  desc.textContent = [entry.material, entry.color].filter(Boolean).join(" · ");
+  txt.appendChild(brand); txt.appendChild(desc);
+  wrap.appendChild(txt);
+
+  // fit text after it is in the DOM
+  requestAnimationFrame(()=>fitText(txt));
+  return wrap;
+}
+
+function fitText(el){
+  let size = 6.5; // px
+  el.style.fontSize = size+"px";
+  let guard = 0;
+  while((el.scrollWidth > el.clientWidth+0.5 || el.scrollHeight > el.clientHeight+0.5)
+        && size > 3 && guard++ < 30){
+    size -= 0.25; el.style.fontSize = size+"px";
+  }
+}
+
+function addTicks(box, W, H, miniW, miniH){
+  const T = 1.2;        // tick length mm
+  const th = 0.18;      // tick thickness mm
+  const vline = (x, top, len)=>{ const d=document.createElement("div"); d.className="tick";
+    d.style.left=(x-th/2)+"mm"; d.style.top=top+"mm"; d.style.width=th+"mm"; d.style.height=len+"mm"; box.appendChild(d); };
+  const hline = (y, left, len)=>{ const d=document.createElement("div"); d.className="tick";
+    d.style.top=(y-th/2)+"mm"; d.style.left=left+"mm"; d.style.height=th+"mm"; d.style.width=len+"mm"; box.appendChild(d); };
+
+  // vertical center cut (x = miniW): ticks at top & bottom edge
+  vline(miniW, 0, T);
+  vline(miniW, H-T, T);
+  // two horizontal cuts (y = miniH, 2*miniH): ticks at left & right edge
+  [miniH, 2*miniH].forEach(y=>{
+    hline(y, 0, T);
+    hline(y, W-T, T);
+  });
+}
+
+function addSectionGrid(box, W, H, miniW, miniH){
+  const th = 0.1; // line thickness mm
+  const line = (l,t,w,h)=>{ const d=document.createElement("div"); d.className="secline";
+    d.style.left=l+"mm"; d.style.top=t+"mm"; d.style.width=w+"mm"; d.style.height=h+"mm"; box.appendChild(d); };
+  // outer rectangle (the sticker edge) so every mini reads as a full box
+  line(0,0,W,th); line(0,H-th,W,th); line(0,0,th,H); line(W-th,0,th,H);
+  // interior cuts: vertical centre + the two thirds
+  line(miniW,0,th,H);
+  line(0,miniH,W,th);
+  line(0,2*miniH,W,th);
+}
+
+/* ---------- boot ---------- */
+renderFilList();
+render();
+</script>
 </body>
 </html>
