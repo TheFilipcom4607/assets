@@ -3,53 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Labeler by thefilip</title>
-<link rel="icon" type="image/svg+xml" href="https://assets.thefilip.com/labeler/favicon.svg">
-<script src="https://assets.thefilip.com/labeler/qrcode.min.js"></script>
+<title>Filament Swatch Label Generator</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script>
+  /* set theme before first paint to avoid a flash */
+  (function(){ try{ var t = localStorage.getItem("labeler-theme");
+    if(!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
+  }catch(e){ document.documentElement.setAttribute("data-theme","light"); } })();
+</script>
+<script src="qrcode.min.js"></script>
 <style>
-  :root{
-    --ink:#1b1b1f; --muted:#6b6b76; --line:#d9d9e0; --accent:#3b6ef5; --bg:#f4f4f7;
+  :root, html[data-theme="light"]{
+    --bg:#f4f4f7; --panel:#ffffff; --stage-bg:#e9ebef;
+    --card:#ffffff; --card2:#eef0f4; --row-bg:#fafbfc; --input-bg:#ffffff;
+    --line:#dcdce3; --line2:#bcc0cb;
+    --ink:#1b1b1f; --muted:#6b6b76; --placeholder:#9aa0ab;
+    --accent:#2f9e57; --accent-ink:#ffffff; --accent-hover:#268a4b;
+    --accent-glow:rgba(47,158,87,.28); --focus-ring:rgba(47,158,87,.20);
+    --note-bg:#fffbe9; --note-border:#f0e3a8; --note-ink:#7a6a1e;
+    --danger:#e0564b; --danger-bg:rgba(224,86,75,.08); --warn:#c0392b;
+    --step-hover:#e2e5ea; --scroll-thumb:#cdd0d8; --scroll-thumb-hover:#b6bac4;
+    --ov-hover:rgba(47,158,87,.14); --ov-start:rgba(47,158,87,.28);
+    --chk-focus:rgba(47,158,87,.45); --chk-hover:#9aa0ab;
+  }
+  html[data-theme="dark"]{
+    --bg:#0e0f13; --panel:#15171d; --stage-bg:radial-gradient(120% 80% at 50% -10%, #1a1e27 0%, #0e0f13 60%);
+    --card:#1b1e26; --card2:#21252f; --row-bg:#1b1e26; --input-bg:#101218;
+    --line:#2a2e39; --line2:#3a4050;
+    --ink:#e9ebf1; --muted:#969cab; --placeholder:#5f6573;
+    --accent:#54c882; --accent-ink:#07140c; --accent-hover:#62d690;
+    --accent-glow:rgba(84,200,130,.22); --focus-ring:rgba(84,200,130,.18);
+    --note-bg:rgba(120,95,20,.16); --note-border:rgba(180,150,60,.32); --note-ink:#d9c98c;
+    --danger:#ef6a5e; --danger-bg:rgba(239,106,94,.08); --warn:#ff8a7d;
+    --step-hover:#323844; --scroll-thumb:#2c313c; --scroll-thumb-hover:#3a4150;
+    --ov-hover:rgba(84,200,130,.14); --ov-start:rgba(84,200,130,.30);
+    --chk-focus:rgba(84,200,130,.55); --chk-hover:#525a6b;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
-    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  .app{display:grid;grid-template-columns:380px 1fr;gap:0;height:100vh}
-  .controls{overflow:auto;padding:16px;background:#fff;border-right:1px solid var(--line)}
-  .stage{overflow:auto;padding:24px;display:flex;justify-content:center;align-items:flex-start}
-  h1{font-size:16px;margin:0 0 2px}
-  h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
-    margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
-  .sub{color:var(--muted);font-size:12px;margin:0 0 8px}
+    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .app{display:grid;grid-template-columns:392px 1fr;gap:0;height:100vh}
+  .controls{overflow:auto;padding:18px 16px 28px;background:var(--panel);border-right:1px solid var(--line)}
+  .stage{overflow:auto;padding:28px;display:flex;justify-content:center;align-items:flex-start;background:var(--stage-bg)}
+
+  .appbrand{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+  .appbrand .logo{border-radius:7px;flex:none;box-shadow:0 0 0 1px var(--line)}
+  .appbrand .at-txt{flex:1;min-width:0}
+  .theme-toggle{flex:none;width:34px;height:34px;padding:0;font-size:15px;border-radius:9px}
+  h1{font-size:18px;font-weight:700;margin:0;letter-spacing:-.01em}
+  h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+    margin:22px 0 9px;padding-bottom:6px;border-bottom:1px solid var(--line);font-weight:600}
+  .sub{color:var(--muted);font-size:12px;margin:2px 0 0}
   label{font-size:12px;color:var(--muted)}
   input,button,select{font:inherit}
+  ::placeholder{color:var(--placeholder)}
+  input[type=range]{accent-color:var(--accent)}
+  /* hide native number spinners; custom steppers are added by JS */
+  input[type=number]{-moz-appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .numwrap{position:relative;display:flex}
+  .numwrap > input[type=number]{width:100%;padding-right:21px}
+  .numsteps{position:absolute;right:0;top:0;bottom:0;width:19px;display:flex;flex-direction:column;
+    border-left:1px solid var(--line);border-radius:0 7px 7px 0;overflow:hidden}
+  .numstep{flex:1;border:0;background:var(--card2);color:var(--muted);font-size:7px;line-height:0;
+    cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;transition:background .1s}
+  .numstep:first-child{border-bottom:1px solid var(--line)}
+  .numstep:hover{background:var(--step-hover);color:var(--ink)}
+  .numstep:active{background:var(--accent);color:var(--accent-ink)}
   input[type=text],input[type=url],input[type=number]{
-    width:100%;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
-  input[type=number]{width:100%}
+    width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:7px;
+    background:var(--input-bg);color:var(--ink);transition:border-color .12s,box-shadow .12s}
+  input[type=text]:focus,input[type=url]:focus,input[type=number]:focus{
+    outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--focus-ring)}
   .row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
   .row > *{flex:1}
   .row.tight{gap:6px}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;
-    border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font-size:13px}
-  .btn:hover{border-color:#b9b9c4}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-  .btn.primary:hover{filter:brightness(1.05)}
-  .btn.sm{padding:3px 7px;font-size:12px;border-radius:6px}
-  .btn.danger:hover{border-color:#e0564b;color:#e0564b}
-  .checks label{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:13px;margin-bottom:6px;cursor:pointer}
-  .checks input{flex:none}
-  /* filament table */
-  .fil{border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:8px;background:#fafafc}
+    border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;
+    padding:8px 11px;font-size:13px;transition:background .12s,border-color .12s,transform .04s}
+  .btn:hover{background:var(--card2);border-color:var(--line2)}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);
+    font-weight:700;box-shadow:0 4px 14px var(--accent-glow)}
+  .btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+  .btn.sm{padding:4px 8px;font-size:12px;border-radius:7px}
+  .btn.danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-bg)}
+  .checks label{display:flex;gap:9px;align-items:flex-start;color:var(--ink);font-size:13px;
+    margin-bottom:8px;cursor:pointer;line-height:1.35}
+  .checks input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;margin:1px 0 0;
+    width:17px;height:17px;border:1px solid var(--line2);border-radius:5px;background:var(--input-bg);
+    cursor:pointer;position:relative;transition:background .12s,border-color .12s}
+  .checks input[type=checkbox]:hover{border-color:var(--chk-hover)}
+  .checks input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}
+  .checks input[type=checkbox]:checked::after{content:"";position:absolute;left:5px;top:2px;
+    width:4px;height:8px;border:solid var(--accent-ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .checks input[type=checkbox]:focus-visible{outline:2px solid var(--chk-focus);outline-offset:1px}
+  /* filament rows */
+  .fil{border:1px solid var(--line);border-radius:11px;padding:10px;margin-bottom:9px;background:var(--row-bg)}
   .fil .line{display:flex;gap:6px;margin-bottom:6px}
   .fil .line:last-child{margin-bottom:0}
-  .fil input[type=color]{width:34px;height:30px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff;flex:none}
+  .fil input[type=color]{width:36px;height:32px;padding:0;border:1px solid var(--line);
+    border-radius:7px;background:transparent;flex:none;cursor:pointer}
   .fil .tools{display:flex;gap:4px;flex:none}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-  .field{display:flex;flex-direction:column;gap:3px}
-  .note{font-size:12px;color:var(--muted);background:#fffbe9;border:1px solid #f0e3a8;
-    border-radius:8px;padding:8px 10px;margin-top:8px}
-  .count{font-size:12px;color:var(--muted)}
-  .warn{color:#c0392b}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .note{font-size:12px;color:var(--note-ink);background:var(--note-bg);
+    border:1px solid var(--note-border);border-radius:9px;padding:9px 11px;margin-top:10px}
+  .count{font-size:12px;color:var(--muted);margin-top:2px}
+  .warn{color:var(--warn)}
+  details summary{cursor:pointer}
+  .controls::-webkit-scrollbar,.stage::-webkit-scrollbar{width:11px;height:11px}
+  .controls::-webkit-scrollbar-thumb,.stage::-webkit-scrollbar-thumb{
+    background:var(--scroll-thumb);border-radius:8px;border:3px solid transparent;background-clip:content-box}
+  .controls::-webkit-scrollbar-thumb:hover,.stage::-webkit-scrollbar-thumb:hover{background:var(--scroll-thumb-hover)}
 
   /* ===== SHEET (screen + print share mm geometry) ===== */
   .sheet{position:relative;width:210mm;height:297mm;background:#fff;
@@ -78,14 +147,14 @@
   .overlay{position:absolute;left:0;top:0;width:210mm;height:297mm;z-index:5}
   .ov-st{position:absolute;outline:1px dashed rgba(120,120,140,.35)}
   .ov-mini{position:absolute;cursor:pointer}
-  .ov-mini:hover{background:rgba(59,110,245,.12)}
-  .ov-mini.start{background:rgba(59,110,245,.28);outline:1px solid var(--accent)}
+  .ov-mini:hover{background:rgba(84,200,130,.14)}
+  .ov-mini.start{background:rgba(84,200,130,.30);outline:1px solid var(--accent)}
 
   @media print{
     html,body{background:#fff}
     .app{display:block;height:auto}
     .controls,.stage-hint{display:none !important}
-    .stage{padding:0;display:block;overflow:visible}
+    .stage{padding:0;display:block;overflow:visible;background:#fff}
     .sheet{box-shadow:none;width:210mm;height:297mm;margin:0}
     .overlay{display:none !important}
     @page{size:A4;margin:0}
@@ -96,8 +165,14 @@
 <div class="app">
   <!-- ===================== CONTROLS ===================== -->
   <div class="controls">
-    <h1>Labeler</h1>
-    <p class="sub" id="sheetSummary">Any precut A4 sticker sheet. Set your sheet in Advanced geometry.</p>
+    <div class="appbrand">
+      <img class="logo" src="favicon.svg" alt="" width="30" height="30">
+      <div class="at-txt">
+        <h1>Labeler</h1>
+        <p class="sub" id="sheetSummary">Any precut A4 sticker sheet. Set your sheet in Advanced geometry.</p>
+      </div>
+      <button class="btn theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle light/dark">🌙</button>
+    </div>
 
     <div class="row">
       <button class="btn primary" id="printBtn">🖨 Print</button>
@@ -629,9 +704,49 @@ function addSectionGrid(box, W, H, miniW, miniH){
   line(0,2*miniH,W,th);
 }
 
+/* ---------- custom dark steppers for number inputs (UI only) ---------- */
+function enhanceNumberInputs(){
+  document.querySelectorAll('input[type=number]').forEach(inp=>{
+    if(inp.dataset.enh) return; inp.dataset.enh = "1";
+    const wrap = document.createElement("div"); wrap.className = "numwrap";
+    // preserve any explicit width the input had (e.g. the QR-size box)
+    if(inp.style.width){ wrap.style.width = inp.style.width; wrap.style.flex = "none";
+      inp.style.width = "100%"; inp.style.flex = "1"; }
+    else { wrap.style.flex = inp.style.flex || ""; wrap.style.width = "100%"; }
+    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    const steps = document.createElement("div"); steps.className = "numsteps";
+    const mk = (txt,dir)=>{ const b=document.createElement("button"); b.type="button";
+      b.className="numstep"; b.tabIndex=-1; b.textContent=txt;
+      b.addEventListener("click", ()=>bump(dir)); return b; };
+    const bump = dir=>{
+      const step = parseFloat(inp.step) || 1;
+      let v = (parseFloat(inp.value)||0) + dir*step;
+      if(inp.min!=="" && v < parseFloat(inp.min)) v = parseFloat(inp.min);
+      if(inp.max!=="" && v > parseFloat(inp.max)) v = parseFloat(inp.max);
+      const dec = (String(step).split(".")[1]||"").length;
+      inp.value = dec ? v.toFixed(dec) : String(v);
+      inp.dispatchEvent(new Event("input", {bubbles:true}));
+    };
+    steps.appendChild(mk("▲", 1)); steps.appendChild(mk("▼", -1));
+    wrap.appendChild(steps);
+  });
+}
+
+/* ---------- theme toggle ---------- */
+const themeToggle = document.getElementById("themeToggle");
+function setTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  try{ localStorage.setItem("labeler-theme", t); }catch(e){}
+  themeToggle.textContent = t==="dark" ? "☀️" : "🌙";
+  themeToggle.title = t==="dark" ? "Switch to light mode" : "Switch to dark mode";
+}
+themeToggle.onclick = ()=> setTheme(document.documentElement.getAttribute("data-theme")==="dark" ? "light" : "dark");
+setTheme(document.documentElement.getAttribute("data-theme") || "light");
+
 /* ---------- boot ---------- */
 renderFilList();
 render();
+enhanceNumberInputs();
 </script>
 </body>
 </html>
