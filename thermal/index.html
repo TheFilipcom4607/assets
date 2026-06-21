@@ -67,12 +67,43 @@
   .prevItem.drag{opacity:.4}
   .progress{height:6px;background:#0f1116;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
   .progress > i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s ease}
+
+  /* ===== Mobile layout: one pane at a time, with a bottom tab bar ===== */
+  /* CSS-only view switcher — hidden entirely on desktop (no JS/logic changes). */
+  .tpView{display:none}
+  .tpTabs{display:none}
+  @media (max-width:760px){
+    .tp-root{height:100dvh}
+    /* Top bar wraps and stays compact */
+    .tp-header{flex-wrap:wrap;gap:8px 10px !important;padding:9px 12px !important}
+    .tp-header .chip{margin-left:0 !important}
+    #tpBaseUrl{width:130px !important}
+    .tp-header #tpStatus{max-width:150px !important}
+
+    /* Collapse the 3 columns into a single swappable pane */
+    .tp-grid{grid-template-columns:1fr !important;grid-template-rows:minmax(0,1fr) !important;min-height:0}
+    .tp-pane{display:none !important;border:0 !important;min-width:0;min-height:0}
+    #tpViewLib:checked   ~ .tp-grid .tp-pane-lib{display:flex !important}
+    #tpViewPaper:checked ~ .tp-grid .tp-pane-paper{display:flex !important}
+    #tpViewInsp:checked  ~ .tp-grid .tp-pane-insp{display:flex !important}
+
+    /* Paper: keep full 384px print width intact, scroll instead of clipping */
+    .tp-paper-scroll{justify-content:flex-start !important;padding:12px !important}
+    #tpPaper{width:404px !important;max-width:none !important;margin:0 !important;padding:14px 10px 32px !important}
+
+    /* Bottom tab bar */
+    .tpTabs{display:flex;border-top:1px solid var(--line);background:#101218;padding:6px;gap:6px;padding-bottom:max(6px,env(safe-area-inset-bottom))}
+    .tpTabs label{flex:1;text-align:center;padding:11px 6px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line2);background:#0f1116;cursor:pointer;user-select:none;-webkit-user-select:none}
+    #tpViewLib:checked   ~ .tpTabs label[for=tpViewLib],
+    #tpViewPaper:checked ~ .tpTabs label[for=tpViewPaper],
+    #tpViewInsp:checked  ~ .tpTabs label[for=tpViewInsp]{background:var(--accent);border-color:var(--accent);color:var(--onacc)}
+  }
 </style>
 </head>
 <body>
 <div class="tp-root">
   <!-- ===== TOP BAR ===== -->
-  <header style="display:flex;align-items:center;gap:14px;padding:11px 16px;border-bottom:1px solid var(--line);background:#101218;">
+  <header class="tp-header" style="display:flex;align-items:center;gap:14px;padding:11px 16px;border-bottom:1px solid var(--line);background:#101218;">
     <div style="display:flex;align-items:center;gap:9px;">
       <span style="width:9px;height:9px;border-radius:2px;background:var(--accent);"></span>
       <span style="font-size:13px;font-weight:700;letter-spacing:.02em;">Thermal Composer</span>
@@ -89,11 +120,16 @@
     </div>
   </header>
 
+  <!-- Mobile view switcher (CSS-only; has no effect on desktop) -->
+  <input class="tpView" type="radio" name="tpView" id="tpViewLib">
+  <input class="tpView" type="radio" name="tpView" id="tpViewPaper" checked>
+  <input class="tpView" type="radio" name="tpView" id="tpViewInsp">
+
   <!-- ===== MAIN 3-COLUMN ===== -->
-  <div style="flex:1;display:grid;grid-template-columns:236px 1fr 310px;min-height:0;">
+  <div class="tp-grid" style="flex:1;display:grid;grid-template-columns:236px 1fr 310px;min-height:0;">
 
     <!-- LIBRARY -->
-    <aside style="border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:#101218;">
+    <aside class="tp-pane tp-pane-lib" style="border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:#101218;">
       <div style="padding:14px 14px 10px;border-bottom:1px solid var(--line);">
         <input class="tpf" id="tpSearch" placeholder="Search blocks…" style="width:100%;font-size:13px;">
       </div>
@@ -101,7 +137,7 @@
     </aside>
 
     <!-- PAPER -->
-    <section style="display:flex;flex-direction:column;min-height:0;">
+    <section class="tp-pane tp-pane-paper" style="display:flex;flex-direction:column;min-height:0;">
       <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;">
         <button class="btn ghost" id="tpDemo">Demo</button>
         <button class="btn ghost" id="tpClear">Clear</button>
@@ -120,17 +156,24 @@
       <div style="padding:8px 16px 0;">
         <div class="progress" id="tpProgress" hidden><i id="tpProgressFill"></i></div>
       </div>
-      <div style="flex:1;overflow:auto;background:#0b0c10;padding:28px 24px 60px;display:flex;justify-content:center;align-items:flex-start;">
+      <div class="tp-paper-scroll" style="flex:1;overflow:auto;background:#0b0c10;padding:28px 24px 60px;display:flex;justify-content:center;align-items:flex-start;">
         <div id="tpPaper" style="flex:none;width:432px;min-height:560px;margin:0 auto;background:var(--paper);color:var(--ink);box-shadow:0 12px 40px rgba(0,0,0,.5);border-radius:3px;padding:18px 24px 40px;overflow:hidden;font-family:'Courier New',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.12;"></div>
       </div>
     </section>
 
     <!-- INSPECTOR -->
-    <aside style="border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:#101218;">
+    <aside class="tp-pane tp-pane-insp" style="border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:#101218;">
       <div id="tpInspector" style="flex:1;overflow:auto;display:flex;flex-direction:column;"></div>
     </aside>
 
   </div>
+
+  <!-- Mobile bottom tab bar (CSS-only; hidden on desktop) -->
+  <nav class="tpTabs">
+    <label for="tpViewLib">Blocks</label>
+    <label for="tpViewPaper">Paper</label>
+    <label for="tpViewInsp">Edit</label>
+  </nav>
 </div>
 
 <script>
