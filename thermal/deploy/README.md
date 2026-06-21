@@ -13,9 +13,10 @@ The fix is to serve the page over **HTTP from the same origin as the printer**.
 This Pi:
 
 - is its own Wi-Fi access point (`PolaroidKit`), so it needs no internet,
-- serves the composer over HTTP via nginx, and
+- serves the composer over HTTP via nginx,
 - **reverse-proxies** `/ping`, `/test` and `/print` to the XIAO, so the browser
-  only ever talks to the Pi — no mixed content, no CORS, no firmware changes.
+  only ever talks to the Pi — no mixed content, no CORS, no firmware changes, and
+- **auto-discovers** the printer, so you never need to know its IP or MAC.
 
 The heavy work (dithering the photo, packing the 1-bit raster) happens in the
 phone's browser; the Pi just serves one file and relays bytes, which is why a
@@ -60,20 +61,29 @@ Set the XIAO firmware's Wi-Fi credentials to the kit network:
 - SSID: `PolaroidKit`
 - Password: whatever you set in `hostapd.conf`
 
-## Pin the printer's IP (recommended)
+## Finding the printer — automatic
 
-The nginx proxy targets `192.168.50.2`. To guarantee the XIAO lands there:
+You **don't** need to know the printer's IP or MAC in advance.
 
-1. Let the XIAO connect once, then on the Pi read its MAC + IP:
-   ```bash
-   cat /var/lib/misc/dnsmasq.leases
-   ```
-2. Put that MAC in `deploy/dnsmasq.conf` (`dhcp-host=...,192.168.50.2`), re-run
-   `sudo ./install.sh` (or just `sudo cp dnsmasq.conf /etc/dnsmasq.conf &&
-   sudo systemctl restart dnsmasq`).
+A tiny service (`find-printer.sh`, run by `printer-discovery.timer` every ~10s)
+looks at the Pi's DHCP leases and probes each device for `GET /ping`. The XIAO
+answers; phones and tablets don't. Whichever device responds becomes the nginx
+upstream, and nginx is reloaded only when the address changes. This also means
+the printer can reboot and get a different IP — it'll be picked up again
+automatically.
 
-If you'd rather give the XIAO a different fixed IP in its own firmware, just set
-that same IP in the three `proxy_pass` lines of `nginx-thermal.conf`.
+Consequences:
+- The **first** print after the XIAO joins may take up to ~10 s while it's
+  discovered. After that it's instant.
+- If printing returns `502 Bad Gateway`, the printer hasn't been found yet —
+  check it's powered on and joined `PolaroidKit`.
+
+Watch discovery live if you're curious:
+```bash
+journalctl -t printer-discovery -f
+cat /var/lib/misc/dnsmasq.leases          # everything that has joined
+cat /etc/nginx/conf.d/printer-upstream.conf   # where nginx is currently pointed
+```
 
 ## Use it
 
@@ -105,8 +115,11 @@ This works, but Bullseye Lite is the lighter, better-trodden path on a Zero 1 W.
 |------|---------|
 | `install.sh` | One-shot setup: installs packages, writes configs, deploys the app |
 | `hostapd.conf` | Wi-Fi access point (SSID / password / channel) |
-| `dnsmasq.conf` | DHCP + DNS, static lease for the XIAO |
+| `dnsmasq.conf` | DHCP + DNS for the kit network |
 | `nginx-thermal.conf` | Serves the app, proxies `/ping` `/test` `/print` to the XIAO |
+| `printer-upstream.conf` | Auto-managed pointer to the printer's current address |
+| `find-printer.sh` | Discovers the printer (the device answering `/ping`) |
+| `printer-discovery.{service,timer}` | Runs discovery every ~10 s |
 
 ## Reverting
 

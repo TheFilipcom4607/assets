@@ -1,0 +1,8 @@
+[Unit]
+Description=Discover the thermal printer and point nginx at it
+After=nginx.service dnsmasq.service
+Wants=nginx.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/find-printer.sh

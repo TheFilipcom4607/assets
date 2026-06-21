@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically discover the thermal printer on the kit network
+
+[Timer]
+OnBootSec=15s
+OnUnitActiveSec=10s
+AccuracySec=2s
+
+[Install]
+WantedBy=timers.target

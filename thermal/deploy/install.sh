@@ -25,9 +25,9 @@ WEBROOT="/var/www/thermal"
 
 backup() { [[ -f "$1" && ! -f "$1.orig" ]] && cp "$1" "$1.orig" || true; }
 
-echo "==> Installing packages (hostapd, dnsmasq, nginx)..."
+echo "==> Installing packages (hostapd, dnsmasq, nginx, curl)..."
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y hostapd dnsmasq nginx
+DEBIAN_FRONTEND=noninteractive apt-get install -y hostapd dnsmasq nginx curl
 
 echo "==> Stopping services while configuring..."
 systemctl stop hostapd dnsmasq nginx 2>/dev/null || true
@@ -90,15 +90,27 @@ echo "==> Deploying the composer to ${WEBROOT}..."
 install -m 644 "$HERE/nginx-thermal.conf" /etc/nginx/sites-available/thermal
 ln -sf /etc/nginx/sites-available/thermal /etc/nginx/sites-enabled/thermal
 rm -f /etc/nginx/sites-enabled/default
+# Upstream placeholder so nginx starts before the printer is ever seen; the
+# discovery service overwrites it with the real address once the XIAO connects.
+[[ -f /etc/nginx/conf.d/printer-upstream.conf ]] || \
+  install -m 644 "$HERE/printer-upstream.conf" /etc/nginx/conf.d/printer-upstream.conf
 mkdir -p "$WEBROOT"
 install -m 644 "$HERE/../index.html" "$WEBROOT/index.html"
 [[ -f "$HERE/../sw.js" ]] && install -m 644 "$HERE/../sw.js" "$WEBROOT/sw.js" || true
 nginx -t
 systemctl enable nginx
 
+# ---- printer auto-discovery ----
+echo "==> Installing printer auto-discovery..."
+install -m 755 "$HERE/find-printer.sh" /usr/local/bin/find-printer.sh
+install -m 644 "$HERE/printer-discovery.service" /etc/systemd/system/printer-discovery.service
+install -m 644 "$HERE/printer-discovery.timer" /etc/systemd/system/printer-discovery.timer
+systemctl daemon-reload
+systemctl enable printer-discovery.timer
+
 echo "==> Starting services..."
 rfkill unblock wlan 2>/dev/null || true
-systemctl start hostapd dnsmasq nginx
+systemctl start hostapd dnsmasq nginx printer-discovery.timer
 
 cat <<EOF
 
@@ -111,7 +123,9 @@ Done. Reboot once (sudo reboot), then:
   4. In the app, set the printer URL to  http://${AP_IP}
      (nginx relays /ping, /test and /print to the XIAO).
 
-If the XIAO didn't land on 192.168.50.2, see README.md to set its MAC
-in dnsmasq.conf (and the IP in nginx-thermal.conf).
+You do NOT need to know the printer's IP: once the XIAO joins, the
+discovery service finds it (the device that answers /ping) within ~10s
+and points nginx at it automatically. The first print may take a few
+seconds longer while it's discovered.
 ------------------------------------------------------------
 EOF
