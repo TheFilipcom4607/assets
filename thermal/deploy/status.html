@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Polaroid Kit — Status</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#0e0f13;color:#e7e9ee;
+    padding:max(20px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));}
+  .card{max-width:520px;margin:0 auto}
+  h1{font-size:18px;margin:0 0 16px;display:flex;align-items:center;gap:8px}
+  .row{display:flex;align-items:center;gap:13px;background:#14161c;border:1px solid #262a33;border-radius:12px;padding:16px;margin-bottom:12px}
+  .dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto;background:#5a6170;transition:background .2s}
+  .ok{background:#7ee787}.warn{background:#e8893a}.bad{background:#ff7b72}
+  .label{font-weight:600}.sub{color:#868d9b;font-size:13px;margin-top:3px;line-height:1.4}
+  button{font:inherit;background:#181b22;color:#e7e9ee;border:1px solid #262a33;border-radius:10px;padding:12px 16px;width:100%;cursor:pointer}
+  button:active{transform:translateY(1px)}
+  pre{white-space:pre-wrap;word-break:break-word;background:#0b0c10;border:1px solid #262a33;border-radius:10px;padding:12px;font-size:12px;color:#cdd2db;margin:10px 0 0;min-height:18px}
+  a{color:#e8893a;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>📷 Polaroid Kit — Status</h1>
+
+  <div class="row">
+    <span class="dot" id="pdot"></span>
+    <div>
+      <div class="label" id="plabel">Checking…</div>
+      <div class="sub" id="psub"></div>
+    </div>
+  </div>
+
+  <div class="row" style="display:block">
+    <button id="ping">Test printer (/ping)</button>
+    <pre id="pingout">—</pre>
+  </div>
+
+  <div class="sub">Composer: <a href="/">open the app →</a></div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  async function refresh(){
+    try{
+      const r = await fetch('status.json?' + Date.now(), { cache:'no-store' });
+      const j = await r.json();
+      if(j.found){
+        $('pdot').className = 'dot ok';
+        $('plabel').textContent = 'Printer connected';
+        $('psub').textContent = j.ip + (j.checked ? '  ·  last checked ' + j.checked : '');
+      } else {
+        $('pdot').className = 'dot warn';
+        $('plabel').textContent = 'Searching for printer…';
+        $('psub').textContent = 'Make sure the XIAO is powered on and has joined Wi-Fi “dom”. Give it ~10 s.';
+      }
+    } catch(e){
+      $('pdot').className = 'dot bad';
+      $('plabel').textContent = 'Status unavailable';
+      $('psub').textContent = 'The discovery service may not be running yet.';
+    }
+  }
+  $('ping').onclick = async () => {
+    const out = $('pingout');
+    out.textContent = 'Pinging…';
+    try{
+      const r = await fetch('/ping?' + Date.now(), { cache:'no-store' });
+      out.textContent = 'HTTP ' + r.status + '\n' + (await r.text());
+    } catch(e){
+      out.textContent = 'Failed: ' + e.message + '\n(printer not found yet, or not powered on)';
+    }
+  };
+  refresh();
+  setInterval(refresh, 3000);
+</script>
+</body>
+</html>

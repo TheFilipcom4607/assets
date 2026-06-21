@@ -97,6 +97,8 @@ rm -f /etc/nginx/sites-enabled/default
 mkdir -p "$WEBROOT"
 install -m 644 "$HERE/../index.html" "$WEBROOT/index.html"
 [[ -f "$HERE/../sw.js" ]] && install -m 644 "$HERE/../sw.js" "$WEBROOT/sw.js" || true
+install -m 644 "$HERE/status.html" "$WEBROOT/status.html"
+[[ -f "$WEBROOT/status.json" ]] || install -m 644 "$HERE/status.json" "$WEBROOT/status.json"
 nginx -t
 systemctl enable nginx
 
@@ -117,15 +119,16 @@ cat <<EOF
 ------------------------------------------------------------
 Done. Reboot once (sudo reboot), then:
 
-  1. On your phone, join Wi-Fi:  PolaroidKit  (password in hostapd.conf)
-  2. Point the XIAO's firmware at the same network (SSID PolaroidKit).
+  1. Power on the XIAO — it joins Wi-Fi "dom" on its own.
+  2. On your phone, join Wi-Fi:  dom   (password: test4test)
   3. Open  http://${AP_IP}/   (or http://polaroid.box/)
   4. In the app, set the printer URL to  http://${AP_IP}
      (nginx relays /ping, /test and /print to the XIAO).
 
-You do NOT need to know the printer's IP: once the XIAO joins, the
-discovery service finds it (the device that answers /ping) within ~10s
-and points nginx at it automatically. The first print may take a few
-seconds longer while it's discovered.
+Check http://${AP_IP}/status to see whether the printer's been found.
+
+You do NOT need to know the printer's IP: once the XIAO joins, discovery
+finds it (the device that answers /ping) within ~10s and points nginx at
+it automatically. The first print may take a few seconds while it's found.
 ------------------------------------------------------------
 EOF

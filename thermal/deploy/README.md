@@ -1,18 +1,23 @@
 # Portable Polaroid kit — Raspberry Pi hub
 
-This turns a Raspberry Pi (tested target: **Pi Zero 1 W**) into a battery-powered
+Turns a Raspberry Pi (tested target: **Pi Zero 1 W**) into a battery-powered
 backpack hub for the Thermal Composer's Polaroid mode.
+
+> **Setting it up for the first time? Follow [GUIDE.md](GUIDE.md)** — a complete
+> step-by-step from flashing the SD card to printing, with troubleshooting.
+> This README is the short technical reference.
 
 ## Why this exists
 
 The hosted composer runs over **HTTPS**, but the XIAO thermal printer is plain
 **HTTP** on a LAN address. Browsers block an HTTPS page from talking to an HTTP
-device ("mixed content"), which is the `Load failed` / `json` errors you saw.
+device ("mixed content") — that's the `Load failed` / `json` errors you saw.
 
 The fix is to serve the page over **HTTP from the same origin as the printer**.
 This Pi:
 
-- is its own Wi-Fi access point (`PolaroidKit`), so it needs no internet,
+- is its own Wi-Fi access point (named **`dom`**, to match the XIAO's firmware),
+  so it needs no internet,
 - serves the composer over HTTP via nginx,
 - **reverse-proxies** `/ping`, `/test` and `/print` to the XIAO, so the browser
   only ever talks to the Pi — no mixed content, no CORS, no firmware changes, and
@@ -22,104 +27,77 @@ The heavy work (dithering the photo, packing the 1-bit raster) happens in the
 phone's browser; the Pi just serves one file and relays bytes, which is why a
 Zero 1 W is plenty.
 
-## Will the Polaroid flow work over plain HTTP?
+## Quick install
 
-Yes. The photo picker is a normal `<input type="file" accept="image/*">`, which
-opens the iOS camera/library without needing a secure context (unlike
-`getUserMedia`). You can also **Add to Home Screen** from the Pi's HTTP page and
-get the full-screen standalone app — you just won't get the service-worker
-offline cache, which doesn't matter because the Pi is always there.
+On Raspberry Pi OS (Bullseye) Lite, **while the Pi still has internet**:
 
-## Requirements
+```bash
+cd thermal/deploy
+sudo ./install.sh
+sudo reboot
+```
 
-- **Raspberry Pi OS (Bullseye) Lite.** On a Zero 1 W this must be the ARMv6
-  Raspberry Pi OS build. **Do not use Ubuntu** — it is ARMv7+ and won't boot on
-  a Zero 1 W.
-- First-boot internet access (join your home Wi-Fi) just long enough to run the
-  installer. After that the Pi becomes the AP and drops the home connection.
+After reboot the Pi broadcasts Wi-Fi **`dom`** (password `test4test`). Power on
+the XIAO (it joins `dom`), join `dom` on your phone, and open
+`http://192.168.50.1/`. Full details and gotchas are in **[GUIDE.md](GUIDE.md)**.
 
-## Install
+## Network at a glance
 
-1. Flash Raspberry Pi OS Lite, enable SSH, and set your Wi-Fi + Wi-Fi country
-   (Raspberry Pi Imager's advanced options, or `raspi-config`). The country
-   setting matters — hostapd won't start the radio without it.
-2. Copy this whole `thermal/` folder onto the Pi (so `index.html` and `sw.js`
-   sit next to `deploy/`).
-3. Run the installer **while still on your home Wi-Fi**:
-   ```bash
-   cd thermal/deploy
-   sudo ./install.sh
-   sudo reboot
-   ```
-
-After reboot the Pi broadcasts `PolaroidKit`.
-
-## Point the XIAO at the kit
-
-Set the XIAO firmware's Wi-Fi credentials to the kit network:
-
-- SSID: `PolaroidKit`
-- Password: whatever you set in `hostapd.conf`
+| Thing | Value |
+|-------|-------|
+| Wi-Fi SSID / password | `dom` / `test4test` (must match the XIAO) |
+| Pi (gateway, web UI) | `192.168.50.1` |
+| DHCP range for clients | `192.168.50.10`–`192.168.50.100` |
+| App URL | `http://192.168.50.1/` (or `http://polaroid.box/`) |
+| Status page | `http://192.168.50.1/status` |
+| Printer URL to type in the app | `http://192.168.50.1` |
 
 ## Finding the printer — automatic
 
-You **don't** need to know the printer's IP or MAC in advance.
+You **don't** need to know the printer's IP or MAC. `find-printer.sh` (run by
+`printer-discovery.timer` every ~10 s) probes each DHCP-leased device for
+`GET /ping`; the XIAO answers, phones don't. The responder becomes the nginx
+upstream, reloaded only when the address changes — so a printer reboot onto a
+new IP is picked up automatically. The result is published to `status.json`
+(shown on the status page).
 
-A tiny service (`find-printer.sh`, run by `printer-discovery.timer` every ~10s)
-looks at the Pi's DHCP leases and probes each device for `GET /ping`. The XIAO
-answers; phones and tablets don't. Whichever device responds becomes the nginx
-upstream, and nginx is reloaded only when the address changes. This also means
-the printer can reboot and get a different IP — it'll be picked up again
-automatically.
+- First print after the XIAO joins may take up to ~10 s while it's discovered.
+- `502 Bad Gateway` = printer not found yet (check it's on and joined `dom`).
 
-Consequences:
-- The **first** print after the XIAO joins may take up to ~10 s while it's
-  discovered. After that it's instant.
-- If printing returns `502 Bad Gateway`, the printer hasn't been found yet —
-  check it's powered on and joined `PolaroidKit`.
-
-Watch discovery live if you're curious:
+Inspect live:
 ```bash
 journalctl -t printer-discovery -f
-cat /var/lib/misc/dnsmasq.leases          # everything that has joined
+cat /var/lib/misc/dnsmasq.leases              # everything that has joined
 cat /etc/nginx/conf.d/printer-upstream.conf   # where nginx is currently pointed
 ```
 
-## Use it
-
-1. Phone joins Wi-Fi `PolaroidKit`.
-2. Open `http://192.168.50.1/` (or `http://polaroid.box/`).
-3. Set the printer URL in the app to `http://192.168.50.1`.
-4. Tap **📷 Polaroid**, pick a photo, print.
-
 ## Updating the app later
-
-Copy a fresh `index.html` (and `sw.js`) over the deployed copy:
 
 ```bash
 sudo cp thermal/index.html /var/www/thermal/index.html
 sudo cp thermal/sw.js      /var/www/thermal/sw.js
 ```
+No restart needed.
 
-No service restart needed.
-
-## Bookworm notes
+## Bookworm note
 
 Raspberry Pi OS **Bookworm** uses NetworkManager instead of dhcpcd. The
-installer detects this and marks `wlan0` as unmanaged so hostapd can own it.
-This works, but Bullseye Lite is the lighter, better-trodden path on a Zero 1 W.
+installer detects this and marks `wlan0` unmanaged so hostapd can own it. It
+works, but Bullseye Lite is the lighter, better-trodden path on a Zero 1 W.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
+| `GUIDE.md` | Full first-boot-to-printing walkthrough + troubleshooting |
 | `install.sh` | One-shot setup: installs packages, writes configs, deploys the app |
-| `hostapd.conf` | Wi-Fi access point (SSID / password / channel) |
+| `hostapd.conf` | Wi-Fi access point (SSID `dom` / password / channel) |
 | `dnsmasq.conf` | DHCP + DNS for the kit network |
-| `nginx-thermal.conf` | Serves the app, proxies `/ping` `/test` `/print` to the XIAO |
+| `nginx-thermal.conf` | Serves the app + status page, proxies `/ping` `/test` `/print` |
 | `printer-upstream.conf` | Auto-managed pointer to the printer's current address |
 | `find-printer.sh` | Discovers the printer (the device answering `/ping`) |
 | `printer-discovery.{service,timer}` | Runs discovery every ~10 s |
+| `status.html` / `status.json` | Field status/debug page and its live data |
 
 ## Reverting
 
