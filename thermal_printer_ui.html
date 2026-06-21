@@ -1,0 +1,1295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thermal Printer Composer</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  .tp-root{
+    --bg:#0e0f13;--surface:#14161c;--surface2:#181b22;--line:#1c1e25;--line2:#262a33;
+    --text:#e7e9ee;--muted:#868d9b;--faint:#5a6170;
+    --accent:#e8893a;--accent2:#d6772a;--onacc:#1a1206;
+    --paper:#fffdf2;--ink:#14120b;--good:#7ee787;--bad:#ff7b72;
+    height:100vh;display:flex;flex-direction:column;overflow:hidden;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;
+    background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;
+  }
+  .tp-root *{scrollbar-width:thin;scrollbar-color:#2a2e38 transparent}
+  .tp-root *::-webkit-scrollbar{width:9px;height:9px}
+  .tp-root *::-webkit-scrollbar-thumb{background:#262a33;border-radius:6px}
+  .tpf{font:inherit;color:var(--text);background:#0f1116;border:1px solid var(--line2);border-radius:8px;padding:9px 11px;outline:none;transition:border-color .12s,box-shadow .12s}
+  .tpf:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,137,58,.16)}
+  .tpf::placeholder{color:#4d5462}
+  textarea.tpf{width:100%;min-height:66px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;line-height:1.45}
+  .tp-root button{font:inherit;cursor:pointer}
+  .btn{font-size:13px;padding:8px 13px;border:1px solid var(--line2);background:var(--surface2);color:var(--text);border-radius:8px;transition:border-color .12s,background .12s,transform .05s;white-space:nowrap}
+  .btn:hover{border-color:#3a4150}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--onacc);font-weight:700}
+  .btn.primary:hover{background:var(--accent2);border-color:var(--accent2)}
+  .btn.ghost{background:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--text)}
+  .btn.danger{color:var(--bad);border-color:#3a2a2c;background:transparent}
+  .btn.danger:hover{border-color:var(--bad)}
+  .tile{display:flex;flex-direction:column;gap:9px;align-items:flex-start;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);cursor:pointer;transition:border-color .12s,background .12s,transform .05s;text-align:left}
+  .tile:hover{border-color:var(--accent);background:#1d2026}
+  .tile:active{transform:translateY(1px)}
+  .tile .g{font-size:16px;line-height:1;color:#aab1c0;font-family:ui-monospace,monospace}
+  .tile .l{font-size:12px;color:#cdd2db;font-weight:600;line-height:1.1}
+  .seg{display:flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+  .seg button{flex:1;border:0;border-right:1px solid var(--line2);background:#0f1116;color:var(--muted);padding:7px 9px;font-size:12px}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--text)}
+  .seg button.active{background:var(--accent);color:var(--onacc);font-weight:700}
+  .tog{border:1px solid var(--line2);background:#0f1116;color:var(--muted);border-radius:8px;padding:8px 13px;font-size:12px}
+  .tog:hover{color:var(--text)}
+  .tog.active{background:var(--accent);border-color:var(--accent);color:var(--onacc);font-weight:700}
+  .flab{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#707888;font-weight:600}
+  .libcat{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5f6675;font-weight:700;margin:16px 2px 9px}
+  .libcat:first-child{margin-top:2px}
+  .chip{display:flex;align-items:center;gap:7px;padding:5px 10px;background:var(--surface2);border:1px solid var(--line2);border-radius:20px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#7ee787;animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .prevItem{position:relative;cursor:pointer;border-radius:4px}
+  .prevItem .grip{position:absolute;left:-16px;top:0;bottom:0;width:14px;display:none;align-items:center;justify-content:center;color:#b8b09a;cursor:grab;font-size:12px}
+  .prevItem:hover .grip{display:flex}
+  .prevItem.sel{outline:2px solid var(--accent);outline-offset:3px;background:rgba(232,137,58,.07)}
+  .prevItem.drag{opacity:.4}
+  .progress{height:6px;background:#0f1116;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .progress > i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s ease}
+</style>
+</head>
+<body>
+<div class="tp-root">
+  <!-- ===== TOP BAR ===== -->
+  <header style="display:flex;align-items:center;gap:14px;padding:11px 16px;border-bottom:1px solid var(--line);background:#101218;">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span style="width:9px;height:9px;border-radius:2px;background:var(--accent);"></span>
+      <span style="font-size:13px;font-weight:700;letter-spacing:.02em;">Thermal Composer</span>
+    </div>
+    <div class="chip" style="margin-left:6px;">
+      <span class="dot" id="tpDot"></span>
+      <input class="tpf" id="tpBaseUrl" placeholder="http://192.168.1.123" autocomplete="off" style="border:0;background:transparent;padding:0;width:178px;font-family:ui-monospace,monospace;font-size:12px;border-radius:0;">
+    </div>
+    <button class="btn ghost" id="tpPing">Ping</button>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+      <span id="tpStatus" style="font-size:12px;color:var(--muted);max-width:320px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button class="btn primary" id="tpPrint" style="padding:8px 20px;">Print</button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN 3-COLUMN ===== -->
+  <div style="flex:1;display:grid;grid-template-columns:236px 1fr 310px;min-height:0;">
+
+    <!-- LIBRARY -->
+    <aside style="border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:#101218;">
+      <div style="padding:14px 14px 10px;border-bottom:1px solid var(--line);">
+        <input class="tpf" id="tpSearch" placeholder="Search blocks…" style="width:100%;font-size:13px;">
+      </div>
+      <div id="tpLibrary" style="flex:1;overflow:auto;padding:6px 14px 18px;"></div>
+    </aside>
+
+    <!-- PAPER -->
+    <section style="display:flex;flex-direction:column;min-height:0;">
+      <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;">
+        <button class="btn ghost" id="tpDemo">Demo</button>
+        <button class="btn ghost" id="tpClear">Clear</button>
+        <div style="width:1px;align-self:stretch;background:var(--line2);margin:0 4px;"></div>
+        <button class="btn ghost" id="tpSave">Save JSON</button>
+        <button class="btn ghost" id="tpLoad">Load JSON</button>
+        <input type="file" accept="application/json" style="display:none" id="tpLoadFile">
+        <div style="width:1px;align-self:stretch;background:var(--line2);margin:0 4px;"></div>
+        <span class="flab" style="margin:0 2px;">Feed</span>
+        <div class="seg" id="tpFeedMode" title="How blank space (feed / after) is sent. Newlines work on cheap clones; Dots use ESC J for exact spacing.">
+          <button data-mode="nl">⏎ Newlines</button>
+          <button data-mode="dots">⋮ Dots</button>
+        </div>
+        <button class="btn ghost" id="tpTest" style="margin-left:auto;">Printer self-test</button>
+      </div>
+      <div style="padding:8px 16px 0;">
+        <div class="progress" id="tpProgress" hidden><i id="tpProgressFill"></i></div>
+      </div>
+      <div style="flex:1;overflow:auto;background:#0b0c10;padding:28px 24px 60px;display:flex;justify-content:center;align-items:flex-start;">
+        <div id="tpPaper" style="flex:none;width:432px;min-height:560px;margin:0 auto;background:var(--paper);color:var(--ink);box-shadow:0 12px 40px rgba(0,0,0,.5);border-radius:3px;padding:18px 24px 40px;overflow:hidden;font-family:'Courier New',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.12;"></div>
+      </div>
+    </section>
+
+    <!-- INSPECTOR -->
+    <aside style="border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:#101218;">
+      <div id="tpInspector" style="flex:1;overflow:auto;display:flex;flex-direction:column;"></div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+/* ===== Ported engine (composer-engine.js), inlined verbatim ===== */
+/* ============================================================
+   THERMAL PRINTER COMPOSER — engine (vanilla controller)
+   Faithful port of the original tool's engine, re-housed in a
+   Library / Paper / Inspector shell. Output JSON is byte-for-byte
+   compatible with code.py. Exposes window.mountThermalComposer(els).
+   ============================================================ */
+(function () {
+const PRINTER_WIDTH = 384;
+const FONT_A_DOT_W = 12, FONT_A_DOT_H = 24, FONT_B_DOT_W = 9, FONT_B_DOT_H = 17;
+const MAX_BODY_BYTES = 90000;
+const COLS_A = 32;
+const CODE39_ALLOWED = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ -. $/+%";
+
+const TYPE_LABEL = {
+  text:'Text', ascii:'ASCII / CP437', box:'Box', qr:'QR code', barcode:'Barcode',
+  image:'Image', rule:'Rule', feed:'Feed', vertical:'Vertical big text', columns:'Columns',
+  section:'Section divider', table:'Table', list:'List', keyvalue:'Key / value',
+  paragraph:'Paragraph', heading:'Heading', signature:'Signature', tearoff:'Tear-off divider',
+  rating:'Rating / bar', chart:'Bar chart', cut:'Paper cut', raw:'Raw ESC/POS'
+};
+const TYPE_ICON = {
+  text:'T', ascii:'/\\', box:'\u25AD', qr:'\u25A6', barcode:'|||', image:'\u25A2', rule:'\u2014', feed:'\u2193',
+  vertical:'\u2195', columns:'\u25A5', section:'\u00A7', table:'\u25A4', list:'\u2022', keyvalue:'\u22EF', paragraph:'\u00B6',
+  heading:'H', signature:'\u270E', tearoff:'\u2504', rating:'\u2605', chart:'\u25AE', cut:'\u2702', raw:'#'
+};
+
+const LIBRARY = [
+  ['Common', ['text','heading','qr','barcode','image','paragraph']],
+  ['Text & art', ['text','ascii','box','vertical']],
+  ['Codes & image', ['qr','barcode','image']],
+  ['Layout', ['rule','feed','section','tearoff','signature','columns']],
+  ['Data & tables', ['table','list','keyvalue','rating','chart']],
+];
+
+const defaults = {
+  text: () => ({ type:'text', text:'EPWA 161500Z 25015KT 9999 FEW042 18/08 Q1014 NOSIG', width:1, height:1, bold:false, underline:0, inverse:false, justify:'left', font:'a', encoding:'cp437', after:0 }),
+  ascii: () => ({ type:'ascii', text:'/\\_/\\\n( o.o )\n > ^ <', width:1, height:1, bold:false, underline:0, inverse:false, justify:'left', font:'a', encoding:'cp437', after:0 }),
+  box: () => ({ type:'box', text:'HELLO EPWA\nprinter real', padding:1, align:'center', justify:'left', ascii:false, after:0 }),
+  qr: () => ({ type:'qr', data:'https://thefilip.com', size:5, ecc:'M', justify:'center', after:1, asImage:false }),
+  barcode: () => ({ type:'barcode', data:'EPWA123', kind:'code39', bar_width:2, bar_height:80, hri:'below', justify:'center', after:1, asImage:false }),
+  image: () => ({ type:'image', width:PRINTER_WIDTH, height:0, data:'', dither:'threshold', threshold:150, brightness:0, maxHeight:384, invert:false, after:1, filename:'', rotate:0, scale:100, imgAlign:'center', crop:null, brightRegion:null }),
+  rule: () => ({ type:'rule', char:'-', width:32, justify:'left', cp437:false, after:0 }),
+  feed: () => ({ type:'feed', lines:3 }),
+  vertical: () => ({ type:'vertical', text:'HELLO', mode:'stack', width:2, height:2, bold:false, justify:'center', space_lines:1, after:1 }),
+  columns: () => ({ type:'columns', cells:[{ text:'Item', align:'left', width:0 }, { text:'$0.00', align:'right', width:0 }], gap:1, encoding:'cp437', after:0 }),
+  section: () => ({ type:'section', title:'SECTION', char:'=', cp437:false, after:0 }),
+  table: () => ({ type:'table', rows:['Item|Qty|Price','Coffee|2|$5.00','Cake|1|$3.50'], header:true, aligns:'LCR', gap:1, encoding:'cp437', after:1 }),
+  list: () => ({ type:'list', text:'Fuel\nFlaps\nLights', style:'checkbox', justify:'left', encoding:'cp437', after:1 }),
+  keyvalue: () => ({ type:'keyvalue', text:'Flight: LO282\nGate: 12\nBoarding: 14:30', sep:':', leader:'.', encoding:'cp437', after:1 }),
+  paragraph: () => ({ type:'paragraph', text:'This is a longer note that wraps neatly to the paper width without breaking words in the middle.', justify:'left', width:0, encoding:'cp437', after:1 }),
+  heading: () => ({ type:'heading', text:'HEADING', size:2, bold:true, rule:true, char:'=', cp437:false, after:1 }),
+  signature: () => ({ type:'signature', label:'Signature', after:1 }),
+  tearoff: () => ({ type:'tearoff', char:'-', label:'', cp437:false, after:0 }),
+  rating: () => ({ type:'rating', mode:'stars', value:4, max:5, width:10, label:'', justify:'left', after:0 }),
+  chart: () => ({ type:'chart', data:'3,5,8,4,6,2', width:24, values:true, after:1 }),
+};
+
+function numField(key,label,min,max){ return { kind:'number', key, label, min, max }; }
+function segField(key,label,options){ return { kind:'seg', key, label, options }; }
+function toggleField(key,label,title){ return { kind:'toggle', key, label, title }; }
+function inputSpec(key,label){ return { kind:'input', key, label }; }
+function alignField(key,label){ return segField(key, label||'Align', [['left','Left'],['center','Center'],['right','Right']]); }
+
+const WMO = {0:'clear',1:'mostly clear',2:'partly cloudy',3:'overcast',45:'fog',48:'rime fog',51:'light drizzle',53:'drizzle',55:'heavy drizzle',61:'light rain',63:'rain',65:'heavy rain',66:'freezing rain',67:'freezing rain',71:'light snow',73:'snow',75:'heavy snow',77:'snow grains',80:'showers',81:'showers',82:'violent showers',85:'snow showers',86:'snow showers',95:'thunderstorm',96:'thunderstorm + hail',99:'thunderstorm + hail'};
+function pad2(n){ return String(n).padStart(2,'0'); }
+function fmtStamp(d,mode){ const date=d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); const time=pad2(d.getHours())+':'+pad2(d.getMinutes()); if(mode==='date')return date; if(mode==='time')return time; return date+' '+time; }
+function counterKey(m){ return 'thermalCounter:'+(m.ctrId||m.label||'default'); }
+function counterText(m,v){ const padded=String(v).padStart(Math.max(1,parseInt(m.pad,10)||1),'0'); return (m.label?m.label+' ':'')+(m.prefix||'')+padded; }
+function peekCounter(m){ const raw=localStorage.getItem(counterKey(m)); return raw===null?(parseInt(m.start,10)||0):(parseInt(raw,10)||0); }
+function bumpCounter(m){ const v=peekCounter(m); localStorage.setItem(counterKey(m),String(v+1)); return v; }
+function daysUntil(str){ const t=Date.parse(String(str)+'T00:00:00'); if(isNaN(t)) return null; const now=new Date(); const today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(); return Math.round((t-today)/86400000); }
+
+const PLUGINS = [
+  { id:'randnum', name:'Random #', blurb:'Generates a fresh random number on every print — raffle tickets, test barcodes, nonces.',
+    defaults:{ label:'TICKET', digits:6, as:'barcode', kind:'code39' },
+    fields:[ inputSpec('label','Label'), numField('digits','Digits',1,18), segField('as','Show as',[['text','Big text'],['barcode','Barcode'],['qr','QR']]), segField('kind','Barcode',['code39','code128']) ],
+    preview(m){ return 'Random '+m.digits+'-digit number as '+m.as+(m.as==='barcode'?' ('+m.kind+')':'')+' — new every print'; },
+    async build(m){ const digits=Math.max(1,Math.min(18,parseInt(m.digits,10)||6)); let n=''; for(let i=0;i<digits;i++) n+=Math.floor(Math.random()*10); const out=[]; if(m.label) out.push({type:'text',text:String(m.label),justify:'center',bold:true,after:0}); if(m.as==='qr') out.push({type:'qr',data:n,size:5,ecc:'M',justify:'center',after:1}); else if(m.as==='barcode') out.push({type:'barcode',data:n,kind:m.kind||'code39',bar_width:2,bar_height:80,hri:'below',justify:'center',after:1}); else out.push({type:'text',text:n,width:2,height:2,justify:'center',after:1}); return out; } },
+  { id:'randean13', name:'Random EAN-13', blurb:'Generates a fresh, checksum-valid EAN-13 barcode on every print — test scans, mock products, label trials.',
+    defaults:{ label:'EAN-13' },
+    fields:[ inputSpec('label','Label') ],
+    preview(m){ return 'Random EAN-13 barcode'+(m.label?' labelled "'+m.label+'"':'')+' — new every print'; },
+    async build(m){ let d=''; for(let i=0;i<12;i++) d+=Math.floor(Math.random()*10); let s=0; for(let i=0;i<12;i++) s+=(+d[i])*(i%2===0?1:3); const code=d+String((10-(s%10))%10); const out=[]; if(m.label) out.push({type:'text',text:String(m.label),justify:'center',bold:true,after:0}); out.push({type:'barcode',data:code,kind:'ean13',bar_width:2,bar_height:80,hri:'below',justify:'center',after:1}); return out; } },
+  { id:'datetime', name:'Date/time', blurb:'Stamps the current local date and/or time at the moment you print.',
+    defaults:{ label:'', mode:'datetime' },
+    fields:[ inputSpec('label','Label'), segField('mode','Show',[['datetime','Date + time'],['date','Date'],['time','Time']]) ],
+    preview(m){ return (m.label?m.label+' ':'')+fmtStamp(new Date(),m.mode)+'  (current '+m.mode+' at print)'; },
+    async build(m){ const stamp=fmtStamp(new Date(),m.mode); return [{type:'text',text:(m.label?m.label+' ':'')+stamp,justify:'center',after:1}]; } },
+  { id:'weather', name:'Weather', blurb:'Live current conditions from open-meteo.com (no API key). Needs the browser online when printing.',
+    defaults:{ place:'Warsaw', lat:52.23, lon:21.01, units:'c' },
+    fields:[ inputSpec('place','Label'), numField('lat','Lat',-90,90), numField('lon','Lon',-180,180), segField('units','Units',[['c','\u00B0C'],['f','\u00B0F']]) ],
+    preview(m){ return 'Current weather for '+m.place+' ('+m.lat+', '+m.lon+') in \u00B0'+(m.units==='f'?'F':'C')+' — fetched at print'; },
+    async build(m){ const unit=m.units==='f'?'fahrenheit':'celsius'; const url='https://api.open-meteo.com/v1/forecast?latitude='+m.lat+'&longitude='+m.lon+'&current=temperature_2m,wind_speed_10m,weather_code&temperature_unit='+unit; const r=await fetch(url); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); const c=j.current||{}; const deg=m.units==='f'?'F':'C'; const desc=WMO[c.weather_code]||('code '+c.weather_code); return [ {type:'text',text:String(m.place||'Weather').toUpperCase(),bold:true,justify:'center',after:0}, {type:'rule',char:'-',width:32,after:0}, {type:'text',text:Math.round(c.temperature_2m)+'\u00B0'+deg+'  '+desc,justify:'center',after:0}, {type:'text',text:'wind '+Math.round(c.wind_speed_10m)+' km/h',justify:'center',after:1} ]; } },
+  { id:'counter', name:'Counter', blurb:'A number that increases by 1 on every print (order/ticket numbers). Stored in this browser.',
+    defaults:()=>({ label:'NO.', prefix:'', pad:4, start:1, ctrId:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6) }),
+    fields:[ inputSpec('label','Label'), inputSpec('prefix','Prefix'), numField('pad','Pad',1,10), numField('start','Start at',0,1000000000) ],
+    preview(m){ return counterText(m,peekCounter(m))+'  (next value — increments each print)'; },
+    async build(m){ const v=bumpCounter(m); return [{type:'text',text:counterText(m,v),width:2,height:2,bold:true,justify:'center',after:1}]; } },
+  { id:'quote', name:'Quote/Joke', blurb:'A random quote or dad joke each print (no API key). Needs the browser online.',
+    defaults:{ source:'quote' },
+    fields:[ segField('source','Source',[['quote','Quote'],['joke','Dad joke']]) ],
+    preview(m){ return (m.source==='joke'?'A random dad joke':'A random quote')+' — fetched at print'; },
+    async build(m){ if(m.source==='joke'){ const r=await fetch('https://icanhazdadjoke.com/',{headers:{Accept:'application/json'}}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); return [{type:'paragraph',text:j.joke,justify:'center',after:1}]; } const r=await fetch('https://dummyjson.com/quotes/random'); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); return [ {type:'paragraph',text:'"'+j.quote+'"',justify:'center',after:0}, {type:'text',text:'- '+j.author,justify:'right',after:1} ]; } },
+  { id:'wifiqr', name:'Wi-Fi QR', blurb:'A QR code guests scan to join your Wi-Fi. SSID + password are encoded locally — nothing leaves the browser.',
+    defaults:{ ssid:'MyNetwork', password:'', security:'WPA', label:'SCAN TO JOIN WIFI' },
+    fields:[ inputSpec('ssid','Network (SSID)'), inputSpec('password','Password'), segField('security','Security',[['WPA','WPA/WPA2'],['WEP','WEP'],['nopass','Open']]), inputSpec('label','Label') ],
+    preview(m){ return 'Wi-Fi QR for "'+(m.ssid||'?')+'" ('+(m.security==='nopass'?'open':m.security)+')'; },
+    async build(m){ const esc=s=>String(s==null?'':s).replace(/([\\;,:"])/g,'\\$1'); const sec=m.security==='nopass'?'nopass':(m.security||'WPA'); const payload='WIFI:T:'+sec+';S:'+esc(m.ssid)+';'+(sec==='nopass'?'':'P:'+esc(m.password)+';')+';'; const out=[]; if(m.label) out.push({type:'text',text:String(m.label),justify:'center',bold:true,after:0}); out.push({type:'qr',data:payload,size:6,ecc:'M',justify:'center',after:0}); out.push({type:'text',text:String(m.ssid||''),justify:'center',after:1}); return out; } },
+  { id:'roll', name:'Dice / Coin', blurb:'Flips a coin or rolls a die fresh on every print — games, chores, decisions.',
+    defaults:{ mode:'d6', label:'' },
+    fields:[ segField('mode','Roll',[['coin','Coin'],['d6','D6'],['d20','D20'],['d100','D100']]), inputSpec('label','Label') ],
+    preview(m){ return (m.mode==='coin'?'A coin flip':'A '+m.mode+' roll')+' — new every print'; },
+    async build(m){ let res; if(m.mode==='coin') res=Math.random()<0.5?'HEADS':'TAILS'; else { const sides=parseInt(String(m.mode).slice(1),10)||6; res=String(1+Math.floor(Math.random()*sides)); } const out=[]; if(m.label) out.push({type:'text',text:String(m.label),justify:'center',bold:true,after:0}); out.push({type:'text',text:res,width:3,height:3,bold:true,justify:'center',after:1}); return out; } },
+  { id:'countdown', name:'Countdown', blurb:'Prints how many days until (or since) a date — deadlines, launches, birthdays.',
+    defaults:{ label:'DAYS TO GO', date:'2027-01-01' },
+    fields:[ inputSpec('label','Label'), inputSpec('date','Date (YYYY-MM-DD)') ],
+    preview(m){ const d=daysUntil(m.date); if(d===null) return 'Set a date as YYYY-MM-DD'; if(d===0) return (m.label?m.label+' ':'')+'today'; return (m.label?m.label+' ':'')+Math.abs(d)+' day'+(Math.abs(d)===1?'':'s')+(d<0?' ago':''); },
+    async build(m){ const d=daysUntil(m.date); const out=[]; if(m.label) out.push({type:'text',text:String(m.label),justify:'center',bold:true,after:0}); if(d===null){ out.push({type:'text',text:'(invalid date)',justify:'center',after:1}); } else { out.push({type:'text',text:String(Math.abs(d)),width:3,height:3,bold:true,justify:'center',after:0}); out.push({type:'text',text:(d<0?'days ago':(d===0?'today':'days to go')),justify:'center',after:0}); out.push({type:'text',text:String(m.date),justify:'center',after:1}); } return out; } },
+  { id:'fact', name:'Fun fact', blurb:'A random fact each print (no API key). Needs the browser online.',
+    defaults:{ source:'useless' },
+    fields:[ segField('source','Source',[['useless','Fun fact'],['cat','Cat fact']]) ],
+    preview(m){ return (m.source==='cat'?'A random cat fact':'A random fun fact')+' — fetched at print'; },
+    async build(m){ let text; if(m.source==='cat'){ const r=await fetch('https://catfact.ninja/fact'); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); text=j.fact; } else { const r=await fetch('https://uselessfacts.jsph.pl/api/v2/facts/random?language=en'); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); text=j.text; } return [ {type:'text',text:(m.source==='cat'?'CAT FACT':'DID YOU KNOW?'),bold:true,justify:'center',after:0}, {type:'rule',char:'-',width:32,after:0}, {type:'paragraph',text:String(text),justify:'center',after:1} ]; } },
+  { id:'crypto', name:'Crypto price', blurb:'Live coin price from CoinGecko (no API key). Needs the browser online.',
+    defaults:{ coin:'bitcoin', vs:'usd' },
+    fields:[ inputSpec('coin','Coin id'), inputSpec('vs','Currency') ],
+    preview(m){ return 'Current '+(m.coin||'bitcoin')+' price in '+String(m.vs||'usd').toUpperCase()+' — fetched at print'; },
+    async build(m){ const coin=String(m.coin||'bitcoin').toLowerCase().trim(); const vs=String(m.vs||'usd').toLowerCase().trim(); const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+encodeURIComponent(coin)+'&vs_currencies='+encodeURIComponent(vs)); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); const price=j[coin]&&j[coin][vs]; if(price==null) throw new Error('unknown coin/currency'); return [ {type:'text',text:coin.toUpperCase(),bold:true,justify:'center',after:0}, {type:'text',text:price+' '+vs.toUpperCase(),width:2,height:2,bold:true,justify:'center',after:1} ]; } },
+];
+function pluginFor(m){ return PLUGINS.find(p=>p.id===m.plugin); }
+
+function validateModule(m){
+  if(m.type==='barcode'){
+    const d=String(m.data||'');
+    if(m.kind==='ean13'){ const n=d.replace(/\D/g,'').length; if(n!==12&&n!==13) return 'EAN-13 needs 12\u201313 digits (have '+n+').'; }
+    else if(m.kind==='ean8'){ const n=d.replace(/\D/g,'').length; if(n!==7&&n!==8) return 'EAN-8 needs 7\u20138 digits (have '+n+').'; }
+    else if(m.kind==='upca'){ const n=d.replace(/\D/g,'').length; if(n!==11&&n!==12) return 'UPC-A needs 11–12 digits (have '+n+').'; }
+    else if(m.kind==='itf'){ const n=d.replace(/\D/g,'').length; if(n<2) return 'ITF needs at least 2 digits (have '+n+').'; }
+    else if(m.kind==='code39'){ const bad=[...new Set(Array.from(d.toUpperCase()).filter(c=>!CODE39_ALLOWED.includes(c)))]; if(bad.length) return 'Code 39 can\'t print: '+bad.join(' ')+' — these become "-".'; }
+  }
+  if(m.type==='qr' && m._qrError) return 'QR data too long to encode at any size.';
+  if(m.type==='image' && m.data){ const bytes=Math.ceil(m.data.length/4)*3; if(bytes>MAX_BODY_BYTES*0.9) return 'Image is ~'+Math.round(bytes/1000)+' KB, near the '+Math.round(MAX_BODY_BYTES/1000)+' KB board limit. Lower max height.'; }
+  return '';
+}
+function imageInfoText(m){
+  return m.data ? (m.filename||'image')+' \u2192 '+m.width+'\u00D7'+m.height+'px packed ('+(Math.ceil(m.width/8)*m.height)+' bytes before base64)'
+    : 'Pick an image. Threshold for logos/line art, Diffusion for photos. Converted to 1-bit packed raster before sending.';
+}
+
+function clampPreviewNumber(value,low,high,fallback){ const n=parseInt(value,10); if(!Number.isFinite(n)) return fallback; return Math.max(low,Math.min(high,n)); }
+function printerTextMetrics(opts){ opts=opts||{}; const font=String(opts.font||'a').toLowerCase(); const widthMult=clampPreviewNumber(opts.width,1,8,1); const heightMult=clampPreviewNumber(opts.height,1,8,1); const baseW=font==='b'?FONT_B_DOT_W:FONT_A_DOT_W; const baseH=font==='b'?FONT_B_DOT_H:FONT_A_DOT_H; const charW=baseW*widthMult; const lineH=baseH*heightMult; const cols=Math.max(1,Math.floor(PRINTER_WIDTH/charW)); return { font, widthMult, heightMult, charW, lineH, cols }; }
+function normalizePreviewText(text){ return String(text==null?'':text).replace(/\t/g,'    ').replace(/\r\n/g,'\n').replace(/\r/g,'\n'); }
+function wrapPrinterLines(text,cols){ const out=[]; for(const raw of normalizePreviewText(text).split('\n')){ const chars=Array.from(raw); if(chars.length===0){ out.push(''); continue; } for(let i=0;i<chars.length;i+=cols) out.push(chars.slice(i,i+cols).join('')); } return out; }
+function makeThermalTextPreview(text,opts){
+  opts=opts||{};
+  const metrics=printerTextMetrics(opts);
+  const lines=wrapPrinterLines(text,metrics.cols);
+  const root=document.createElement('div'); root.style.width='384px'; root.style.maxWidth='384px'; root.style.overflow='hidden';
+  root.title=metrics.cols+' chars/line on the real printer';
+  const justify=String(opts.justify||'left').toLowerCase();
+  const align=justify==='center'?'center':(justify==='right'?'right':'left');
+  const xScale=metrics.widthMult/metrics.heightMult;
+  const fontPx=Math.max(7,Math.round(metrics.lineH*0.84));
+  for(const lineText of lines){
+    const line=document.createElement('div'); line.style.width='384px'; line.style.overflow='hidden'; line.style.height=metrics.lineH+'px'; line.style.textAlign=align;
+    const run=document.createElement('span'); run.style.display='inline-block'; run.style.whiteSpace='pre'; run.style.fontFamily="'Courier New',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+    run.textContent=lineText===''?'\u00a0':lineText; run.style.fontSize=fontPx+'px'; run.style.lineHeight=metrics.lineH+'px';
+    if(Math.abs(xScale-1)>0.001){ run.style.transform='scaleX('+xScale+')'; run.style.transformOrigin=align+' top'; }
+    if(opts.bold) run.style.fontWeight='700';
+    if(opts.inverse){ run.style.background='#111'; run.style.color='#fff'; }
+    if(parseInt(opts.underline,10)>0) run.style.textDecoration='underline';
+    line.appendChild(run); root.appendChild(line);
+  }
+  return root;
+}
+function makeFeedPreview(lines,label){ const f=document.createElement('div'); f.style.cssText='border:1px dashed rgba(0,0,0,.25);color:rgba(0,0,0,.45);text-align:center;padding:6px;margin:2px 0;font-family:system-ui;font-size:11px;'; const n=Math.max(0,parseInt(lines,10)||0); f.style.height=Math.max(10,n*FONT_A_DOT_H)+'px'; f.style.display='grid'; f.style.placeItems='center'; f.textContent=label||('feed('+n+')'); return f; }
+
+function sectionLineJS(title,fill,total){ fill=(String(fill||'=').slice(0,1))||'='; const tagged=title?' '+title+' ':''; if(tagged.length>=total) return tagged.slice(0,total); const left=Math.floor((total-tagged.length)/2); const right=total-tagged.length-left; return fill.repeat(left)+tagged+fill.repeat(right); }
+function padCellJS(txt,width,align){ if(width<1) width=1; if(txt.length>width) txt=txt.slice(0,width); const pad=width-txt.length; if(align==='right') return ' '.repeat(pad)+txt; if(align==='center'){ const l=Math.floor(pad/2); return ' '.repeat(l)+txt+' '.repeat(pad-l); } return txt+' '.repeat(pad); }
+function columnsLineJS(cells,gap,total){ const n=cells.length; if(!n) return ''; let avail=total-gap*(n-1); if(avail<n) avail=n; const explicit=cells.map(c=>parseInt(c.width,10)||0); const flex=[]; explicit.forEach((w,i)=>{ if(w<=0) flex.push(i); }); const widths=explicit.slice(); if(flex.length){ const each=Math.max(1,Math.floor((avail-explicit.reduce((a,b)=>a+b,0))/flex.length)); for(const i of flex) widths[i]=each; const leftover=avail-widths.reduce((a,b)=>a+b,0); if(leftover>0) widths[flex[flex.length-1]]+=leftover; } return cells.map((c,i)=>padCellJS(String(c.text||''),widths[i],c.align||'left')).join(' '.repeat(gap)); }
+function alignLetterJS(s,i){ const ch=(s[i]||'').toUpperCase(); return ch==='R'?'right':ch==='C'?'center':'left'; }
+function listLinesJS(text,style){ let n=0; return String(text).split('\n').map(raw=>{ const it=raw.trim(); if(!it) return ''; n++; if(style==='number') return n+'. '+it; if(style==='checkbox') return '[ ] '+it; return '- '+it; }); }
+function kvLinesJS(text,sep,leader,total){ sep=sep||':'; leader=(String(leader)||'.').slice(0,1)||'.'; return String(text).split('\n').map(raw=>{ if(!raw.trim()) return ''; const idx=raw.indexOf(sep); let k,v; if(idx>=0){ k=raw.slice(0,idx); v=raw.slice(idx+sep.length); } else { k=raw; v=''; } k=k.trim(); v=v.trim(); const space=total-k.length-v.length; if(space>=3) return k+' '+leader.repeat(space-2)+' '+v; if(space>=1) return (k+' '.repeat(space)+v).slice(0,total); return (k+' '+v).slice(0,total); }); }
+function wrapTextJS(text,width){ if(width<1) width=1; const out=[]; for(const para of String(text).split('\n')){ let line=''; for(let w of para.split(' ')){ while(w.length>width){ if(line){ out.push(line); line=''; } out.push(w.slice(0,width)); w=w.slice(width); } if(!line) line=w; else if(line.length+1+w.length<=width) line+=' '+w; else { out.push(line); line=w; } } out.push(line); } return out; }
+function tearoffLineJS(char,label,total){ char=(String(char)||'-').slice(0,1)||'-'; const base=(char+' ').repeat(Math.floor(total/2)+1).slice(0,total); if(label){ const tag=' '+label+' '; if(tag.length>=total) return tag.slice(0,total); const start=Math.floor((total-tag.length)/2); return base.slice(0,start)+tag+base.slice(start+tag.length); } return base; }
+function ratingLineJS(mode,value,maxv,width,label){ if(maxv<1) maxv=1; if(width<1) width=1; let ratio=Math.max(0,Math.min(1,value/maxv)); let bar; if(mode==='blocks'){ const f=Math.round(ratio*width); bar='\u2588'.repeat(f)+'\u2591'.repeat(width-f); } else if(mode==='stars'){ let v=Math.max(0,Math.min(maxv,Math.round(value))); bar='*'.repeat(v)+'.'.repeat(maxv-v); } else { const f=Math.round(ratio*width); bar='['+'#'.repeat(f)+'-'.repeat(width-f)+'] '+Math.round(ratio*100)+'%'; } return label?label+' '+bar:bar; }
+function chartLinesJS(values,width,showValues){ const nums=values.map(v=>parseFloat(v)).filter(v=>!isNaN(v)); if(!nums.length) return []; let mx=Math.max(...nums); if(mx<=0) mx=1; if(width<1) width=1; const labels=nums.map(v=>Number.isInteger(v)?String(v):v.toFixed(1)); const lw=showValues?Math.max(...labels.map(l=>l.length)):0; return nums.map((v,i)=>{ const b='\u2588'.repeat(Math.max(0,Math.round((v/mx)*width))); return showValues?labels[i].padStart(lw)+' '+b:b; }); }
+function makeBoxPreview(m){ const lines=String(m.text||'').split('\n'); const pad=Math.max(0,m.padding||0); const maxLen=Math.max(1,...lines.map(x=>x.length)); const inner=maxLen+pad*2; const ascii=!!m.ascii; const tl=ascii?'+':'\u250C',tr=ascii?'+':'\u2510',bl=ascii?'+':'\u2514',br=ascii?'+':'\u2518'; const h=ascii?'-':'\u2500',v=ascii?'|':'\u2502'; const out=[tl+h.repeat(inner)+tr]; for(const line of lines){ let left=pad,right=pad+(maxLen-line.length); if(m.align==='right'){ left+=maxLen-line.length; right=pad; } if(m.align==='center'){ const extra=maxLen-line.length; left+=Math.floor(extra/2); right=pad+Math.ceil(extra/2); } out.push(v+' '.repeat(left)+line+' '.repeat(right)+v); } out.push(bl+h.repeat(inner)+br); return out.join('\n'); }
+
+const CODE39_PATTERNS={'0':'000110100','1':'100100001','2':'001100001','3':'101100000','4':'000110001','5':'100110000','6':'001110000','7':'000100101','8':'100100100','9':'001100100','A':'100001001','B':'001001001','C':'101001000','D':'000011001','E':'100011000','F':'001011000','G':'000001101','H':'100001100','I':'001001100','J':'000011100','K':'100000011','L':'001000011','M':'101000010','N':'000010011','O':'100010010','P':'001010010','Q':'000000111','R':'100000110','S':'001000110','T':'000010110','U':'110000001','V':'011000001','W':'111000000','X':'010010001','Y':'110010000','Z':'011010000','-':'010000101','.':'110000100',' ':'011000100','$':'010101000','/':'010100010','+':'010001010','%':'000101010','*':'010010100'};
+/* ============================================================
+   BARCODE BITMAP ENGINE
+   Real client-side encoders -> 1-bit raster image modules, so any
+   symbology prints on printers without native barcode support.
+   Returns a module-unit bit string (1 = dark bar, 0 = space).
+   ============================================================ */
+const NATIVE_BARCODE = new Set(['code39','code128','ean13','ean8']);
+const _EAN_L=["0001101","0011001","0010011","0111101","0100011","0110001","0101111","0111011","0110111","0001011"];
+const _EAN_G=["0100111","0110011","0011011","0100001","0011101","0111001","0000101","0010001","0001001","0010111"];
+const _EAN_R=["1110010","1100110","1101100","1000010","1011100","1001110","1010000","1000100","1001000","1110100"];
+const _EAN_PARITY=["LLLLLL","LLGLGG","LLGGLG","LLGGGL","LGLLGG","LGGLLG","LGGGLL","LGLGLG","LGLGGL","LGGLGL"];
+const _ITF_PAT=["00110","10001","01001","11000","00101","10100","01100","00011","10010","01010"];
+const _C128=["212222","222122","222221","121223","121322","131222","122213","122312","132212","221213","221312","231212","112232","122132","122231","113222","123122","123221","223211","221132","221231","213212","223112","312131","311222","321122","321221","312212","322112","322211","212123","212321","232121","111323","131123","131321","112313","132113","132311","211313","231113","231311","112133","112331","132131","113123","113321","133121","313121","211331","231131","213113","213311","213131","311123","311321","331121","312113","312311","332111","314111","221411","431111","111224","111422","121124","121421","141122","141221","112214","112412","122114","122411","142112","142211","241211","221114","413111","241112","134111","111242","121142","121241","114212","124112","124211","411212","421112","421211","212141","214121","412121","111143","111341","131141","114113","114311","411113","411311","113141","114131","311141","411131","211412","211214","211232","2331112"];
+function _eanCheck(d){ let s=0; for(let i=0;i<d.length;i++){ const n=+d[d.length-1-i]; s+=(i%2===0)?n*3:n; } return (10-(s%10))%10; }
+function _patBits(widthStr){ let bits=''; for(let i=0;i<widthStr.length;i++) bits+=(i%2===0?'1':'0').repeat(+widthStr[i]); return bits; }
+function encodeBarcodeBits(kind,data){
+  kind=String(kind||'code39').toLowerCase();
+  try{
+    if(kind==='code39'){
+      const clean=String(data==null?'':data).toUpperCase().replace(/[^0-9A-Z\-. $\/+%]/g,'-');
+      const seq='*'+clean+'*'; let bits='';
+      for(let c=0;c<seq.length;c++){ const pat=CODE39_PATTERNS[seq[c]]||CODE39_PATTERNS['-']; for(let i=0;i<9;i++) bits+=(i%2===0?'1':'0').repeat(pat[i]==='1'?3:1); if(c<seq.length-1) bits+='0'; }
+      return { bits, hri:clean };
+    }
+    if(kind==='code128'){
+      const str=String(data==null?'':data); const digits=/^\d+$/.test(str);
+      let vals=[], start;
+      if(digits && str.length>=2 && str.length%2===0){ start=105; for(let i=0;i<str.length;i+=2) vals.push(parseInt(str.substr(i,2),10)); }
+      else { start=104; for(const ch of str){ let cc=ch.charCodeAt(0); if(cc<32||cc>126) cc=32; vals.push(cc-32); } }
+      let sum=start; for(let i=0;i<vals.length;i++) sum+=vals[i]*(i+1); const check=sum%103;
+      let bits=''; for(const v of [start,...vals,check,106]) bits+=_patBits(_C128[v]);
+      return { bits, hri:str };
+    }
+    if(kind==='ean13'){
+      let d=String(data||'').replace(/\D/g,''); if(d.length===12) d+=_eanCheck(d); if(d.length!==13) return {error:'EAN-13 needs 12–13 digits'};
+      const par=_EAN_PARITY[+d[0]], L=d.slice(1,7), R=d.slice(7,13); let bits='101';
+      for(let i=0;i<6;i++) bits+=(par[i]==='L'?_EAN_L:_EAN_G)[+L[i]]; bits+='01010'; for(let i=0;i<6;i++) bits+=_EAN_R[+R[i]]; bits+='101';
+      return { bits, hri:d };
+    }
+    if(kind==='ean8'){
+      let d=String(data||'').replace(/\D/g,''); if(d.length===7) d+=_eanCheck(d); if(d.length!==8) return {error:'EAN-8 needs 7–8 digits'};
+      let bits='101'; for(let i=0;i<4;i++) bits+=_EAN_L[+d[i]]; bits+='01010'; for(let i=4;i<8;i++) bits+=_EAN_R[+d[i]]; bits+='101';
+      return { bits, hri:d };
+    }
+    if(kind==='upca'){
+      let d=String(data||'').replace(/\D/g,''); if(d.length===11) d+=_eanCheck(d); if(d.length!==12) return {error:'UPC-A needs 11–12 digits'};
+      let bits='101'; for(let i=0;i<6;i++) bits+=_EAN_L[+d[i]]; bits+='01010'; for(let i=6;i<12;i++) bits+=_EAN_R[+d[i]]; bits+='101';
+      return { bits, hri:d };
+    }
+    if(kind==='itf'){
+      let d=String(data||'').replace(/\D/g,''); if(d.length%2===1) d='0'+d; if(d.length<2) return {error:'ITF needs at least 2 digits'};
+      let bits='1010'; for(let i=0;i<d.length;i+=2){ const a=+d[i], b=+d[i+1]; for(let k=0;k<5;k++) bits+='1'.repeat(_ITF_PAT[a][k]==='1'?3:1)+'0'.repeat(_ITF_PAT[b][k]==='1'?3:1); } bits+='11101';
+      return { bits, hri:d };
+    }
+    return {error:'unknown barcode kind "'+kind+'"'};
+  }catch(e){ return {error:String(e&&e.message||e)}; }
+}
+function renderBarcodeCanvas(kind,data,opts){
+  opts=opts||{};
+  const enc=encodeBarcodeBits(kind,data); if(enc.error||!enc.bits) return {error:enc.error||'cannot encode'};
+  const bits=enc.bits; const totalModules=bits.length+20;
+  let bw=Math.min(parseInt(opts.barWidth,10)||2, Math.max(1,Math.floor(PRINTER_WIDTH/totalModules))); if(bw<1) bw=1;
+  const quiet=10*bw, barsW=bits.length*bw, cw=Math.min(PRINTER_WIDTH,barsW+2*quiet);
+  const bh=Math.max(1,parseInt(opts.barHeight,10)||80);
+  const hriMode=String(opts.hri||'none'); const showHri=hriMode!=='none'&&hriMode!==''; const textH=showHri?18:0; const above=hriMode==='above';
+  const cv=document.createElement('canvas'); cv.width=cw; cv.height=bh+textH; const cx=cv.getContext('2d');
+  cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.fillStyle='#000';
+  const x0=Math.floor((cw-barsW)/2), barY=above?textH:0;
+  for(let i=0;i<bits.length;i++) if(bits[i]==='1') cx.fillRect(x0+i*bw,barY,bw,bh);
+  if(showHri){ cx.fillStyle='#000'; cx.font='16px "Courier New",monospace'; cx.textAlign='center'; cx.textBaseline=above?'top':'bottom'; cx.fillText(enc.hri||String(data||''), cw/2, above?0:cv.height-1); }
+  return { canvas:cv };
+}
+function makeBarcodePreview(m){
+  const r=renderBarcodeCanvas(String(m.kind||'code39'), m.data, { barWidth:m.bar_width, barHeight:60, hri:m.hri });
+  if(r.canvas){ const img=document.createElement('img'); img.src=r.canvas.toDataURL('image/png'); img.style.cssText='display:block;max-width:100%;image-rendering:pixelated;background:#fff;padding:6px 8px;'; img.title=(m.kind||'barcode')+(m.asImage?' — printed as image':''); return img; }
+  const err=document.createElement('div'); err.style.cssText='border:1px dashed rgba(0,0,0,.4);color:rgba(0,0,0,.6);font-size:10px;padding:10px;text-align:center;font-family:system-ui;'; err.textContent='barcode: '+(r.error||'error'); return err;
+}
+function renderQrCanvas(data,ecc,size){
+  let matrix=null; try{ matrix=makeQrMatrix(String(data||''),ecc||'M'); }catch(e){ matrix=null; }
+  if(!matrix) return {error:'QR data too long to encode'};
+  const n=matrix.length, quiet=4, total=n+quiet*2;
+  let px=Math.max(1,Math.min(10,parseInt(size,10)||5)); px=Math.min(px,Math.max(1,Math.floor(PRINTER_WIDTH/total)));
+  const cv=document.createElement('canvas'); cv.width=total*px; cv.height=total*px; const cx=cv.getContext('2d');
+  cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.fillStyle='#000';
+  for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(matrix[y][x]) cx.fillRect((x+quiet)*px,(y+quiet)*px,px,px);
+  return { canvas:cv };
+}
+/* Place a rendered code canvas onto a full-width 1-bit raster image module. */
+function rasterTo384(src,justify){
+  const scale=Math.min(1, PRINTER_WIDTH/src.width);
+  const w=Math.max(1,Math.round(src.width*scale)), h=Math.max(1,Math.round(src.height*scale));
+  const cv=document.createElement('canvas'); cv.width=PRINTER_WIDTH; cv.height=h; const cx=cv.getContext('2d',{willReadFrequently:true});
+  cx.fillStyle='#fff'; cx.fillRect(0,0,PRINTER_WIDTH,h);
+  const xoff=justify==='left'?0:justify==='right'?(PRINTER_WIDTH-w):Math.floor((PRINTER_WIDTH-w)/2);
+  cx.imageSmoothingEnabled=false; cx.drawImage(src,xoff,0,w,h);
+  const id=cx.getImageData(0,0,PRINTER_WIDTH,h).data, wb=Math.ceil(PRINTER_WIDTH/8), packed=new Uint8Array(wb*h);
+  for(let y=0;y<h;y++) for(let x=0;x<PRINTER_WIDTH;x++){ const i=(y*PRINTER_WIDTH+x)*4; const lum=id[i]*0.299+id[i+1]*0.587+id[i+2]*0.114; if(lum<128) packed[y*wb+(x>>3)]|=0x80>>(x&7); }
+  return { type:'image', width:PRINTER_WIDTH, height:h, data:bytesToBase64(packed), after:0 };
+}
+function barcodeToImageModule(m){
+  const r=renderBarcodeCanvas(m.kind,m.data,{ barWidth:m.bar_width, barHeight:m.bar_height, hri:m.hri });
+  if(r.error||!r.canvas) return { type:'text', text:'[barcode error: '+(r.error||'?')+']', justify:m.justify||'center', after:m.after };
+  const img=rasterTo384(r.canvas, m.justify||'center'); img.after=m.after; return img;
+}
+function qrToImageModule(m){
+  const r=renderQrCanvas(m.data,m.ecc,m.size);
+  if(r.error||!r.canvas) return { type:'text', text:'[QR error: '+(r.error||'?')+']', justify:m.justify||'center', after:m.after };
+  const img=rasterTo384(r.canvas, m.justify||'center'); img.after=m.after; return img;
+}
+function barcodeWrap(){ const w=document.createElement('div'); w.style.cssText='height:78px;margin:4px auto;max-width:260px;background:#fff;display:flex;align-items:stretch;justify-content:center;gap:0;padding:8px 10px 18px;border:1px solid rgba(0,0,0,.2);position:relative;'; return w; }
+function makeCode39Preview(data){ const cleaned=Array.from(String(data||'').toUpperCase()).map(c=>CODE39_PATTERNS[c]?c:'-').join(''); const seq='*'+cleaned+'*'; const wrap=barcodeWrap(); const unit=2; const addBar=(w,dark)=>{ const i=document.createElement('i'); i.style.display='block'; i.style.width=w+'px'; i.style.background=dark?'#111':'transparent'; wrap.appendChild(i); }; for(let s=0;s<seq.length;s++){ const pat=CODE39_PATTERNS[seq[s]]; for(let i=0;i<9;i++) addBar(pat[i]==='1'?unit*3:unit,i%2===0); if(s<seq.length-1) addBar(unit,false); } const small=document.createElement('small'); small.style.cssText='position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:9px;font-family:system-ui;'; small.textContent=String(data||''); wrap.appendChild(small); return wrap; }
+function makeApproxBarcodePreview(data,kind){ const d=String(data||'BARCODE'); const wrap=barcodeWrap(); wrap.style.gap='1px'; wrap.title=(kind||'barcode')+' — approximate preview'; let seed=0; for(let i=0;i<d.length;i++) seed=(seed*31+d.charCodeAt(i))>>>0; for(let i=0;i<52;i++){ seed=(seed*1664525+1013904223)>>>0; const bit=(seed>>>28)&1; const bar=document.createElement('i'); bar.style.display='block'; bar.style.background='#111'; bar.style.width=((seed>>>24)%3+1)+'px'; bar.style.opacity=bit?'1':'0'; wrap.appendChild(bar); } const small=document.createElement('small'); small.style.cssText='position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:9px;font-family:system-ui;'; small.textContent=d+' (\u2248)'; wrap.appendChild(small); return wrap; }
+
+function makeQrPreview(m){ const wrap=document.createElement('div'); let matrix=null; try{ matrix=makeQrMatrix(String(m.data||''),m.ecc||'M'); }catch(e){ matrix=null; } m._qrError=!matrix; if(!matrix){ const q=document.createElement('div'); q.style.cssText='width:128px;height:128px;margin:4px auto;background:#eee;display:grid;place-items:center;font:700 12px system-ui;color:#333;'; q.textContent='QR?'; wrap.appendChild(q); return wrap; } const n=matrix.length; const quiet=4; const total=n+quiet*2; const canvas=document.createElement('canvas'); canvas.width=total; canvas.height=total; const ctx=canvas.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,total,total); ctx.fillStyle='#111'; for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(matrix[y][x]) ctx.fillRect(x+quiet,y+quiet,1,1); const px=Math.max(2,Math.min(6,parseInt(m.size,10)||5)); canvas.style.width=Math.min(240,total*px)+'px'; canvas.style.height=canvas.style.width; canvas.style.imageRendering='pixelated'; canvas.style.background='#fff'; canvas.style.display='block'; canvas.style.margin='4px 0'; wrap.appendChild(canvas); return wrap; }
+
+function makeQrMatrix(text, eccLetter){
+  const ECL={L:0,M:1,Q:2,H:3};
+  const ecl=ECL[String(eccLetter||'M').toUpperCase()] ?? 1;
+  const ECL_FORMAT=[1,0,3,2];
+  const ECC_CW_PER_BLOCK=[
+    [-1,7,10,15,20,26,18,20,24,30,18,20,24,26,30,22,24,28,30,28,28,28,28,30,30,26,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+    [-1,10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28],
+    [-1,13,22,18,26,18,24,18,22,20,24,28,26,24,20,30,24,28,28,26,30,28,30,30,30,30,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+    [-1,17,28,22,16,22,28,26,26,24,28,24,28,22,24,24,30,28,28,26,28,30,24,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]
+  ];
+  const NUM_EC_BLOCKS=[
+    [-1,1,1,1,1,1,2,2,2,2,4,4,4,4,4,6,6,6,6,7,8,8,9,9,10,12,12,12,13,14,15,16,17,18,19,19,20,21,22,24,25],
+    [-1,1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49],
+    [-1,1,1,2,2,4,4,6,6,8,8,8,10,12,16,12,17,16,18,21,20,23,23,25,27,29,34,34,35,38,40,43,45,48,51,53,56,59,62,65,68],
+    [-1,1,1,2,4,4,4,5,6,8,8,11,11,16,16,18,16,19,21,25,25,25,34,30,32,35,37,40,42,45,48,51,54,57,60,63,66,70,74,77,81]
+  ];
+  const numRawDataModules=(ver)=>{ let result=(16*ver+128)*ver+64; if(ver>=2){ const numAlign=Math.floor(ver/7)+2; result-=(25*numAlign-10)*numAlign-55; if(ver>=7) result-=36; } return result; };
+  const numDataCodewords=(ver,e)=>Math.floor(numRawDataModules(ver)/8)-ECC_CW_PER_BLOCK[e][ver]*NUM_EC_BLOCKS[e][ver];
+  const data=[];
+  for(const ch of String(text)){ const cp=ch.codePointAt(0); if(cp<0x80) data.push(cp); else if(cp<0x800) data.push(0xC0|(cp>>6),0x80|(cp&0x3F)); else if(cp<0x10000) data.push(0xE0|(cp>>12),0x80|((cp>>6)&0x3F),0x80|(cp&0x3F)); else data.push(0xF0|(cp>>18),0x80|((cp>>12)&0x3F),0x80|((cp>>6)&0x3F),0x80|(cp&0x3F)); }
+  let version=-1;
+  for(let v=1;v<=40;v++){ const ccBits=v<=9?8:16; if(4+ccBits+data.length*8<=numDataCodewords(v,ecl)*8){ version=v; break; } }
+  if(version<0) return null;
+  const bits=[];
+  const appendBits=(val,len)=>{ for(let i=len-1;i>=0;i--) bits.push((val>>>i)&1); };
+  appendBits(0x4,4); appendBits(data.length,version<=9?8:16);
+  for(const b of data) appendBits(b,8);
+  const capacityBits=numDataCodewords(version,ecl)*8;
+  appendBits(0,Math.min(4,capacityBits-bits.length));
+  while(bits.length%8!==0) bits.push(0);
+  for(let pad=0xEC;bits.length<capacityBits;pad^=0xEC^0x11) appendBits(pad,8);
+  const dataCw=[];
+  for(let i=0;i<bits.length;i+=8){ let b=0; for(let j=0;j<8;j++) b=(b<<1)|bits[i+j]; dataCw.push(b); }
+  const gfMul=(x,y)=>{ let z=0; for(let i=7;i>=0;i--){ z=(z<<1)^((z>>>7)*0x11D); z^=((y>>>i)&1)*x; } return z&0xFF; };
+  const rsDivisor=(degree)=>{ const result=new Array(degree).fill(0); result[degree-1]=1; let root=1; for(let i=0;i<degree;i++){ for(let j=0;j<result.length;j++){ result[j]=gfMul(result[j],root); if(j+1<result.length) result[j]^=result[j+1]; } root=gfMul(root,0x02); } return result; };
+  const rsRemainder=(dataBytes,divisor)=>{ const result=new Array(divisor.length).fill(0); for(const b of dataBytes){ const factor=b^result.shift(); result.push(0); for(let i=0;i<result.length;i++) result[i]^=gfMul(divisor[i],factor); } return result; };
+  const numBlocks=NUM_EC_BLOCKS[ecl][version]; const eccLen=ECC_CW_PER_BLOCK[ecl][version];
+  const rawCw=Math.floor(numRawDataModules(version)/8); const numShort=numBlocks-(rawCw%numBlocks); const shortLen=Math.floor(rawCw/numBlocks);
+  const divisor=rsDivisor(eccLen); const blocks=[]; let k=0;
+  for(let i=0;i<numBlocks;i++){ const datLen=shortLen-eccLen+(i<numShort?0:1); const dat=dataCw.slice(k,k+datLen); k+=datLen; blocks.push({dat,ecc:rsRemainder(dat,divisor)}); }
+  const allCw=[]; const maxDat=shortLen-eccLen+1;
+  for(let i=0;i<maxDat;i++){ for(let b=0;b<numBlocks;b++) if(i<blocks[b].dat.length) allCw.push(blocks[b].dat[i]); }
+  for(let i=0;i<eccLen;i++){ for(let b=0;b<numBlocks;b++) allCw.push(blocks[b].ecc[i]); }
+  const size=version*4+17;
+  const modules=Array.from({length:size},()=>new Array(size).fill(false));
+  const isFn=Array.from({length:size},()=>new Array(size).fill(false));
+  const setFn=(x,y,val)=>{ modules[y][x]=val; isFn[y][x]=true; };
+  for(let i=0;i<size;i++){ setFn(6,i,i%2===0); setFn(i,6,i%2===0); }
+  const finder=(cx,cy)=>{ for(let dy=-4;dy<=4;dy++) for(let dx=-4;dx<=4;dx++){ const x=cx+dx,y=cy+dy; if(x<0||x>=size||y<0||y>=size) continue; const dist=Math.max(Math.abs(dx),Math.abs(dy)); setFn(x,y,dist!==2&&dist!==4); } };
+  finder(3,3); finder(size-4,3); finder(3,size-4);
+  const alignPositions=(ver)=>{ if(ver===1) return []; const num=Math.floor(ver/7)+2; const step=Math.ceil((size-13)/(2*num-2))*2; const pos=[6]; for(let p=size-7;pos.length<num;p-=step) pos.splice(1,0,p); return pos; };
+  const ap=alignPositions(version);
+  for(let i=0;i<ap.length;i++){ for(let j=0;j<ap.length;j++){ if((i===0&&j===0)||(i===0&&j===ap.length-1)||(i===ap.length-1&&j===0)) continue; const cx=ap[i],cy=ap[j]; for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++) setFn(cx+dx,cy+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1); } }
+  for(let i=0;i<=5;i++){ isFn[8][i]=true; isFn[i][8]=true; }
+  isFn[8][7]=true; isFn[7][8]=true; isFn[8][8]=true;
+  for(let i=0;i<8;i++){ isFn[8][size-1-i]=true; isFn[size-1-i][8]=true; }
+  setFn(8,size-8,true);
+  if(version>=7){ for(let i=0;i<18;i++){ const a=size-11+(i%3),b=Math.floor(i/3); isFn[a][b]=true; isFn[b][a]=true; } }
+  let bitIdx=0; const totalBits=allCw.length*8;
+  for(let right=size-1;right>=1;right-=2){ if(right===6) right=5; for(let vert=0;vert<size;vert++){ for(let j=0;j<2;j++){ const x=right-j; const upward=((right+1)&2)===0; const y=upward?size-1-vert:vert; if(!isFn[y][x]&&bitIdx<totalBits){ modules[y][x]=((allCw[bitIdx>>>3]>>>(7-(bitIdx&7)))&1)!==0; bitIdx++; } } } }
+  const applyMask=(mask)=>{ for(let y=0;y<size;y++) for(let x=0;x<size;x++){ if(isFn[y][x]) continue; let invert=false; switch(mask){ case 0: invert=(x+y)%2===0; break; case 1: invert=y%2===0; break; case 2: invert=x%3===0; break; case 3: invert=(x+y)%3===0; break; case 4: invert=(Math.floor(x/3)+Math.floor(y/2))%2===0; break; case 5: invert=(x*y)%2+(x*y)%3===0; break; case 6: invert=((x*y)%2+(x*y)%3)%2===0; break; case 7: invert=((x+y)%2+(x*y)%3)%2===0; break; } if(invert) modules[y][x]=!modules[y][x]; } };
+  const drawFormat=(mask)=>{ const dataF=(ECL_FORMAT[ecl]<<3)|mask; let rem=dataF; for(let i=0;i<10;i++) rem=(rem<<1)^((rem>>>9)*0x537); const fbits=((dataF<<10)|rem)^0x5412; const bit=(i)=>((fbits>>>i)&1)!==0; for(let i=0;i<=5;i++) modules[i][8]=bit(i); modules[7][8]=bit(6); modules[8][8]=bit(7); modules[8][7]=bit(8); for(let i=9;i<15;i++) modules[8][14-i]=bit(i); for(let i=0;i<8;i++) modules[8][size-1-i]=bit(i); for(let i=8;i<15;i++) modules[size-15+i][8]=bit(i); modules[size-8][8]=true; };
+  const drawVersion=()=>{ if(version<7) return; let rem=version; for(let i=0;i<12;i++) rem=(rem<<1)^((rem>>>11)*0x1F25); const vbits=(version<<12)|rem; for(let i=0;i<18;i++){ const b=((vbits>>>i)&1)!==0; const a=size-11+(i%3),c=Math.floor(i/3); modules[a][c]=b; modules[c][a]=b; } };
+  const penalty=()=>{ let p=0; for(let y=0;y<size;y++){ let rc=modules[y][0],rl=1; for(let x=1;x<size;x++){ if(modules[y][x]===rc){ rl++; if(rl===5) p+=3; else if(rl>5) p++; } else { rc=modules[y][x]; rl=1; } } } for(let x=0;x<size;x++){ let rc=modules[0][x],rl=1; for(let y=1;y<size;y++){ if(modules[y][x]===rc){ rl++; if(rl===5) p+=3; else if(rl>5) p++; } else { rc=modules[y][x]; rl=1; } } } for(let y=0;y<size-1;y++) for(let x=0;x<size-1;x++){ const c=modules[y][x]; if(c===modules[y][x+1]&&c===modules[y+1][x]&&c===modules[y+1][x+1]) p+=3; } const pat1=[true,false,true,true,true,false,true,false,false,false,false]; const pat2=[false,false,false,false,true,false,true,true,true,false,true]; const match=(sx,sy,dx,dy,pat)=>{ for(let i=0;i<11;i++){ const x=sx+dx*i,y=sy+dy*i; if(x<0||x>=size||y<0||y>=size||modules[y][x]!==pat[i]) return false; } return true; }; for(let y=0;y<size;y++) for(let x=0;x<size;x++){ if(match(x,y,1,0,pat1)) p+=40; if(match(x,y,1,0,pat2)) p+=40; if(match(x,y,0,1,pat1)) p+=40; if(match(x,y,0,1,pat2)) p+=40; } let dark=0; for(let y=0;y<size;y++) for(let x=0;x<size;x++) if(modules[y][x]) dark++; const total=size*size; p+=Math.max(0,Math.ceil(Math.abs(dark*20-total*10)/total)-1)*10; return p; };
+  drawVersion();
+  let bestMask=0,bestPenalty=Infinity;
+  for(let mask=0;mask<8;mask++){ applyMask(mask); drawFormat(mask); const pen=penalty(); if(pen<bestPenalty){ bestPenalty=pen; bestMask=mask; } applyMask(mask); }
+  applyMask(bestMask); drawFormat(bestMask);
+  return modules;
+}
+
+function previewModule(m){
+  const item=document.createElement('div');
+  item.style.cssText='padding:3px 0;width:384px;overflow:hidden;';
+  const tp=(text,opts)=>item.appendChild(makeThermalTextPreview(text,opts));
+  if(m.type==='text'||m.type==='ascii'){ tp(m.text||'',{justify:m.justify,font:m.font,width:m.width,height:m.height,bold:m.bold,underline:m.underline,inverse:m.inverse}); }
+  else if(m.type==='box'){ tp(makeBoxPreview(m),{justify:m.justify,font:'a',width:1,height:1}); }
+  else if(m.type==='qr'){ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent=m.justify==='left'?'flex-start':(m.justify==='right'?'flex-end':'center'); row.appendChild(makeQrPreview(m)); item.appendChild(row); const small=document.createElement('div'); small.style.fontSize='10px'; small.style.textAlign=m.justify||'center'; small.textContent=m.data||''; item.appendChild(small); }
+  else if(m.type==='barcode'){ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent=m.justify==='left'?'flex-start':(m.justify==='right'?'flex-end':'center'); row.appendChild(makeBarcodePreview(m)); item.appendChild(row); }
+  else if(m.type==='image'){ if(m.previewDataUrl){ const img=document.createElement('img'); img.src=m.previewDataUrl; img.style.width='100%'; img.style.imageRendering='pixelated'; item.appendChild(img); } else { const ph=document.createElement('div'); ph.style.cssText='border:1px dashed rgba(0,0,0,.4);color:rgba(0,0,0,.55);text-align:center;padding:14px;font-family:system-ui;font-size:11px;'; ph.textContent=m.data?'[image — preview not stored]':'[no image picked]'; item.appendChild(ph); } }
+  else if(m.type==='rule'){ tp((m.char||'-').slice(0,1).repeat(m.width||32),{justify:m.justify,font:'a',width:1,height:1}); }
+  else if(m.type==='vertical'){ if(String(m.mode)==='rotate'){ const opts={justify:'left',font:'a',width:m.width,height:m.height,bold:m.bold}; const metrics=printerTextMetrics(opts); const inner=makeThermalTextPreview(m.text||'',opts); const wrap=document.createElement('div'); wrap.title='rotated 90° — approximate preview'; wrap.style.display='flex'; wrap.style.alignItems='center'; wrap.style.justifyContent=m.justify==='right'?'flex-end':(m.justify==='left'?'flex-start':'center'); const textLen=Array.from(String(m.text||'')).filter(c=>c!=='\n').length; wrap.style.height=Math.max(metrics.lineH,textLen*metrics.charW)+'px'; const rot=document.createElement('div'); rot.style.transform='rotate(90deg)'; rot.style.transformOrigin='center center'; rot.appendChild(inner); wrap.appendChild(rot); item.appendChild(wrap); } else { const stacked=Array.from(String(m.text||'')).filter(c=>c!=='\n').join('\n'); tp(stacked,{justify:m.justify,font:'a',width:m.width,height:m.height,bold:m.bold}); } }
+  else if(m.type==='feed'){ item.appendChild(makeFeedPreview(m.lines||0)); }
+  else if(m.type==='table'){ const rows=(m.rows||[]).map(r=>String(r).split('|')); const ncol=rows.reduce((a,r)=>Math.max(a,r.length),0); const gap=parseInt(m.gap,10)||0; const lines=rows.map(r=>{ const cells=[]; for(let c=0;c<ncol;c++) cells.push({text:r[c]||'',align:alignLetterJS(m.aligns||'',c),width:0}); return columnsLineJS(cells,gap,COLS_A); }); if(m.header&&lines.length){ tp(lines[0],{justify:'left',font:'a',width:1,height:1,bold:true}); tp('-'.repeat(COLS_A),{justify:'left',font:'a',width:1,height:1}); if(lines.length>1) tp(lines.slice(1).join('\n'),{justify:'left',font:'a',width:1,height:1}); } else { tp(lines.join('\n'),{justify:'left',font:'a',width:1,height:1}); } }
+  else if(m.type==='list'){ tp(listLinesJS(m.text||'',m.style||'bullet').join('\n'),{justify:m.justify,font:'a',width:1,height:1}); }
+  else if(m.type==='keyvalue'){ tp(kvLinesJS(m.text||'',m.sep||':',m.leader||'.',COLS_A).join('\n'),{justify:'left',font:'a',width:1,height:1}); }
+  else if(m.type==='paragraph'){ const w=parseInt(m.width,10)||0; const ww=(w<1||w>COLS_A)?COLS_A:w; tp(wrapTextJS(m.text||'',ww).join('\n'),{justify:m.justify,font:'a',width:1,height:1}); }
+  else if(m.type==='heading'){ const size=Math.max(1,Math.min(4,parseInt(m.size,10)||2)); tp(m.text||'',{justify:'center',font:'a',width:size,height:size,bold:m.bold!==false}); if(m.rule!==false) tp(((String(m.char||'=')).slice(0,1)||'=').repeat(COLS_A),{justify:'left',font:'a',width:1,height:1}); }
+  else if(m.type==='signature'){ const lines=['X'+'_'.repeat(COLS_A-1)]; if(m.label) lines.push(m.label); tp(lines.join('\n'),{justify:'left',font:'a',width:1,height:1}); }
+  else if(m.type==='tearoff'){ tp(tearoffLineJS(m.char||'-',m.label||'',COLS_A),{justify:'left',font:'a',width:1,height:1}); }
+  else if(m.type==='rating'){ tp(ratingLineJS(m.mode||'bar',parseFloat(m.value)||0,parseInt(m.max,10)||5,parseInt(m.width,10)||10,m.label||''),{justify:m.justify,font:'a',width:1,height:1}); }
+  else if(m.type==='chart'){ const parts=String(m.data||'').replace(/,/g,' ').split(/\s+/).filter(Boolean); tp(chartLinesJS(parts,parseInt(m.width,10)||24,m.values!==false).join('\n'),{justify:'left',font:'a',width:1,height:1}); }
+  else if(m.type==='section'){ tp(sectionLineJS(m.title||'',m.char||'=',COLS_A),{justify:'left',font:'a',width:1,height:1}); }
+  else if(m.type==='columns'){ tp(columnsLineJS(m.cells||[],parseInt(m.gap,10)||0,COLS_A),{justify:'left',font:'a',width:1,height:1}); }
+  else if(m.type==='plugin'){ const p=pluginFor(m); const box=document.createElement('div'); box.style.cssText='border:1px dashed rgba(0,0,0,.4);color:rgba(0,0,0,.62);font-style:italic;text-align:center;padding:8px 10px;margin:2px 0;font-size:11px;line-height:1.35;font-family:system-ui;'; box.textContent=p?'\u26A1 '+(p.preview?p.preview(m):p.name):'\u26A1 unknown plugin "'+m.plugin+'"'; item.appendChild(box); }
+  else { const o=document.createElement('div'); o.style.cssText='color:rgba(0,0,0,.5);font-family:system-ui;font-size:11px;padding:4px;'; o.textContent='['+m.type+']'; item.appendChild(o); }
+  if(m.after>0 && m.type!=='feed') item.appendChild(makeFeedPreview(m.after,'after feed('+m.after+')'));
+  return item;
+}
+
+function moduleToPrint(m){ const out=Object.assign({},m); delete out.id; delete out.previewDataUrl; delete out.filename; delete out.threshold; delete out.brightness; delete out.maxHeight; delete out.invert; delete out.dither; if(out.type==='image'){ delete out.rotate; delete out.scale; delete out.imgAlign; delete out.crop; delete out.brightRegion; } for(const k of Object.keys(out)) if(k.startsWith('_')) delete out[k]; if(out.type==='box'){ out.lines=String(out.text||'').split('\n'); delete out.text; } return out; }
+function serializeForSave(m){
+  // Unlike moduleToPrint (the wire format), the saved file keeps editor-only
+  // settings so an imported job stays fully re-editable. For images that means
+  // the transforms and the original source image are persisted too.
+  const out=Object.assign({},m);
+  delete out.id; delete out.previewDataUrl;
+  if(out._sourceDataUrl) out.sourceDataUrl=out._sourceDataUrl;
+  for(const k of Object.keys(out)) if(k.startsWith('_')) delete out[k];
+  if(out.type==='box'){ out.lines=String(out.text||'').split('\n'); delete out.text; }
+  return out;
+}
+function bytesToBase64(bytes){ let binary=''; const chunk=0x8000; for(let i=0;i<bytes.length;i+=chunk) binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk)); return btoa(binary); }
+
+/* ============================================================
+   CONTROLLER
+   ============================================================ */
+class App {
+  constructor(els){
+    this.els=els;
+    this.modules=[];
+    this.nextId=1;
+    this.selectedId=null;
+    this.search='';
+    this._dragId=null;
+    this.feedMode='nl';
+    try{ const fm=localStorage.getItem('thermalFeedMode'); if(fm==='dots'||fm==='nl') this.feedMode=fm; }catch(e){}
+    this.init();
+  }
+  init(){
+    try{ const saved=localStorage.getItem('thermalPrinterBaseUrl'); if(saved&&this.els.baseUrl) this.els.baseUrl.value=saved; }catch(e){}
+    this.setupFeedModeToggle();
+    document.addEventListener('keydown',(e)=>this.handleKeyDown(e));
+    document.addEventListener('paste',(e)=>this.handlePaste(e));
+    this.renderLibrary();
+    this.renderPaper();
+    this.renderInspector();
+  }
+  handleKeyDown(e){
+    if(this._modalOpen) return;
+    if(this.selectedId==null) return;
+    const t=e.target, tag=t&&t.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||tag==='BUTTON'||(t&&t.isContentEditable)) return;
+    if(e.key==='Delete'||e.key==='Backspace'){ e.preventDefault(); this.deleteModule(this.selectedId); }
+  }
+  /* Clipboard paste (e.g. "Copy image" from a browser, or a screenshot). Loads into the
+     selected image block, or spins up a new image block if none is selected. */
+  handlePaste(e){
+    // Don't steal pastes aimed at a text field (URL bar, text/paragraph editors, etc).
+    const t=e.target, tag=t&&t.tagName;
+    if(tag==='TEXTAREA'||(t&&t.isContentEditable)||(tag==='INPUT'&&!/^(file|button|checkbox|radio|range|submit)$/i.test(t.type||'text'))) return;
+    const items=e.clipboardData&&e.clipboardData.items; if(!items) return;
+    for(const it of items){
+      if(it.type&&it.type.indexOf('image')===0){ const file=it.getAsFile(); if(file){ e.preventDefault(); this.acceptImageFile(file); } return; }
+    }
+  }
+  acceptImageFile(file){
+    let m=this.modules.find(x=>x.id===this.selectedId);
+    // Reuse the selected image block only if it's still empty — otherwise add a new one
+    // so a paste never clobbers an image you already placed.
+    if(!m||m.type!=='image'||m.data){ this.addModule('image'); m=this.modules.find(x=>x.id===this.selectedId); }
+    if(!m) return;
+    if(!file.name) try{ Object.defineProperty(file,'name',{value:'pasted.png'}); }catch(_){ }
+    this.select(m.id);
+    this.convertImageFile(file,m.id);
+    this.setStatus('Image added.','ok');
+  }
+  setupFeedModeToggle(){
+    const seg=document.getElementById('tpFeedMode'); if(!seg) return;
+    const sync=()=>{ for(const b of seg.children) b.classList.toggle('active', b.dataset.mode===this.feedMode); };
+    for(const b of seg.children){ b.onclick=()=>{ this.feedMode=b.dataset.mode; try{ localStorage.setItem('thermalFeedMode',this.feedMode); }catch(e){} sync(); }; }
+    sync();
+  }
+  /* handlers used by the DC template */
+  onBaseInput(){ try{ localStorage.setItem('thermalPrinterBaseUrl', this.els.baseUrl.value.trim()); }catch(e){} }
+  onSearch(){ this.search=this.els.search.value; this.renderLibrary(); }
+  onPing(){ this.ping().catch(e=>this.setStatus(e.message,'err')); }
+  onPrint(){
+    if(this._printing) return;
+    this._printing=true;
+    const btn=document.getElementById('tpPrint');
+    if(btn){ btn.disabled=true; btn.style.opacity='.55'; btn.style.cursor='default'; }
+    this.printNow().catch(e=>this.setStatus(e.message,'err')).finally(()=>{
+      this._printing=false;
+      if(btn){ btn.disabled=false; btn.style.opacity=''; btn.style.cursor=''; }
+    });
+  }
+  onTest(){ this.printTest().catch(e=>this.setStatus(e.message,'err')); }
+  onDemo(){ this.loadDemo(); }
+  onClear(){ this.modules=[]; this.selectedId=null; this.renderPaper(); this.renderInspector(); }
+  onSave(){ this.saveJson(); }
+  onLoad(){ this.els.loadFile && this.els.loadFile.click(); }
+  onLoadFile(e){ const f=e.target.files&&e.target.files[0]; if(f) this.loadJsonFile(f); e.target.value=''; }
+
+  setStatus(text,cls){ const s=this.els.status; if(!s) return; s.textContent=text; s.style.color=cls==='ok'?'var(--good)':cls==='err'?'var(--bad)':'var(--muted)'; if(this.els.dot) this.els.dot.style.background=cls==='err'?'#ff7b72':'#7ee787'; }
+  showProgress(pct){ const b=this.els.progress; if(!b) return; b.hidden=false; this.els.progressFill.style.width=Math.max(0,Math.min(100,pct))+'%'; }
+  hideProgress(){ if(this.els.progress){ this.els.progress.hidden=true; this.els.progressFill.style.width='0%'; } }
+  baseUrl(){ let v=(this.els.baseUrl?this.els.baseUrl.value:'').trim(); if(!v) throw new Error('Put the board IP first, e.g. http://192.168.1.123'); if(!/^https?:\/\//i.test(v)) v='http://'+v; return v.replace(/\/$/,''); }
+
+  withId(m){ m.id=this.nextId++; return m; }
+  selectedIndex(){ return this.modules.findIndex(m=>m.id===this.selectedId); }
+  insertAfterSelected(m){ const idx=this.selectedIndex(); if(idx>=0) this.modules.splice(idx+1,0,m); else this.modules.push(m); this.selectedId=m.id; this.renderPaper(); this.renderInspector(); }
+  addModule(type){ this.insertAfterSelected(this.withId(defaults[type]())); }
+  makeModuleFromSpec(spec){ if(!spec) return null; if(spec.kind==='plugin'){ const p=PLUGINS.find(x=>x.id===spec.id); if(!p) return null; const cfg=typeof p.defaults==='function'?p.defaults():JSON.parse(JSON.stringify(p.defaults)); return this.withId(Object.assign({type:'plugin',plugin:spec.id},cfg)); } if(!defaults[spec.type]) return null; return this.withId(defaults[spec.type]()); }
+  addAtIndex(spec,index){ const m=this.makeModuleFromSpec(spec); if(!m) return; if(index==null||index<0||index>this.modules.length) index=this.modules.length; this.modules.splice(index,0,m); this.selectedId=m.id; this.renderPaper(); this.renderInspector(); }
+  ensureDropMarker(){ if(!this._dropMarker){ const d=document.createElement('div'); d.style.cssText='height:0;border-top:2px solid var(--accent);margin:-1px 0;pointer-events:none;'; this._dropMarker=d; } return this._dropMarker; }
+  clearDropMarker(){ if(this._dropMarker&&this._dropMarker.parentNode) this._dropMarker.parentNode.removeChild(this._dropMarker); }
+  addPlugin(id){ const p=PLUGINS.find(x=>x.id===id); if(!p) return; const cfg=typeof p.defaults==='function'?p.defaults():JSON.parse(JSON.stringify(p.defaults)); this.insertAfterSelected(this.withId(Object.assign({type:'plugin',plugin:id},cfg))); }
+  deleteModule(id){ const i=this.modules.findIndex(m=>m.id===id); this.modules=this.modules.filter(m=>m.id!==id); if(this.selectedId===id){ const nxt=this.modules[Math.min(i,this.modules.length-1)]; this.selectedId=nxt?nxt.id:null; } this.renderPaper(); this.renderInspector(); }
+  duplicateModule(id){ const i=this.modules.findIndex(m=>m.id===id); if(i<0) return; const copy=JSON.parse(JSON.stringify(this.modules[i])); for(const k of Object.keys(copy)) if(k.startsWith('_')) delete copy[k]; this.withId(copy); this.modules.splice(i+1,0,copy); this.selectedId=copy.id; this.renderPaper(); this.renderInspector(); }
+  moveModule(id,dir){ const i=this.modules.findIndex(m=>m.id===id); const j=i+dir; if(i<0||j<0||j>=this.modules.length) return; const tmp=this.modules[i]; this.modules[i]=this.modules[j]; this.modules[j]=tmp; this.renderPaper(); }
+  reorder(srcId,targetId,after){ if(srcId===targetId) return; const from=this.modules.findIndex(m=>m.id===srcId); if(from<0) return; const moved=this.modules.splice(from,1)[0]; let to=this.modules.findIndex(m=>m.id===targetId); if(to<0){ this.modules.push(moved); } else { if(after) to+=1; this.modules.splice(to,0,moved); } this.renderPaper(); }
+  select(id){ this.selectedId=id; this.renderPaper(); this.renderInspector(); }
+  update(id,key,value){ const m=this.modules.find(x=>x.id===id); if(!m) return; m[key]=value; this.renderPaper(); this.refreshWarnings(); }
+  numberUpdate(id,key,value){ const n=parseInt(value,10); this.update(id,key,Number.isFinite(n)?n:0); }
+
+  renderLibrary(){
+    const root=this.els.library; if(!root) return; root.innerHTML='';
+    const q=this.search.trim().toLowerCase();
+    const matches=(label)=>!q||label.toLowerCase().includes(q);
+    const grid=()=>{ const d=document.createElement('div'); d.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;'; return d; };
+    const tile=(glyph,label,onClick,plugin,dragSpec)=>{ const b=document.createElement('button'); b.className='tile'; if(plugin) b.style.borderColor='#2e2a22'; const g=document.createElement('span'); g.className='g'; g.textContent=glyph; if(plugin) g.style.color='var(--accent)'; const l=document.createElement('span'); l.className='l'; l.textContent=label; b.appendChild(g); b.appendChild(l); b.onclick=onClick; if(dragSpec){ b.draggable=true; b.title=(b.title?b.title+' — ':'')+'click or drag onto the paper'; b.addEventListener('dragstart',(e)=>{ this._libDrag=dragSpec; b.style.opacity='.5'; try{ e.dataTransfer.effectAllowed='copy'; e.dataTransfer.setData('text/plain',label); }catch(_){} }); b.addEventListener('dragend',()=>{ this._libDrag=null; b.style.opacity=''; this.clearDropMarker(); }); } return b; };
+    let any=false;
+    for(const entry of LIBRARY){
+      const cat=entry[0], types=entry[1];
+      const visible=types.filter(t=>matches(TYPE_LABEL[t]));
+      if(!visible.length) continue;
+      any=true;
+      const h=document.createElement('div'); h.className='libcat'; h.textContent=cat; root.appendChild(h);
+      const g=grid();
+      for(const t of visible) g.appendChild(tile(TYPE_ICON[t]||'\u2022',TYPE_LABEL[t],()=>this.addModule(t),false,{kind:'block',type:t}));
+      root.appendChild(g);
+    }
+    const pvis=PLUGINS.filter(p=>matches(p.name)||(q&&'plugin'.includes(q)));
+    if(pvis.length){
+      any=true;
+      const h=document.createElement('div'); h.className='libcat'; h.textContent='\u26A1 Plugins'; root.appendChild(h);
+      const g=grid();
+      for(const p of pvis){ const b=tile('\u26A1',p.name,()=>this.addPlugin(p.id),true,{kind:'plugin',id:p.id}); b.title=p.blurb||''; g.appendChild(b); }
+      root.appendChild(g);
+    }
+    if(!any){ const e=document.createElement('div'); e.style.cssText='color:var(--faint);font-size:12px;padding:18px 2px;'; e.textContent='No blocks match \u201C'+this.search+'\u201D.'; root.appendChild(e); }
+  }
+
+  renderPaper(){
+    const paper=this.els.paper; if(!paper) return; paper.innerHTML='';
+    paper.ondragover=(e)=>{ if(this._libDrag){ e.preventDefault(); e.dataTransfer.dropEffect='copy'; } };
+    paper.ondrop=(e)=>{ if(this._libDrag&&e.target===paper){ e.preventDefault(); const spec=this._libDrag; this._libDrag=null; this.clearDropMarker(); this.addAtIndex(spec,this.modules.length); } };
+    if(!this.modules.length){ const e=document.createElement('div'); e.style.cssText='color:rgba(0,0,0,.32);text-align:center;font-family:system-ui;font-size:12px;padding:60px 24px;line-height:1.6;pointer-events:none;'; e.textContent='Empty receipt. Drag a block here or click one in the library, or hit Demo.'; paper.appendChild(e); return; }
+    for(const m of this.modules){
+      const wrap=document.createElement('div'); wrap.className='prevItem'+(m.id===this.selectedId?' sel':'');
+      const grip=document.createElement('div'); grip.className='grip'; grip.textContent='\u283F'; wrap.appendChild(grip);
+      wrap.appendChild(previewModule(m));
+      wrap.onclick=()=>this.select(m.id);
+      wrap.draggable=true;
+      wrap.ondragstart=(e)=>{ this._dragId=m.id; wrap.classList.add('drag'); try{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',String(m.id)); }catch(_){} };
+      wrap.ondragend=()=>{ wrap.classList.remove('drag'); this.clearDropMarker(); };
+      wrap.ondragover=(e)=>{ e.preventDefault(); const rect=wrap.getBoundingClientRect(); const after=(e.clientY-rect.top)>rect.height/2; if(this._libDrag){ e.dataTransfer.dropEffect='copy'; const mk=this.ensureDropMarker(); this.clearDropMarker(); if(after) wrap.after(mk); else wrap.before(mk); } else { e.dataTransfer.dropEffect='move'; } };
+      wrap.ondrop=(e)=>{ e.preventDefault(); const rect=wrap.getBoundingClientRect(); const after=(e.clientY-rect.top)>rect.height/2; if(this._libDrag){ const idx=this.modules.findIndex(x=>x.id===m.id)+(after?1:0); const spec=this._libDrag; this._libDrag=null; this.clearDropMarker(); this.addAtIndex(spec,idx); } else if(this._dragId!=null){ this.reorder(this._dragId,m.id,after); this._dragId=null; } };
+      paper.appendChild(wrap);
+    }
+  }
+
+  refreshWarnings(){ const root=this.els.inspector; if(!root) return; const list=root.querySelectorAll('[data-warn]'); for(const el of list){ const m=this.modules.find(x=>String(x.id)===el.dataset.warn); el.textContent=m?validateModule(m):''; el.style.display=el.textContent?'block':'none'; } }
+  refreshImageInfo(m){ const el=this.els.inspector&&this.els.inspector.querySelector('[data-img-info="'+m.id+'"]'); if(el) el.textContent=imageInfoText(m); }
+
+  field(labelText, control, flexBasis){ const w=document.createElement('div'); w.style.cssText='display:flex;flex-direction:column;gap:6px;'; if(flexBasis) w.style.flex='1 1 '+flexBasis; const s=document.createElement('span'); s.className='flab'; s.textContent=labelText; w.appendChild(s); w.appendChild(control); return w; }
+  buildField(m,spec){
+    if(spec.kind==='toggle'){ const w=document.createElement('div'); w.style.cssText='display:flex;align-items:flex-end;'; const b=document.createElement('button'); b.className='tog'+(m[spec.key]?' active':''); b.textContent=spec.label; if(spec.title) b.title=spec.title; b.onclick=()=>{ this.update(m.id,spec.key,!m[spec.key]); b.classList.toggle('active',!!m[spec.key]); }; w.appendChild(b); return w; }
+    if(spec.kind==='seg'){ const seg=document.createElement('div'); seg.className='seg'; const cur=String(m[spec.key]); for(const opt of spec.options){ const val=Array.isArray(opt)?String(opt[0]):String(opt); const disp=Array.isArray(opt)?opt[1]:opt; const b=document.createElement('button'); b.textContent=disp; if(Array.isArray(opt)&&opt[2]) b.title=opt[2]; if(cur===val) b.className='active'; b.onclick=()=>{ this.update(m.id,spec.key,val); for(const sib of seg.children) sib.classList.remove('active'); b.classList.add('active'); }; seg.appendChild(b); } return this.field(spec.label, seg, '1 1 150px'); }
+    const inp=document.createElement('input'); inp.className='tpf'; inp.type=spec.kind==='number'?'number':'text'; if(spec.min!==undefined) inp.min=spec.min; if(spec.max!==undefined) inp.max=spec.max; inp.value=m[spec.key]==null?'':m[spec.key]; inp.style.width='100%'; if(spec.kind==='number'){ inp.oninput=()=>this.numberUpdate(m.id,spec.key,inp.value); return this.field(spec.label, inp, '0 1 92px'); } inp.oninput=()=>this.update(m.id,spec.key,inp.value); return this.field(spec.label, inp, '100%'); }
+  fieldRow(m,specs){ const g=document.createElement('div'); g.style.cssText='display:flex;flex-wrap:wrap;gap:13px 14px;align-items:flex-end;'; for(const s of specs) g.appendChild(this.buildField(m,s)); return g; }
+  textAreaField(m,key,labelText){ const ta=document.createElement('textarea'); ta.className='tpf'; ta.value=m[key]||''; ta.oninput=()=>this.update(m.id,key,ta.value); return this.field(labelText, ta); }
+  inputField(m,key,labelText){ const inp=document.createElement('input'); inp.className='tpf'; inp.style.width='100%'; inp.value=m[key]||''; inp.oninput=()=>this.update(m.id,key,inp.value); return this.field(labelText, inp); }
+  note(text){ const p=document.createElement('p'); p.style.cssText='margin:0;color:var(--faint);font-size:11.5px;line-height:1.5;'; p.textContent=text; return p; }
+  warnNote(m){ const p=document.createElement('p'); p.dataset.warn=m.id; p.style.cssText='margin:0;color:var(--bad);font-size:11.5px;line-height:1.5;'; const t=validateModule(m); p.textContent=t; p.style.display=t?'block':'none'; return p; }
+
+  renderInspector(){
+    const root=this.els.inspector; if(!root) return; root.innerHTML='';
+    const m=this.modules.find(x=>x.id===this.selectedId);
+    if(!m){ const e=document.createElement('div'); e.style.cssText='padding:26px 18px;color:var(--faint);font-size:12.5px;line-height:1.7;'; const t=document.createElement('div'); t.style.cssText='font-size:13px;color:var(--muted);font-weight:600;margin-bottom:6px;'; t.textContent='Nothing selected'; const b=document.createElement('div'); b.textContent='Click a block on the paper to edit it here, or add one from the library. Drag blocks to reorder.'; e.appendChild(t); e.appendChild(b); root.appendChild(e); return; }
+
+    const head=document.createElement('div'); head.style.cssText='position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--line);background:#101218;';
+    const ic=document.createElement('span'); ic.style.cssText='width:28px;height:28px;border-radius:7px;background:#1d2026;display:grid;place-items:center;font-size:13px;color:var(--accent);font-family:ui-monospace,monospace;'; ic.textContent=m.type==='plugin'?'\u26A1':(TYPE_ICON[m.type]||'\u2022');
+    const ttl=document.createElement('span'); ttl.style.cssText='font-size:14px;font-weight:700;flex:1;'; ttl.textContent=m.type==='plugin'?((pluginFor(m)&&pluginFor(m).name)||'Plugin'):(TYPE_LABEL[m.type]||m.type);
+    const up=document.createElement('button'); up.className='btn ghost'; up.style.padding='6px 9px'; up.textContent='\u2191'; up.title='Move up'; up.onclick=()=>this.moveModule(m.id,-1);
+    const dn=document.createElement('button'); dn.className='btn ghost'; dn.style.padding='6px 9px'; dn.textContent='\u2193'; dn.title='Move down'; dn.onclick=()=>this.moveModule(m.id,1);
+    head.appendChild(ic); head.appendChild(ttl); head.appendChild(up); head.appendChild(dn);
+    root.appendChild(head);
+
+    const body=document.createElement('div'); body.style.cssText='padding:16px;display:flex;flex-direction:column;gap:16px;';
+    const add=el=>body.appendChild(el);
+
+    if(m.type==='text'||m.type==='ascii'){
+      add(this.textAreaField(m,'text','Text'));
+      add(this.fieldRow(m,[ alignField('justify'), segField('font','Font',[['a','A'],['b','B']]), numField('width','W',1,8), numField('height','H',1,8), segField('underline','Underline',[['0','off'],['1','thin'],['2','thick']]), segField('encoding','Encoding',['cp437','ascii','utf-8']), numField('after','Feed',0,20), toggleField('bold','Bold'), toggleField('inverse','Inverse') ]));
+    } else if(m.type==='box'){
+      add(this.textAreaField(m,'text','Box lines'));
+      add(this.fieldRow(m,[ alignField('justify','Print align'), alignField('align','Text align'), numField('padding','Padding',0,8), numField('after','Feed',0,20), toggleField('ascii','ASCII box') ]));
+    } else if(m.type==='qr'){
+      add(this.inputField(m,'data','QR data'));
+      add(this.fieldRow(m,[ alignField('justify'), numField('size','Size',1,16), segField('ecc','ECC',['L','M','Q','H']), numField('after','Feed',0,20), toggleField('asImage','As image','Render the QR as a bitmap image instead of using the printer’s native QR command — works on printers that lack QR support') ]));
+      add(this.note('Turn on “As image” if your printer can’t print QR codes natively.'));
+      add(this.warnNote(m));
+    } else if(m.type==='barcode'){
+      add(this.inputField(m,'data','Barcode data'));
+      add(this.fieldRow(m,[ segField('kind','Type',[['code39','Code 39'],['code128','Code 128'],['ean13','EAN-13'],['ean8','EAN-8'],['upca','UPC-A'],['itf','ITF']]), alignField('justify'), numField('bar_width','Bar w',1,6), numField('bar_height','Height',1,255), segField('hri','HRI text',['none','above','below','both']), numField('after','Feed',0,20), toggleField('asImage','As image','Render as a bitmap image instead of the printer’s native barcode command') ]));
+      add(this.note('Code 39 / 128 / EAN-13 / EAN-8 print natively. UPC-A and ITF (and anything with “As image” on) are rasterised and sent as a bitmap so any printer can show them.'));
+      add(this.warnNote(m));
+    } else if(m.type==='image'){
+      this.buildImageEditor(m,add);
+    } else if(m.type==='rule'){
+      add(this.fieldRow(m,[ inputSpec('char','Char'), numField('width','Width',1,80), alignField('justify'), numField('after','Feed',0,20), toggleField('cp437','CP437') ]));
+    } else if(m.type==='feed'){
+      add(this.fieldRow(m,[ numField('lines','Lines',0,30) ]));
+    } else if(m.type==='vertical'){
+      add(this.textAreaField(m,'text','Text'));
+      add(this.fieldRow(m,[ segField('mode','Mode',[['stack','Stacked'],['rotate','Rotated 90°']]), alignField('justify'), numField('width','W',1,8), numField('height','H',1,8), numField('space_lines','Space',0,8), numField('after','Feed',0,20), toggleField('bold','Bold') ]));
+      add(this.note('Stacked prints one big letter per line (reliable). Rotated uses ESC V and depends on printer firmware.'));
+    } else if(m.type==='section'){
+      add(this.inputField(m,'title','Title'));
+      add(this.fieldRow(m,[ inputSpec('char','Fill char'), numField('after','Feed',0,20), toggleField('cp437','CP437') ]));
+    } else if(m.type==='table'){
+      if(!Array.isArray(m.rows)) m.rows=[];
+      const ta=document.createElement('textarea'); ta.className='tpf'; ta.value=m.rows.join('\n'); ta.oninput=()=>{ m.rows=ta.value.split('\n'); this.renderPaper(); };
+      add(this.field('Rows (one per line, columns separated by | )', ta));
+      add(this.fieldRow(m,[ inputSpec('aligns','Aligns (LCR)'), numField('gap','Gap',0,8), numField('after','Feed',0,20), toggleField('header','Bold header') ]));
+      add(this.note('With Bold header on, the first row is the header. Aligns: one letter (L/C/R) per column.'));
+    } else if(m.type==='list'){
+      add(this.textAreaField(m,'text','Items (one per line)'));
+      add(this.fieldRow(m,[ segField('style','Style',[['bullet','\u2022 Bullet'],['number','1. Number'],['checkbox','\u2610 Checkbox']]), alignField('justify'), numField('after','Feed',0,20) ]));
+    } else if(m.type==='keyvalue'){
+      add(this.textAreaField(m,'text','Lines (key: value)'));
+      add(this.fieldRow(m,[ inputSpec('sep','Separator'), inputSpec('leader','Leader'), numField('after','Feed',0,20) ]));
+    } else if(m.type==='paragraph'){
+      add(this.textAreaField(m,'text','Text'));
+      add(this.fieldRow(m,[ alignField('justify'), numField('width','Width',0,42), numField('after','Feed',0,20) ]));
+    } else if(m.type==='heading'){
+      add(this.inputField(m,'text','Title'));
+      add(this.fieldRow(m,[ numField('size','Size',1,4), inputSpec('char','Rule char'), numField('after','Feed',0,20), toggleField('bold','Bold'), toggleField('rule','Underline rule') ]));
+    } else if(m.type==='signature'){
+      add(this.inputField(m,'label','Caption'));
+      add(this.fieldRow(m,[ numField('after','Feed',0,20) ]));
+    } else if(m.type==='tearoff'){
+      add(this.fieldRow(m,[ inputSpec('char','Char'), inputSpec('label','Label (optional)'), numField('after','Feed',0,20), toggleField('cp437','CP437') ]));
+    } else if(m.type==='rating'){
+      add(this.fieldRow(m,[ segField('mode','Style',[['stars','Stars'],['bar','Bar %'],['blocks','Blocks']]), inputSpec('label','Label'), numField('value','Value',0,100), numField('max','Max',1,100), numField('width','Width',1,30), alignField('justify'), numField('after','Feed',0,20) ]));
+    } else if(m.type==='chart'){
+      add(this.inputField(m,'data','Numbers (comma separated)'));
+      add(this.fieldRow(m,[ numField('width','Bar width',1,30), numField('after','Feed',0,20), toggleField('values','Show values') ]));
+    } else if(m.type==='columns'){
+      this.buildColumnsEditor(m,add);
+    } else if(m.type==='plugin'){
+      const p=pluginFor(m);
+      if(!p){ add(this.note('Unknown plugin "'+m.plugin+'". It won\'t print.')); }
+      else { if(p.fields&&p.fields.length) add(this.fieldRow(m,p.fields)); add(this.note(p.blurb||'Runs in the browser and generates blocks at print time.')); }
+    } else {
+      add(this.note('This block type ('+m.type+') has no visual editor — it prints from its loaded JSON.'));
+    }
+
+    root.appendChild(body);
+
+    const foot=document.createElement('div'); foot.style.cssText='margin-top:auto;display:flex;gap:8px;padding:14px 16px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#101218;';
+    const dup=document.createElement('button'); dup.className='btn ghost'; dup.textContent='Duplicate'; dup.onclick=()=>this.duplicateModule(m.id);
+    const del=document.createElement('button'); del.className='btn danger'; del.textContent='Delete'; del.style.marginLeft='auto'; del.onclick=()=>this.deleteModule(m.id);
+    foot.appendChild(dup); foot.appendChild(del);
+    root.appendChild(foot);
+  }
+
+  buildColumnsEditor(m,add){
+    if(!Array.isArray(m.cells)) m.cells=[];
+    const list=document.createElement('div'); list.style.cssText='display:flex;flex-direction:column;gap:10px;';
+    m.cells.forEach((c,i)=>{
+      const cell=document.createElement('div'); cell.style.cssText='display:flex;gap:9px;align-items:flex-end;padding-bottom:10px;border-bottom:1px dashed var(--line2);';
+      const ti=document.createElement('input'); ti.className='tpf'; ti.style.width='100%'; ti.value=c.text||''; ti.oninput=()=>{ c.text=ti.value; this.renderPaper(); };
+      cell.appendChild(this.field('Text',ti,'1 1 auto'));
+      const seg=document.createElement('div'); seg.className='seg'; [['left','L'],['center','C'],['right','R']].forEach(pair=>{ const v=pair[0],lbl=pair[1]; const b=document.createElement('button'); b.textContent=lbl; if((c.align||'left')===v) b.className='active'; b.onclick=()=>{ c.align=v; for(const s of seg.children) s.classList.remove('active'); b.classList.add('active'); this.renderPaper(); }; seg.appendChild(b); });
+      cell.appendChild(this.field('Align',seg,'0 0 auto'));
+      const wi=document.createElement('input'); wi.className='tpf'; wi.type='number'; wi.min=0; wi.max=42; wi.style.width='62px'; wi.value=c.width||0; wi.oninput=()=>{ c.width=parseInt(wi.value,10)||0; this.renderPaper(); };
+      cell.appendChild(this.field('Width',wi,'0 0 auto'));
+      const del=document.createElement('button'); del.className='btn danger'; del.style.padding='8px 11px'; del.textContent='\u2715'; del.title='Remove column'; del.onclick=()=>{ m.cells.splice(i,1); this.renderPaper(); this.renderInspector(); };
+      cell.appendChild(del);
+      list.appendChild(cell);
+    });
+    add(this.field('Columns', list));
+    const addB=document.createElement('button'); addB.className='btn ghost'; addB.style.alignSelf='flex-start'; addB.textContent='+ add column'; addB.onclick=()=>{ m.cells.push({text:'',align:'left',width:0}); this.renderPaper(); this.renderInspector(); };
+    add(addB);
+    add(this.fieldRow(m,[ numField('gap','Gap',0,8), segField('encoding','Encoding',['cp437','ascii','utf-8']), numField('after','Feed',0,20) ]));
+    add(this.note('Columns share one line (\u224832 chars). Width 0 = auto. Overflow is truncated.'));
+  }
+
+  buildImageEditor(m,add){
+    const repack=()=>{ if(m._sourceDataUrl) this.convertDataUrl(m._sourceDataUrl,m.id); else this.renderPaper(); };
+    let _rt=null; const repackSoon=()=>{ clearTimeout(_rt); _rt=setTimeout(repack,90); };
+    const fileInput=document.createElement('input'); fileInput.type='file'; fileInput.accept='image/*'; fileInput.className='tpf'; fileInput.style.width='100%'; fileInput.style.fontSize='12px'; fileInput.onchange=()=>{ if(fileInput.files[0]){ this.convertImageFile(fileInput.files[0],m.id); fileInput.value=''; } };
+    const fileField=this.field('Image file', fileInput);
+    const hint=document.createElement('span'); hint.style.cssText='color:var(--faint);font-size:11px;line-height:1.4;'; hint.textContent='…or paste an image (Ctrl+V) or drag one here';
+    fileField.appendChild(hint);
+    // whole field doubles as a drop zone for image files
+    fileField.addEventListener('dragover',e=>{ if(e.dataTransfer&&Array.from(e.dataTransfer.types||[]).includes('Files')){ e.preventDefault(); fileField.style.outline='2px dashed var(--accent)'; fileField.style.outlineOffset='3px'; } });
+    fileField.addEventListener('dragleave',()=>{ fileField.style.outline=''; });
+    fileField.addEventListener('drop',e=>{ fileField.style.outline=''; const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f&&/^image\//.test(f.type||'')){ e.preventDefault(); this.convertImageFile(f,m.id); } });
+    add(fileField);
+    const seg=document.createElement('div'); seg.className='seg';
+    [['threshold','Threshold (logos)'],['diffusion','Diffusion (photos)']].forEach(pair=>{ const val=pair[0],lbl=pair[1]; const b=document.createElement('button'); b.textContent=lbl; b.className=(m.dither||'threshold')===val?'active':''; b.title=val==='diffusion'?'Floyd–Steinberg error diffusion — keeps shades of gray (best for photos)':'Hard black/white cutoff — crisp edges (best for line art and logos)'; b.onclick=()=>{ m.dither=val; this.renderInspector(); repack(); }; seg.appendChild(b); });
+    add(this.field('Dither', seg));
+    const row=document.createElement('div'); row.style.cssText='display:flex;flex-wrap:wrap;gap:13px 14px;align-items:flex-end;';
+    const numCtrl=(label,value,min,max,onInput)=>{ const inp=document.createElement('input'); inp.className='tpf'; inp.type='number'; inp.min=min; inp.max=max; inp.value=value; inp.style.width='100%'; inp.oninput=()=>onInput(inp.value); return this.field(label,inp,'0 1 110px'); };
+    if(m.dither==='diffusion'){
+      // Real luminance offset applied before dithering. Unlike the threshold, this
+      // genuinely lightens/darkens the printed result (positive = brighter print).
+      const bWrap=document.createElement('div'); bWrap.style.cssText='display:flex;align-items:center;gap:9px;';
+      const bs=document.createElement('input'); bs.type='range'; bs.min='-100'; bs.max='100'; bs.step='1'; bs.value=String(m.brightness||0); bs.style.cssText='flex:1 1 auto;accent-color:var(--accent);cursor:pointer;min-width:90px;';
+      const bn=document.createElement('input'); bn.type='number'; bn.className='tpf'; bn.min='-100'; bn.max='100'; bn.value=String(m.brightness||0); bn.style.cssText='flex:0 0 60px;width:60px;';
+      let bt=null;
+      const apply=v=>{ const n=Math.max(-100,Math.min(100,parseInt(v,10)||0)); m.brightness=n; bs.value=String(n); bn.value=String(n); clearTimeout(bt); bt=setTimeout(repack,60); };
+      bs.oninput=()=>apply(bs.value); bn.oninput=()=>apply(bn.value);
+      bWrap.appendChild(bs); bWrap.appendChild(bn);
+      row.appendChild(this.field('Brightness', bWrap, '1 1 200px'));
+    } else {
+      row.appendChild(numCtrl('Threshold', m.threshold, 1, 254, v=>{ m.threshold=parseInt(v,10)||150; repackSoon(); }));
+    }
+    row.appendChild(numCtrl('Max height px', m.maxHeight, 16, 1200, v=>{ m.maxHeight=parseInt(v,10)||384; repackSoon(); }));
+    row.appendChild(numCtrl('Feed', m.after, 0, 20, v=>this.numberUpdate(m.id,'after',v)));
+    const invWrap=document.createElement('div'); invWrap.style.cssText='display:flex;align-items:flex-end;'; const invBtn=document.createElement('button'); invBtn.className='tog'+(m.invert?' active':''); invBtn.textContent='Invert'; invBtn.onclick=()=>{ m.invert=!m.invert; invBtn.classList.toggle('active',m.invert); repack(); }; invWrap.appendChild(invBtn); row.appendChild(invWrap);
+    add(row);
+
+    // ---- Transform: rotate / scale / align ----
+    const trow=document.createElement('div'); trow.style.cssText='display:flex;flex-wrap:wrap;gap:13px 14px;align-items:flex-end;';
+    // rotate buttons (90° steps); rotating reinterprets orientation, so clear any crop
+    const rotWrap=document.createElement('div'); const rotBtns=document.createElement('div'); rotBtns.style.cssText='display:flex;gap:6px;';
+    const rotBy=(d)=>{ m.rotate=(((parseFloat(m.rotate)||0)+d)%360+360)%360; m.crop=null; this.renderInspector(); repack(); };
+    const mkBtn=(label,title,onClick)=>{ const b=document.createElement('button'); b.className='btn'; b.style.padding='8px 11px'; b.textContent=label; b.title=title; b.onclick=onClick; return b; };
+    rotBtns.appendChild(mkBtn('↺','Rotate 90° counter-clockwise',()=>rotBy(-90)));
+    rotBtns.appendChild(mkBtn('↻','Rotate 90° clockwise',()=>rotBy(90)));
+    rotWrap.appendChild(this.field('Rotate '+Math.round(((parseFloat(m.rotate)||0)%360+360)%360)+'°  (±90°)', rotBtns, '0 0 auto'));
+    trow.appendChild(rotWrap);
+    trow.appendChild(numCtrl('Scale %', m.scale==null?100:m.scale, 5, 100, v=>{ m.scale=Math.max(5,Math.min(100,parseInt(v,10)||100)); repackSoon(); }));
+    const alignSeg=document.createElement('div'); alignSeg.className='seg';
+    [['left','L'],['center','C'],['right','R']].forEach(pair=>{ const val=pair[0]; const b=document.createElement('button'); b.textContent=pair[1]; b.title=pair[0]; if((m.imgAlign||'center')===val) b.className='active'; b.onclick=()=>{ m.imgAlign=val; for(const s of alignSeg.children) s.classList.remove('active'); b.classList.add('active'); repack(); }; alignSeg.appendChild(b); });
+    trow.appendChild(this.field('Align', alignSeg, '0 0 auto'));
+    add(trow);
+
+    // ---- Interactive crop ----
+    if(m._sourceDataUrl){
+      const cropHead=document.createElement('div'); cropHead.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;';
+      const lab=document.createElement('span'); lab.className='flab'; lab.textContent='Crop (drag on the image)';
+      const btns=document.createElement('div'); btns.style.cssText='display:flex;gap:6px;';
+      const enlargeBtn=document.createElement('button'); enlargeBtn.className='btn ghost'; enlargeBtn.style.cssText='padding:4px 9px;font-size:11px;'; enlargeBtn.textContent='⤢ Enlarge'; enlargeBtn.title='Open a larger crop view'; enlargeBtn.onclick=()=>this.openCropModal(m, repack);
+      const resetBtn=document.createElement('button'); resetBtn.className='btn ghost'; resetBtn.style.cssText='padding:4px 9px;font-size:11px;'; resetBtn.textContent='Reset crop'; resetBtn.onclick=()=>{ m.crop=null; this.renderInspector(); repack(); };
+      btns.appendChild(enlargeBtn); btns.appendChild(resetBtn);
+      cropHead.appendChild(lab); cropHead.appendChild(btns);
+      add(cropHead);
+      add(this.buildCropTool(m, repack, { maxImgHeight:'52vh' }));
+    } else {
+      add(this.note('Pick a file above to enable interactive cropping.'));
+    }
+
+    // ---- Local brightness: one rotatable, feathered region ----
+    if(m._sourceDataUrl){
+      const brHead=document.createElement('div'); brHead.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;';
+      const brLab=document.createElement('span'); brLab.className='flab'; brLab.textContent='Local brightness';
+      brHead.appendChild(brLab);
+      if(m.brightRegion){
+        const rm=document.createElement('button'); rm.className='btn ghost'; rm.style.cssText='padding:4px 9px;font-size:11px;'; rm.textContent='Remove region'; rm.onclick=()=>{ m.brightRegion=null; this.renderInspector(); repack(); };
+        brHead.appendChild(rm);
+      }
+      add(brHead);
+      if(!m.brightRegion){
+        const addBtn=document.createElement('button'); addBtn.className='btn'; addBtn.style.alignSelf='flex-start'; addBtn.textContent='+ Add brighten region';
+        addBtn.onclick=()=>{ m.brightRegion={cx:0.5,cy:0.5,w:0.6,h:0.4,angle:0,amount:40,feather:0.4}; this.renderInspector(); repack(); };
+        add(addBtn);
+        add(this.note('Drag a box over a too-dark area to lift it (or push the amount negative to darken). The edge is feathered so it blends into the photo.'));
+      } else {
+        add(this.buildBrightenTool(m, repack));
+        const sliderRow=(label,min,max,val,onVal)=>{
+          const wrap=document.createElement('div'); wrap.style.cssText='display:flex;align-items:center;gap:9px;';
+          const s=document.createElement('input'); s.type='range'; s.min=String(min); s.max=String(max); s.step='1'; s.value=String(val); s.style.cssText='flex:1 1 auto;accent-color:var(--accent);cursor:pointer;min-width:90px;';
+          const n=document.createElement('input'); n.type='number'; n.className='tpf'; n.min=String(min); n.max=String(max); n.value=String(val); n.style.cssText='flex:0 0 60px;width:60px;';
+          let t=null; const apply=v=>{ const num=Math.max(min,Math.min(max,parseInt(v,10)||0)); s.value=String(num); n.value=String(num); onVal(num); clearTimeout(t); t=setTimeout(repack,60); };
+          s.oninput=()=>apply(s.value); n.oninput=()=>apply(n.value);
+          wrap.appendChild(s); wrap.appendChild(n); return this.field(label, wrap, '1 1 200px');
+        };
+        const sRow=document.createElement('div'); sRow.style.cssText='display:flex;flex-wrap:wrap;gap:13px 14px;align-items:flex-end;';
+        sRow.appendChild(sliderRow('Amount', -100, 100, Math.round(m.brightRegion.amount||0), v=>{ m.brightRegion.amount=v; }));
+        sRow.appendChild(sliderRow('Feather %', 0, 100, Math.round((m.brightRegion.feather==null?0.4:m.brightRegion.feather)*100), v=>{ m.brightRegion.feather=v/100; }));
+        add(sRow);
+      }
+    }
+
+    const info=document.createElement('p'); info.className=''; info.style.cssText='margin:0;color:var(--faint);font-size:11.5px;line-height:1.5;'; info.dataset.imgInfo=m.id; info.textContent=imageInfoText(m); add(info);
+    add(this.warnNote(m));
+  }
+
+  /* Single rotatable, feathered local-brightness region drawn over the dithered preview.
+     Coords are fractions of the output canvas. Resize is symmetric from the center to keep
+     the rotation math simple (good enough for a spotlight box). */
+  buildBrightenTool(m, repack){
+    const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;';
+    const stage=document.createElement('div'); stage.style.cssText='position:relative;display:inline-block;max-width:100%;background:#0f1116;border:1px solid var(--line2);border-radius:8px;overflow:hidden;touch-action:none;user-select:none;line-height:0;';
+    const img=document.createElement('img'); img.draggable=false; img.dataset.brightBackdrop=m.id; img.src=m.previewDataUrl||''; img.style.cssText='display:block;max-width:100%;width:auto;height:auto;pointer-events:none;max-height:52vh;';
+    stage.appendChild(img);
+
+    const region=document.createElement('div');
+    region.style.cssText='position:absolute;border:1.5px solid var(--accent);box-sizing:border-box;cursor:move;background:rgba(232,137,58,.12);';
+    const handles={};
+    [['nw','top:-7px;left:-7px;'],['ne','top:-7px;right:-7px;'],['sw','bottom:-7px;left:-7px;'],['se','bottom:-7px;right:-7px;']].forEach(p=>{ const hd=document.createElement('div'); hd.dataset.h=p[0]; hd.style.cssText='position:absolute;width:13px;height:13px;background:var(--accent);border:2px solid #1a1206;border-radius:50%;cursor:nwse-resize;'+p[1]; region.appendChild(hd); handles[p[0]]=hd; });
+    const stem=document.createElement('div'); stem.style.cssText='position:absolute;left:50%;top:-22px;width:2px;height:18px;background:var(--accent);transform:translateX(-50%);';
+    const rot=document.createElement('div'); rot.dataset.rot='1'; rot.style.cssText='position:absolute;left:50%;top:-30px;width:14px;height:14px;background:var(--accent);border:2px solid #1a1206;border-radius:50%;transform:translateX(-50%);cursor:grab;';
+    region.appendChild(stem); region.appendChild(rot);
+    stage.appendChild(region);
+    wrap.appendChild(stage);
+
+    const br=m.brightRegion;
+    const clamp01=v=>Math.max(0,Math.min(1,v));
+    const layout=()=>{ region.style.left=(br.cx*100)+'%'; region.style.top=(br.cy*100)+'%'; region.style.width=(br.w*100)+'%'; region.style.height=(br.h*100)+'%'; region.style.transform='translate(-50%,-50%) rotate('+(br.angle||0)+'deg)'; };
+
+    let drag=null;
+    const stagePt=e=>{ const r=stage.getBoundingClientRect(); return { x:e.clientX-r.left, y:e.clientY-r.top, w:r.width, h:r.height }; };
+    stage.addEventListener('pointerdown',e=>{
+      const p=stagePt(e); const role=e.target&&e.target.dataset?(e.target.dataset.rot?'rot':e.target.dataset.h?'resize':null):null;
+      if(role==='rot') drag={mode:'rot'};
+      else if(role==='resize') drag={mode:'resize'};
+      else if(e.target===region) drag={mode:'move',ox:br.cx*p.w-p.x,oy:br.cy*p.h-p.y};
+      else return;
+      stage.setPointerCapture(e.pointerId); e.preventDefault();
+    });
+    stage.addEventListener('pointermove',e=>{
+      if(!drag) return; const p=stagePt(e);
+      if(drag.mode==='move'){ br.cx=clamp01((p.x+drag.ox)/p.w); br.cy=clamp01((p.y+drag.oy)/p.h); }
+      else { const dx=p.x-br.cx*p.w, dy=p.y-br.cy*p.h; const th=(br.angle||0)*Math.PI/180, c=Math.cos(th), s=Math.sin(th);
+        if(drag.mode==='rot'){ br.angle=Math.round(Math.atan2(dy,dx)*180/Math.PI+90); }
+        else { const lx=dx*c+dy*s, ly=-dx*s+dy*c; br.w=Math.max(0.04,Math.min(2,2*Math.abs(lx)/p.w)); br.h=Math.max(0.04,Math.min(2,2*Math.abs(ly)/p.h)); }
+      }
+      layout();
+    });
+    const end=e=>{ if(!drag) return; drag=null; try{ stage.releasePointerCapture(e.pointerId); }catch(_){ } repack(); };
+    stage.addEventListener('pointerup',end);
+    stage.addEventListener('pointercancel',end);
+
+    layout();
+    return wrap;
+  }
+
+  buildCropTool(m, repack, opts){
+    opts=opts||{};
+    const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;';
+    const stage=document.createElement('div');
+    stage.style.cssText='position:relative;display:inline-block;max-width:100%;background:#0f1116;border:1px solid var(--line2);border-radius:8px;overflow:hidden;touch-action:none;user-select:none;line-height:0;cursor:crosshair;'+(opts.maxWidth?('max-width:'+opts.maxWidth+';'):'');
+    const imgEl=document.createElement('img'); imgEl.draggable=false; imgEl.style.cssText='display:block;max-width:100%;width:auto;height:auto;pointer-events:none;'+(opts.maxImgHeight?('max-height:'+opts.maxImgHeight+';'):'');
+    stage.appendChild(imgEl);
+    const sel=document.createElement('div');
+    sel.style.cssText='position:absolute;border:1.5px solid var(--accent);box-shadow:0 0 0 9999px rgba(0,0,0,.45);box-sizing:border-box;cursor:move;';
+    const handles={};
+    [['nw','top:-7px;left:-7px;cursor:nwse-resize'],['ne','top:-7px;right:-7px;cursor:nesw-resize'],['sw','bottom:-7px;left:-7px;cursor:nesw-resize'],['se','bottom:-7px;right:-7px;cursor:nwse-resize']].forEach(p=>{ const hd=document.createElement('div'); hd.dataset.h=p[0]; hd.style.cssText='position:absolute;width:14px;height:14px;background:var(--accent);border:2px solid #1a1206;border-radius:50%;'+p[1]; sel.appendChild(hd); handles[p[0]]=hd; });
+    stage.appendChild(sel);
+    wrap.appendChild(stage);
+
+    let crop=(m.crop&&m.crop.w>0&&m.crop.h>0)?{x:m.crop.x,y:m.crop.y,w:m.crop.w,h:m.crop.h}:{x:0,y:0,w:1,h:1};
+    const clamp01=v=>Math.max(0,Math.min(1,v));
+    const layout=()=>{ sel.style.left=(crop.x*100)+'%'; sel.style.top=(crop.y*100)+'%'; sel.style.width=(crop.w*100)+'%'; sel.style.height=(crop.h*100)+'%'; };
+    const commit=()=>{ const full=crop.x<=0.001&&crop.y<=0.001&&crop.w>=0.999&&crop.h>=0.999; m.crop=full?null:{x:crop.x,y:crop.y,w:crop.w,h:crop.h}; repack(); };
+
+    let drag=null;
+    const frac=e=>{ const r=stage.getBoundingClientRect(); return { x:clamp01((e.clientX-r.left)/r.width), y:clamp01((e.clientY-r.top)/r.height) }; };
+    stage.addEventListener('pointerdown',e=>{
+      const f=frac(e); const hpos=e.target&&e.target.dataset?e.target.dataset.h:null;
+      if(hpos) drag={mode:'resize',pos:hpos};
+      else if(e.target===sel) drag={mode:'move',sx:f.x,sy:f.y,ox:crop.x,oy:crop.y};
+      else { drag={mode:'new',ax:f.x,ay:f.y}; crop={x:f.x,y:f.y,w:0,h:0}; layout(); }
+      stage.setPointerCapture(e.pointerId); e.preventDefault();
+    });
+    stage.addEventListener('pointermove',e=>{
+      if(!drag) return; const f=frac(e);
+      if(drag.mode==='move'){ crop.x=clamp01(Math.min(drag.ox+(f.x-drag.sx),1-crop.w)); crop.y=clamp01(Math.min(drag.oy+(f.y-drag.sy),1-crop.h)); }
+      else if(drag.mode==='new'){ crop.x=Math.min(drag.ax,f.x); crop.y=Math.min(drag.ay,f.y); crop.w=Math.abs(f.x-drag.ax); crop.h=Math.abs(f.y-drag.ay); }
+      else { const right=crop.x+crop.w, bottom=crop.y+crop.h, p=drag.pos; const min=0.02;
+        if(p[1]==='w'){ crop.x=Math.min(f.x,right-min); crop.w=right-crop.x; } else { crop.w=Math.max(min,f.x-crop.x); }
+        if(p[0]==='n'){ crop.y=Math.min(f.y,bottom-min); crop.h=bottom-crop.y; } else { crop.h=Math.max(min,f.y-crop.y); }
+      }
+      layout();
+    });
+    const end=()=>{ if(!drag) return; drag=null; if(crop.w<0.02||crop.h<0.02){ crop={x:0,y:0,w:1,h:1}; layout(); } commit(); };
+    stage.addEventListener('pointerup',end);
+    stage.addEventListener('pointercancel',end);
+
+    // render the (freely rotated) source as the crop backdrop — matches the print pipeline.
+    // The PNG encode is done async (toBlob) and coalesced to at most one run per frame, so
+    // dragging the rotate slider stays smooth (a synchronous toDataURL per input event froze
+    // the slider, badly so in Firefox).
+    const src=new Image();
+    let prevUrl=null, rafPending=false;
+    const sizeBackdrop=(natW,natH)=>{ if(opts.upscale){ const maxW=Math.min(window.innerWidth*0.86,900), maxH=window.innerHeight*0.74; const sc=Math.min(maxW/natW,maxH/natH); imgEl.style.maxWidth='none'; imgEl.style.maxHeight='none'; imgEl.style.width=Math.round(natW*sc)+'px'; imgEl.style.height=Math.round(natH*sc)+'px'; } };
+    const paint=()=>{
+      rafPending=false;
+      if(!src.complete||!src.naturalWidth) return;
+      const ang=parseFloat(m.rotate)||0;
+      if(((ang%360)+360)%360===0){ if(prevUrl){ URL.revokeObjectURL(prevUrl); prevUrl=null; } imgEl.src=m._sourceDataUrl; sizeBackdrop(src.width,src.height); return; }
+      const rad=ang*Math.PI/180, acos=Math.abs(Math.cos(rad)), asin=Math.abs(Math.sin(rad));
+      const cw=Math.max(1,Math.round(src.width*acos+src.height*asin)), ch=Math.max(1,Math.round(src.width*asin+src.height*acos));
+      const c=document.createElement('canvas'); c.width=cw; c.height=ch; const cx=c.getContext('2d');
+      cx.fillStyle='white'; cx.fillRect(0,0,cw,ch);
+      cx.translate(cw/2,ch/2); cx.rotate(rad); cx.drawImage(src,-src.width/2,-src.height/2);
+      sizeBackdrop(cw,ch);
+      c.toBlob(blob=>{ if(!blob) return; const u=URL.createObjectURL(blob); const old=prevUrl; prevUrl=u; imgEl.src=u; if(old) URL.revokeObjectURL(old); },'image/png');
+    };
+    const renderBackdrop=()=>{ if(rafPending) return; rafPending=true; requestAnimationFrame(paint); };
+    src.onload=renderBackdrop;
+    src.src=m._sourceDataUrl;
+
+    // free-rotation control (any angle, like a layer transform)
+    const rotRow=document.createElement('div'); rotRow.style.cssText='display:flex;align-items:center;gap:10px;width:100%;max-width:520px;';
+    const rlab=document.createElement('span'); rlab.className='flab'; rlab.textContent='Rotate'; rlab.style.flex='0 0 auto';
+    const slider=document.createElement('input'); slider.type='range'; slider.min='-180'; slider.max='180'; slider.step='1'; slider.style.cssText='flex:1 1 auto;accent-color:var(--accent);cursor:pointer;';
+    const num=document.createElement('input'); num.type='number'; num.className='tpf'; num.min='-180'; num.max='180'; num.style.cssText='flex:0 0 62px;width:62px;';
+    const deg=document.createElement('span'); deg.className='flab'; deg.textContent='°'; deg.style.flex='0 0 auto';
+    const norm180=a=>{ a=((a%360)+360)%360; return a>180?a-360:a; };
+    let debounce=null;
+    const applyAngle=(a,live)=>{
+      m.rotate=((a%360)+360)%360;
+      m.crop=null; crop={x:0,y:0,w:1,h:1}; layout();
+      renderBackdrop();
+      if(live){ clearTimeout(debounce); debounce=setTimeout(()=>repack(),40); }
+      else { clearTimeout(debounce); repack(); }
+    };
+    slider.value=String(norm180(parseFloat(m.rotate)||0));
+    num.value=slider.value;
+    slider.oninput=()=>{ num.value=slider.value; applyAngle(parseFloat(slider.value),true); };
+    slider.onchange=()=>applyAngle(parseFloat(slider.value),false);
+    num.oninput=()=>{ const v=parseFloat(num.value); if(!Number.isNaN(v)){ slider.value=String(Math.max(-180,Math.min(180,norm180(v)))); applyAngle(v,true); } };
+    num.onchange=()=>{ const v=parseFloat(num.value)||0; applyAngle(v,false); };
+    rotRow.appendChild(rlab); rotRow.appendChild(slider); rotRow.appendChild(num); rotRow.appendChild(deg);
+    wrap.appendChild(rotRow);
+
+    layout();
+    return wrap;
+  }
+
+  openCropModal(m, repack){
+    const root=document.querySelector('.tp-root')||document.body;
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:24px;';
+    const panel=document.createElement('div');
+    panel.style.cssText='background:var(--surface);border:1px solid var(--line2);border-radius:12px;padding:16px;max-width:92vw;max-height:92vh;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 70px rgba(0,0,0,.6);';
+    const head=document.createElement('div'); head.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:14px;';
+    const title=document.createElement('span'); title.className='flab'; title.textContent='Crop — drag to select, corners to resize';
+    const closeBtn=document.createElement('button'); closeBtn.className='btn primary'; closeBtn.textContent='Done';
+    head.appendChild(title); head.appendChild(closeBtn); panel.appendChild(head);
+    let tool=this.buildCropTool(m, repack, { upscale:true });
+    panel.appendChild(tool);
+    const foot=document.createElement('div'); foot.style.cssText='display:flex;gap:8px;justify-content:flex-end;';
+    const resetBtn=document.createElement('button'); resetBtn.className='btn ghost'; resetBtn.textContent='Reset crop';
+    resetBtn.onclick=()=>{ m.crop=null; repack(); const fresh=this.buildCropTool(m, repack, { upscale:true }); tool.replaceWith(fresh); tool=fresh; };
+    foot.appendChild(resetBtn); panel.appendChild(foot);
+    overlay.appendChild(panel);
+    this._modalOpen=true;
+    const close=()=>{ this._modalOpen=false; document.removeEventListener('keydown',onKey); overlay.remove(); this.renderInspector(); };
+    closeBtn.onclick=close;
+    overlay.onclick=(e)=>{ if(e.target===overlay) close(); };
+    const onKey=(e)=>{ if(e.key==='Escape'){ e.preventDefault(); close(); } };
+    document.addEventListener('keydown',onKey);
+    root.appendChild(overlay);
+  }
+
+  /* ---------- networking ---------- */
+  job(){ return { reset:true, modules:this.modules.map(serializeForSave) }; }
+  async expandModules(){
+    const out=[];
+    // The board's per-item "after" gap normally uses ESC J (dot feed), which many
+    // cheap clones silently ignore. We express every gap as N "lines" and emit it
+    // either as real newlines (works everywhere) or as ESC J dot feeds (exact
+    // spacing on printers that support it), per the Feed-mode toggle.
+    const mode=this.feedMode||'nl';
+    const DOTS_PER_LINE=24;
+    const escJ=(dots)=>{ dots=Math.max(0,dots|0); let h=''; while(dots>0){ const n=Math.min(255,dots); h+='1B4A'+n.toString(16).padStart(2,'0').toUpperCase(); dots-=n; } return h; };
+    const append=(lines)=>{ lines=parseInt(lines,10)||0; if(lines<=0) return; if(mode==='dots'){ const hex=escJ(lines*DOTS_PER_LINE); if(hex) out.push({type:'raw',hex:hex}); } else { out.push({type:'feed',lines:lines}); } };
+    const push=(pm)=>{
+      // Codes the board can't print natively (or that the user forced) are
+      // rasterised client-side and sent as image modules.
+      if(pm.type==='barcode' && (pm.asImage || !NATIVE_BARCODE.has(String(pm.kind||'').toLowerCase()))) pm=barcodeToImageModule(pm);
+      else if(pm.type==='qr' && pm.asImage) pm=qrToImageModule(pm);
+      if(pm.type==='feed'){ append(pm.lines); return; }
+      const after=parseInt(pm.after,10)||0;
+      if(after>0){ pm.after=0; out.push(pm); append(after); } else { out.push(pm); }
+    };
+    for(const m of this.modules){
+      if(m.type!=='plugin'){ push(moduleToPrint(m)); continue; }
+      const p=pluginFor(m);
+      if(!p){ out.push({type:'text',text:'[plugin missing: '+m.plugin+']'}); continue; }
+      let built;
+      try{ built=await p.build(m); }catch(e){ built=[{type:'text',text:'[plugin '+p.id+' failed: '+(e.message||e)+']'}]; }
+      const arr=Array.isArray(built)?built:[built];
+      for(const bm of arr) push(moduleToPrint(bm));
+    }
+    return out;
+  }
+  async printJob(){ return { reset:true, modules:await this.expandModules() }; }
+  async post(path,data){ const res=await fetch(this.baseUrl()+path,{ method:'POST', headers:{'Content-Type':'application/json'}, body:data?JSON.stringify(data):'{}' }); const text=await res.text(); let obj; try{ obj=JSON.parse(text); }catch(_){ obj={ok:res.ok,raw:text}; } if(!res.ok||obj.ok===false) throw new Error(obj.error||res.statusText||'request failed'); return obj; }
+  async ping(){ this.setStatus('Pinging...'); const res=await fetch(this.baseUrl()+'/ping'); const obj=await res.json(); this.setStatus('Connected: '+(obj.ip||'ok'),'ok'); }
+  handleProgressEvent(ev){ if(ev.type==='start'){ this.showProgress(2); this.setStatus('Printing 0/'+ev.modules+'...'); } else if(ev.type==='progress'){ this.showProgress(ev.percent); this.setStatus('Printing '+ev.done+'/'+ev.modules+'... ('+ev.percent+'%)'); } else if(ev.type==='done'){ this.showProgress(100); } }
+  async printNow(){
+    this.setStatus('Building job...');
+    const data=await this.printJob();
+    const bodyBytes=new Blob([JSON.stringify(data)]).size;
+    if(bodyBytes>MAX_BODY_BYTES) throw new Error('Job is ~'+Math.round(bodyBytes/1000)+' KB, over the '+Math.round(MAX_BODY_BYTES/1000)+' KB board limit. Remove or shrink image(s).');
+    this.setStatus('Sending print job...'); this.showProgress(0);
+    let res;
+    try{ res=await fetch(this.baseUrl()+'/print',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); }catch(e){ this.hideProgress(); throw e; }
+    if(!res.ok){ this.hideProgress(); throw new Error('HTTP '+res.status); }
+    let done=null;
+    const consume=(line)=>{ const t=line.trim(); if(!t) return; let ev; try{ ev=JSON.parse(t); }catch(_){ return; } this.handleProgressEvent(ev); if(ev.type==='done') done=ev; };
+    if(res.body&&res.body.getReader){
+      const reader=res.body.getReader(); const dec=new TextDecoder(); let buf='';
+      for(;;){ const r=await reader.read(); if(r.done) break; buf+=dec.decode(r.value,{stream:true}); let nl; while((nl=buf.indexOf('\n'))>=0){ consume(buf.slice(0,nl)); buf=buf.slice(nl+1); } }
+      consume(buf);
+    } else { (await res.text()).split('\n').forEach(consume); }
+    this.showProgress(100); setTimeout(()=>this.hideProgress(),900);
+    if(done&&done.errors&&done.errors.length) this.setStatus('Printed '+done.modules+' module(s), '+done.errors.length+' error(s).','err');
+    else if(done) this.setStatus('Printed '+done.modules+' module(s).','ok');
+    else this.setStatus('Print finished.','ok');
+  }
+  async printTest(){ this.setStatus('Printing self-test...'); await this.post('/test',{}); this.setStatus('Self-test sent.','ok'); }
+
+  saveJson(){
+    const def=this._lastSaveName||'thermal_print_job';
+    let name=window.prompt('Save as — file name:', def);
+    if(name===null){ this.setStatus('Save cancelled.'); return; }
+    name=String(name).trim().replace(/[\\/:*?"<>|]+/g,'_')||'thermal_print_job';
+    if(!/\.json$/i.test(name)) name+='.json';
+    this._lastSaveName=name.replace(/\.json$/i,'');
+    const blob=new Blob([JSON.stringify(this.job(),null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href); this.setStatus('Saved '+name,'ok');
+  }
+  loadJsonFile(file){
+    const reader=new FileReader();
+    reader.onload=()=>{ let obj; try{ obj=JSON.parse(reader.result); }catch(e){ this.setStatus('Could not load JSON: '+e.message,'err'); return; } if(!obj||!Array.isArray(obj.modules)){ this.setStatus('Could not load JSON: no "modules" array found.','err'); return; } this.modules=obj.modules.map(m=>{ const mm=Object.assign({},m); if(Array.isArray(mm.lines)){ mm.text=mm.lines.join('\n'); delete mm.lines; } if(mm.sourceDataUrl){ mm._sourceDataUrl=mm.sourceDataUrl; delete mm.sourceDataUrl; } return this.withId(mm); }); this.selectedId=this.modules.length?this.modules[0].id:null; this.renderPaper(); this.renderInspector(); for(const mm of this.modules){ if(mm.type==='image'&&mm._sourceDataUrl) this.convertDataUrl(mm._sourceDataUrl,mm.id); } this.setStatus('Loaded '+this.modules.length+' module(s) from '+file.name+'.','ok'); };
+    reader.onerror=()=>this.setStatus('Could not read file.','err');
+    reader.readAsText(file);
+  }
+  convertImageFile(file,id){ const reader=new FileReader(); reader.onload=()=>{ const m=this.modules.find(x=>x.id===id); if(m){ m._sourceDataUrl=reader.result; m.filename=file.name; m.crop=null; } if(this.selectedId===id) this.renderInspector(); this.convertDataUrl(reader.result,id); }; reader.readAsDataURL(file); }
+  convertDataUrl(dataUrl,id){
+    const m=this.modules.find(x=>x.id===id); if(!m) return;
+    const img=new Image();
+    img.onload=()=>{
+      const maxHeight=Math.max(16,parseInt(m.maxHeight,10)||384);
+      // 1. free rotation by any angle into a white-backed bounding box
+      const rad=((parseFloat(m.rotate)||0))*Math.PI/180;
+      const acos=Math.abs(Math.cos(rad)), asin=Math.abs(Math.sin(rad));
+      const rw=Math.max(1,Math.round(img.width*acos+img.height*asin));
+      const rh=Math.max(1,Math.round(img.width*asin+img.height*acos));
+      const rcan=document.createElement('canvas'); rcan.width=rw; rcan.height=rh;
+      const rctx=rcan.getContext('2d');
+      rctx.fillStyle='white'; rctx.fillRect(0,0,rw,rh);
+      rctx.translate(rw/2,rh/2); rctx.rotate(rad); rctx.drawImage(img,-img.width/2,-img.height/2);
+      // 2. crop (fractions of the rotated image)
+      const cr=(m.crop&&m.crop.w>0&&m.crop.h>0)?m.crop:{x:0,y:0,w:1,h:1};
+      const sx=Math.max(0,Math.round(cr.x*rw)), sy=Math.max(0,Math.round(cr.y*rh));
+      const sw=Math.max(1,Math.min(rw-sx,Math.round(cr.w*rw))), sh=Math.max(1,Math.min(rh-sy,Math.round(cr.h*rh)));
+      // 3. scale: target a fraction of the paper width, then fit within paper width and max height
+      const scalePct=Math.max(5,Math.min(100,parseInt(m.scale,10)||100));
+      const targetW=Math.max(1,Math.round(PRINTER_WIDTH*scalePct/100));
+      let s=Math.min(targetW/sw, maxHeight/sh);
+      const w=Math.max(1,Math.min(PRINTER_WIDTH,Math.round(sw*s)));
+      const h=Math.max(1,Math.round(sh*s));
+      // 4. place on the full-width paper canvas with horizontal alignment
+      const align=String(m.imgAlign||'center');
+      const xoff=align==='left'?0:align==='right'?(PRINTER_WIDTH-w):Math.floor((PRINTER_WIDTH-w)/2);
+      const canvas=document.createElement('canvas'); canvas.width=PRINTER_WIDTH; canvas.height=h;
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      ctx.fillStyle='white'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(rcan,sx,sy,sw,sh,xoff,0,w,h);
+      const image=ctx.getImageData(0,0,canvas.width,canvas.height); const data=image.data;
+      const diffuse=m.dither==='diffusion';
+      // Diffusion keeps a fixed mid cutoff and is controlled by the Brightness offset
+      // instead — moving the FS threshold barely changes the average density.
+      const threshold=diffuse?128:Math.max(1,Math.min(254,parseInt(m.threshold,10)||150));
+      const brightness=diffuse?Math.max(-100,Math.min(100,parseInt(m.brightness,10)||0)):0;
+      const widthBytes=Math.ceil(PRINTER_WIDTH/8); const packed=new Uint8Array(widthBytes*h);
+      const lum=new Float32Array(PRINTER_WIDTH*h);
+      for(let p=0,n=lum.length;p<n;p++){ const i=p*4; lum[p]=data[i]*0.299+data[i+1]*0.587+data[i+2]*0.114+brightness; }
+      // Local brightness: a single rotatable, feathered rectangle adds its amount only inside the
+      // region (works in both dither modes — a luminance offset shifts the local cutoff/density).
+      const br=m.brightRegion;
+      if(br && (parseFloat(br.amount)||0)!==0 && br.w>0 && br.h>0){
+        const amt=Math.max(-150,Math.min(150,parseFloat(br.amount)||0));
+        const cxPx=(br.cx||0)*PRINTER_WIDTH, cyPx=(br.cy||0)*h;
+        const halfW=Math.max(1,(br.w/2)*PRINTER_WIDTH), halfH=Math.max(1,(br.h/2)*h);
+        const th=(br.angle||0)*Math.PI/180, cosT=Math.cos(th), sinT=Math.sin(th);
+        const f=Math.max(0,Math.min(1,br.feather==null?0.4:br.feather));
+        for(let y=0;y<h;y++){ for(let x=0;x<PRINTER_WIDTH;x++){ const dx=x-cxPx, dy=y-cyPx; const lx=dx*cosT+dy*sinT, ly=-dx*sinT+dy*cosT; const t=Math.max(Math.abs(lx)/halfW,Math.abs(ly)/halfH); if(t<=1){ const wgt=f<=0?1:Math.max(0,Math.min(1,(1-t)/f)); lum[y*PRINTER_WIDTH+x]+=amt*wgt; } } }
+      }
+      for(let y=0;y<h;y++){ for(let x=0;x<PRINTER_WIDTH;x++){ const p=y*PRINTER_WIDTH+x; let black; if(diffuse){ const oldVal=lum[p]; const newVal=oldVal<threshold?0:255; const err=oldVal-newVal; if(x+1<PRINTER_WIDTH) lum[p+1]+=err*7/16; if(y+1<h){ if(x>0) lum[p+PRINTER_WIDTH-1]+=err*3/16; lum[p+PRINTER_WIDTH]+=err*5/16; if(x+1<PRINTER_WIDTH) lum[p+PRINTER_WIDTH+1]+=err*1/16; } black=newVal===0; } else { black=lum[p]<threshold; } if(m.invert) black=!black; const i=p*4; const out=black?0:255; data[i]=data[i+1]=data[i+2]=out; data[i+3]=255; if(black) packed[y*widthBytes+(x>>3)]|=0x80>>(x&7); } }
+      ctx.putImageData(image,0,0);
+      m.width=PRINTER_WIDTH; m.height=h; m.data=bytesToBase64(packed); m.previewDataUrl=canvas.toDataURL('image/png');
+      this.renderPaper(); this.refreshImageInfo(m); this.refreshWarnings();
+      // keep the brighten-region tool's backdrop in sync with the latest dithered output
+      if(this.selectedId===id && this.els.inspector){ const bb=this.els.inspector.querySelector('img[data-bright-backdrop="'+id+'"]'); if(bb) bb.src=m.previewDataUrl; }
+    };
+    img.src=dataUrl;
+  }
+
+  loadDemo(){
+    this.modules=[
+      this.withId({ type:'heading', text:'THE DEMO CAFE', size:2, bold:true, rule:true, char:'=', cp437:false, after:1 }),
+      this.withId({ type:'section', title:'ORDER', char:'-', cp437:false, after:1 }),
+      this.withId({ type:'table', rows:['Item|Qty|Total','Latte|2|$9.00','Croissant|1|$3.50','Cookie|3|$6.00'], header:true, aligns:'LCR', gap:1, encoding:'cp437', after:1 }),
+      this.withId({ type:'rule', char:'-', width:32, justify:'left', cp437:false, after:0 }),
+      this.withId({ type:'columns', cells:[{ text:'TOTAL', align:'left', width:0 }, { text:'$18.50', align:'right', width:0 }], gap:1, encoding:'cp437', after:1 }),
+      this.withId({ type:'keyvalue', text:'Paid: Card\nServer: Sam', sep:':', leader:'.', encoding:'cp437', after:1 }),
+      this.withId({ type:'feed', lines:1 }),
+      this.withId({ type:'rating', mode:'stars', value:5, max:5, width:10, label:'Rate us:', justify:'center', after:1 }),
+      this.withId({ type:'qr', data:'https://example.com/feedback', size:5, ecc:'M', justify:'center', after:1 }),
+      this.withId({ type:'feed', lines:1 }),
+      this.withId({ type:'barcode', data:'ORDER0042', kind:'code39', bar_width:2, bar_height:80, hri:'below', justify:'center', after:1 }),
+      this.withId({ type:'feed', lines:1 }),
+      this.withId({ type:'text', text:'Thank you, come again!', justify:'center', encoding:'cp437', after:1 }),
+      this.withId({ type:'feed', lines:1 }),
+      this.withId({ type:'plugin', plugin:'datetime', label:'PRINTED', mode:'datetime' }),
+      this.withId({ type:'tearoff', char:'-', label:'TEAR HERE', cp437:false, after:0 }),
+    ];
+    this.selectedId=this.modules[0].id;
+    this.renderPaper(); this.renderInspector();
+  }
+}
+
+window.mountThermalComposer = function(els){ return new App(els); };
+})();
+
+/* ===== Bootstrap: wire the redesigned shell to the ported engine ===== */
+(function () {
+  const els = {
+    dot:          document.getElementById('tpDot'),
+    baseUrl:      document.getElementById('tpBaseUrl'),
+    status:       document.getElementById('tpStatus'),
+    search:       document.getElementById('tpSearch'),
+    library:      document.getElementById('tpLibrary'),
+    progress:     document.getElementById('tpProgress'),
+    progressFill: document.getElementById('tpProgressFill'),
+    paper:        document.getElementById('tpPaper'),
+    inspector:    document.getElementById('tpInspector'),
+    loadFile:     document.getElementById('tpLoadFile'),
+  };
+
+  const app = window.mountThermalComposer(els);
+
+  const on = (id, ev, method) => {
+    const node = document.getElementById(id);
+    if (node) node.addEventListener(ev, (e) => app[method](e));
+  };
+  on('tpBaseUrl',  'input',  'onBaseInput');
+  on('tpSearch',   'input',  'onSearch');
+  on('tpPing',     'click',  'onPing');
+  on('tpPrint',    'click',  'onPrint');
+  on('tpDemo',     'click',  'onDemo');
+  on('tpClear',    'click',  'onClear');
+  on('tpSave',     'click',  'onSave');
+  on('tpLoad',     'click',  'onLoad');
+  on('tpTest',     'click',  'onTest');
+  on('tpLoadFile', 'change', 'onLoadFile');
+})();
+</script>
+</body>
+</html>
