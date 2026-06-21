@@ -52,6 +52,9 @@ the XIAO (it joins `dom`), join `dom` on your phone, and open
 | Status page | `http://192.168.50.1/status` |
 | Printer URL to type in the app | `http://192.168.50.1` |
 
+> ⚠️ If your **home** Wi-Fi is also named `dom`, only use the kit **away from
+> home** — two identical networks in range will fight. See [GUIDE.md](GUIDE.md).
+
 ## Finding the printer — automatic
 
 You **don't** need to know the printer's IP or MAC. `find-printer.sh` (run by

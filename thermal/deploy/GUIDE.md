@@ -9,6 +9,24 @@ The end result: the Pi is a self-contained Wi-Fi network called **`dom`**. Your
 phone and the printer both join it; you open a web page on the Pi and print. No
 internet required in the field.
 
+> ## ⚠️ Read this first — your home Wi-Fi is also called `dom`
+>
+> The XIAO is hard-wired to join **`dom` / `test4test`**, and your home network
+> happens to use the same name (and password). That's workable, but it means the
+> kit and your home network are *identical twins* — devices can't tell them
+> apart. So:
+>
+> - **Only use the kit away from home** (backpack / out and about), where the
+>   home router is out of range. That's your use case, so you're fine.
+> - **Never run the kit while your home `dom` router is in range.** Both being on
+>   at once makes your phone and the printer randomly attach to whichever is
+>   stronger, which breaks things in confusing ways.
+> - **Do the install at home** (it needs internet), but **do the first real test
+>   away from home** — or temporarily power off your home router — otherwise your
+>   phone may join the home router instead of the Pi.
+> - Upside: because the name *and* password match home, your iPhone will
+>   **auto-join the kit using the saved password** — no need to re-enter it.
+
 ---
 
 ## What you need
@@ -104,16 +122,22 @@ sudo reboot
 
 ## Phase 5 — Bring up the printer and phone
 
+> **Do this away from your home router** (or with it powered off). At home, both
+> your home network and the kit are `dom`, so your phone may join the wrong one
+> and you'll be chasing ghosts. Out of range of home, this is foolproof.
+
 1. **Power on the XIAO.** It joins `dom` by itself (that's what its firmware is
    set to). Give it ~15 seconds.
 2. **On your phone**, open Wi-Fi settings and join:
    - Network: **`dom`**
-   - Password: **`test4test`**
+   - Password: **`test4test`** (your phone likely auto-joins, since it's the
+     same as your saved home network)
    - iOS will say “No Internet Connection” — that's fine, stay on it.
 3. Open Safari and go to:
    ```
    http://192.168.50.1/status
    ```
+   - If the page loads at all, you're on the **kit** (not the home router) — good.
    - 🟢 **Printer connected** → discovery found the XIAO. 
    - 🟠 **Searching…** → wait ~10 s and let the page refresh; make sure the XIAO
      is powered and joined `dom`.
@@ -171,10 +195,18 @@ sudo rfkill unblock wlan
 - Make sure nothing **else** on the network also answers `/ping` (discovery
   picks the first device that does).
 
-**Two networks called `dom`.**
-If your XIAO previously joined a different real router also named `dom`, or you
-left another AP up, the phone/printer may attach to the wrong one. Make sure the
-Pi is the only thing broadcasting `dom` when you're using the kit.
+**Your home Wi-Fi is also `dom` (same name and password).**
+This is expected in your setup. They're indistinguishable to your devices, so:
+- Use the kit **away from home**; that's the whole point and it sidesteps the
+  clash completely.
+- If you must test near home, **power off the home router** first, or you'll get
+  intermittent failures as the phone/printer flip between the two.
+- Quick check you're on the right one: if `http://192.168.50.1/` loads, you're on
+  the kit. If it times out, your phone joined the home router instead — forget/
+  rejoin Wi-Fi away from home.
+- Don't bother trying to use the kit *at* home — the two networks fighting isn't
+  worth it; at home the board is on your home LAN and the mixed-content block is
+  a separate problem.
 
 **iPhone keeps dropping `dom` / jumping to cellular.**
 iOS dislikes networks with no internet. Stay on the Wi-Fi screen until the page
