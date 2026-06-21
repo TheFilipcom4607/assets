@@ -73,27 +73,54 @@
   .tpView{display:none}
   .tpTabs{display:none}
   @media (max-width:760px){
-    .tp-root{height:100dvh}
-    /* Top bar wraps and stays compact */
-    .tp-header{flex-wrap:wrap;gap:8px 10px !important;padding:9px 12px !important}
-    .tp-header .chip{margin-left:0 !important}
-    #tpBaseUrl{width:130px !important}
-    .tp-header #tpStatus{max-width:150px !important}
+    .tp-root{height:100vh;height:100dvh}
 
-    /* Collapse the 3 columns into a single swappable pane */
+    /* --- Top bar: two tidy rows, clear of the iOS status bar / notch --- */
+    .tp-header{
+      flex-wrap:wrap;gap:8px 10px !important;
+      padding:calc(9px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 9px calc(14px + env(safe-area-inset-left)) !important;
+    }
+    /* Row 1: title (left) + status & Print (right). Row 2: IP, Ping, Polaroid. */
+    .tp-header > div:first-child{flex:1 1 auto;min-width:0}   /* title grows, pushes Print right */
+    .tp-header .chip{order:1;flex:1 1 180px;margin-left:0 !important} /* IP field grows on row 2 */
+    #tpPing{order:1}
+    #tpPolaroid{order:1}
+    #tpBaseUrl{flex:1 1 auto;width:auto !important;min-width:0}
+    .tp-header #tpStatus{max-width:130px !important}
+
+    /* --- Collapse the 3 columns into a single swappable pane --- */
     .tp-grid{grid-template-columns:1fr !important;grid-template-rows:minmax(0,1fr) !important;min-height:0}
     .tp-pane{display:none !important;border:0 !important;min-width:0;min-height:0}
     #tpViewLib:checked   ~ .tp-grid .tp-pane-lib{display:flex !important}
     #tpViewPaper:checked ~ .tp-grid .tp-pane-paper{display:flex !important}
     #tpViewInsp:checked  ~ .tp-grid .tp-pane-insp{display:flex !important}
 
-    /* Paper: keep full 384px print width intact, scroll instead of clipping */
-    .tp-paper-scroll{justify-content:flex-start !important;padding:12px !important}
-    #tpPaper{width:404px !important;max-width:none !important;margin:0 !important;padding:14px 10px 32px !important}
+    /* --- Paper toolbar: wrap neatly, drop the desktop divider rules --- */
+    .tp-paper-toolbar{gap:6px !important;padding:8px 12px !important}
+    .tp-paper-toolbar .btn{padding:7px 10px}
+    .tp-div{display:none !important}
+    #tpTest{margin-left:0 !important}
 
-    /* Bottom tab bar */
-    .tpTabs{display:flex;border-top:1px solid var(--line);background:#101218;padding:6px;gap:6px;padding-bottom:max(6px,env(safe-area-inset-bottom))}
-    .tpTabs label{flex:1;text-align:center;padding:11px 6px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line2);background:#0f1116;cursor:pointer;user-select:none;-webkit-user-select:none}
+    /* --- Paper: scaled with JS (--tp-fit) so the true 384px print width
+           always fits the screen — no horizontal panning --- */
+    .tp-paper-scroll{padding:14px 12px calc(24px + env(safe-area-inset-bottom)) !important}
+    #tpPaper{zoom:var(--tp-fit,1)}
+
+    /* --- Bottom tab bar --- */
+    .tpTabs{
+      display:flex;border-top:1px solid var(--line);background:#101218;gap:6px;
+      padding:6px calc(8px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left));
+    }
+    .tpTabs label{
+      flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+      padding:11px 6px;border-radius:9px;font-size:12.5px;font-weight:600;
+      color:var(--muted);border:1px solid var(--line2);background:#0f1116;
+      cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;
+    }
+    .tpTabs label::before{font-size:13px;opacity:.85}
+    .tpTabs label[for=tpViewLib]::before{content:"\25A4"}
+    .tpTabs label[for=tpViewPaper]::before{content:"\25AF"}
+    .tpTabs label[for=tpViewInsp]::before{content:"\270E"}
     #tpViewLib:checked   ~ .tpTabs label[for=tpViewLib],
     #tpViewPaper:checked ~ .tpTabs label[for=tpViewPaper],
     #tpViewInsp:checked  ~ .tpTabs label[for=tpViewInsp]{background:var(--accent);border-color:var(--accent);color:var(--onacc)}
@@ -138,14 +165,14 @@
 
     <!-- PAPER -->
     <section class="tp-pane tp-pane-paper" style="display:flex;flex-direction:column;min-height:0;">
-      <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;">
+      <div class="tp-paper-toolbar" style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;">
         <button class="btn ghost" id="tpDemo">Demo</button>
         <button class="btn ghost" id="tpClear">Clear</button>
-        <div style="width:1px;align-self:stretch;background:var(--line2);margin:0 4px;"></div>
+        <div class="tp-div" style="width:1px;align-self:stretch;background:var(--line2);margin:0 4px;"></div>
         <button class="btn ghost" id="tpSave">Save JSON</button>
         <button class="btn ghost" id="tpLoad">Load JSON</button>
         <input type="file" accept="application/json" style="display:none" id="tpLoadFile">
-        <div style="width:1px;align-self:stretch;background:var(--line2);margin:0 4px;"></div>
+        <div class="tp-div" style="width:1px;align-self:stretch;background:var(--line2);margin:0 4px;"></div>
         <span class="flab" style="margin:0 2px;">Feed</span>
         <div class="seg" id="tpFeedMode" title="How blank space (feed / after) is sent. Newlines work on cheap clones; Dots use ESC J for exact spacing.">
           <button data-mode="nl">⏎ Newlines</button>
@@ -1466,6 +1493,27 @@ window.mountThermalComposer = function(els){ return new App(els); };
     if (paper) paper.addEventListener('click', (e) => {
       if (mq.matches && e.target.closest('.prevItem')) showPane('tpViewInsp');
     });
+
+    /* Fit the fixed 384px-wide receipt preview to the screen, so the paper is
+       never wider than the viewport (no horizontal panning). Only scales down,
+       never up, and is cleared on desktop. */
+    const PAPER_NATURAL = 432;     // paper width incl. its own padding
+    const scroll = paper && paper.closest('.tp-paper-scroll');
+    const fitPaper = () => {
+      if (!paper) return;
+      if (!mq.matches) { paper.style.removeProperty('--tp-fit'); return; }
+      // clientWidth is 0 while the paper pane is on an inactive tab — fall back
+      // to the viewport so the value is still correct when the user returns.
+      const box = (scroll && scroll.clientWidth) ? scroll.clientWidth : window.innerWidth;
+      const scale = Math.min(1, Math.max(0.4, (box - 24) / PAPER_NATURAL));
+      paper.style.setProperty('--tp-fit', String(scale));
+    };
+    fitPaper();
+    window.addEventListener('resize', fitPaper);
+    window.addEventListener('orientationchange', fitPaper);
+    (mq.addEventListener ? mq.addEventListener('change', fitPaper) : mq.addListener(fitPaper));
+    const paperTab = document.getElementById('tpViewPaper');
+    if (paperTab) paperTab.addEventListener('change', fitPaper);
   })();
 })();
 
