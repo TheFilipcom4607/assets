@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thermal Printer Composer</title>
+<!-- PWA / installable: lets the UI be added to the iPhone home screen and run offline -->
+<meta name="theme-color" content="#0e0f13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Thermal">
+<link rel="apple-touch-icon" id="tpAppleIcon">
+<link rel="icon" id="tpFavicon">
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
@@ -74,6 +82,7 @@
       <input class="tpf" id="tpBaseUrl" placeholder="http://192.168.1.123" autocomplete="off" style="border:0;background:transparent;padding:0;width:178px;font-family:ui-monospace,monospace;font-size:12px;border-radius:0;">
     </div>
     <button class="btn ghost" id="tpPing">Ping</button>
+    <button class="btn ghost" id="tpPolaroid" title="One-tap photo printing (portable kit)">📷 Polaroid</button>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
       <span id="tpStatus" style="font-size:12px;color:var(--muted);max-width:320px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
       <button class="btn primary" id="tpPrint" style="padding:8px 20px;">Print</button>
@@ -568,6 +577,10 @@ class App {
     this.renderLibrary();
     this.renderPaper();
     this.renderInspector();
+    // Polaroid quick-print: open straight into it via #polaroid (an iPhone Shortcut can
+    // just open the URL with that hash), and react to hash changes while running.
+    window.addEventListener('hashchange',()=>{ if(location.hash==='#polaroid') this.openPolaroid(); else this.closePolaroid(); });
+    if(location.hash==='#polaroid') this.openPolaroid();
   }
   handleKeyDown(e){
     if(this._modalOpen) return;
@@ -608,6 +621,7 @@ class App {
   onBaseInput(){ try{ localStorage.setItem('thermalPrinterBaseUrl', this.els.baseUrl.value.trim()); }catch(e){} }
   onSearch(){ this.search=this.els.search.value; this.renderLibrary(); }
   onPing(){ this.ping().catch(e=>this.setStatus(e.message,'err')); }
+  onPolaroid(){ this.openPolaroid(); }
   onPrint(){
     if(this._printing) return;
     this._printing=true;
@@ -835,11 +849,12 @@ class App {
     fileField.addEventListener('drop',e=>{ fileField.style.outline=''; const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f&&/^image\//.test(f.type||'')){ e.preventDefault(); this.convertImageFile(f,m.id); } });
     add(fileField);
     const seg=document.createElement('div'); seg.className='seg';
-    [['threshold','Threshold (logos)'],['diffusion','Diffusion (photos)']].forEach(pair=>{ const val=pair[0],lbl=pair[1]; const b=document.createElement('button'); b.textContent=lbl; b.className=(m.dither||'threshold')===val?'active':''; b.title=val==='diffusion'?'Floyd–Steinberg error diffusion — keeps shades of gray (best for photos)':'Hard black/white cutoff — crisp edges (best for line art and logos)'; b.onclick=()=>{ m.dither=val; this.renderInspector(); repack(); }; seg.appendChild(b); });
+    const DITHER_TITLES={ threshold:'Hard black/white cutoff — crisp edges (best for line art and logos)', diffusion:'Floyd–Steinberg error diffusion — keeps shades of gray (best for photos)', atkinson:'Atkinson dithering — lighter, higher-contrast diffusion that suits thermal photos (less ink, less mud)' };
+    [['threshold','Threshold'],['diffusion','Diffusion'],['atkinson','Atkinson']].forEach(pair=>{ const val=pair[0],lbl=pair[1]; const b=document.createElement('button'); b.textContent=lbl; b.className=(m.dither||'threshold')===val?'active':''; b.title=DITHER_TITLES[val]||''; b.onclick=()=>{ m.dither=val; this.renderInspector(); repack(); }; seg.appendChild(b); });
     add(this.field('Dither', seg));
     const row=document.createElement('div'); row.style.cssText='display:flex;flex-wrap:wrap;gap:13px 14px;align-items:flex-end;';
     const numCtrl=(label,value,min,max,onInput)=>{ const inp=document.createElement('input'); inp.className='tpf'; inp.type='number'; inp.min=min; inp.max=max; inp.value=value; inp.style.width='100%'; inp.oninput=()=>onInput(inp.value); return this.field(label,inp,'0 1 110px'); };
-    if(m.dither==='diffusion'){
+    if(m.dither==='diffusion'||m.dither==='atkinson'){
       // Real luminance offset applied before dithering. Unlike the threshold, this
       // genuinely lightens/darkens the printed result (positive = brighter print).
       const bWrap=document.createElement('div'); bWrap.style.cssText='display:flex;align-items:center;gap:9px;';
@@ -1170,8 +1185,8 @@ class App {
     reader.readAsText(file);
   }
   convertImageFile(file,id){ const reader=new FileReader(); reader.onload=()=>{ const m=this.modules.find(x=>x.id===id); if(m){ m._sourceDataUrl=reader.result; m.filename=file.name; m.crop=null; } if(this.selectedId===id) this.renderInspector(); this.convertDataUrl(reader.result,id); }; reader.readAsDataURL(file); }
-  convertDataUrl(dataUrl,id){
-    const m=this.modules.find(x=>x.id===id); if(!m) return;
+  convertDataUrl(dataUrl,id,done){
+    const m=this.modules.find(x=>x.id===id)||(this._polaroidModule&&this._polaroidModule.id===id?this._polaroidModule:null); if(!m) return;
     const img=new Image();
     img.onload=()=>{
       const maxHeight=Math.max(16,parseInt(m.maxHeight,10)||384);
@@ -1202,9 +1217,10 @@ class App {
       ctx.fillStyle='white'; ctx.fillRect(0,0,canvas.width,canvas.height);
       ctx.drawImage(rcan,sx,sy,sw,sh,xoff,0,w,h);
       const image=ctx.getImageData(0,0,canvas.width,canvas.height); const data=image.data;
-      const diffuse=m.dither==='diffusion';
-      // Diffusion keeps a fixed mid cutoff and is controlled by the Brightness offset
-      // instead — moving the FS threshold barely changes the average density.
+      const diffuse=m.dither==='diffusion'||m.dither==='atkinson';
+      const atkinson=m.dither==='atkinson';
+      // Error-diffusion modes keep a fixed mid cutoff and are steered by the Brightness
+      // offset instead — moving the FS threshold barely changes the average density.
       const threshold=diffuse?128:Math.max(1,Math.min(254,parseInt(m.threshold,10)||150));
       const brightness=diffuse?Math.max(-100,Math.min(100,parseInt(m.brightness,10)||0)):0;
       const widthBytes=Math.ceil(PRINTER_WIDTH/8); const packed=new Uint8Array(widthBytes*h);
@@ -1221,15 +1237,115 @@ class App {
         const f=Math.max(0,Math.min(1,br.feather==null?0.4:br.feather));
         for(let y=0;y<h;y++){ for(let x=0;x<PRINTER_WIDTH;x++){ const dx=x-cxPx, dy=y-cyPx; const lx=dx*cosT+dy*sinT, ly=-dx*sinT+dy*cosT; const t=Math.max(Math.abs(lx)/halfW,Math.abs(ly)/halfH); if(t<=1){ const wgt=f<=0?1:Math.max(0,Math.min(1,(1-t)/f)); lum[y*PRINTER_WIDTH+x]+=amt*wgt; } } }
       }
-      for(let y=0;y<h;y++){ for(let x=0;x<PRINTER_WIDTH;x++){ const p=y*PRINTER_WIDTH+x; let black; if(diffuse){ const oldVal=lum[p]; const newVal=oldVal<threshold?0:255; const err=oldVal-newVal; if(x+1<PRINTER_WIDTH) lum[p+1]+=err*7/16; if(y+1<h){ if(x>0) lum[p+PRINTER_WIDTH-1]+=err*3/16; lum[p+PRINTER_WIDTH]+=err*5/16; if(x+1<PRINTER_WIDTH) lum[p+PRINTER_WIDTH+1]+=err*1/16; } black=newVal===0; } else { black=lum[p]<threshold; } if(m.invert) black=!black; const i=p*4; const out=black?0:255; data[i]=data[i+1]=data[i+2]=out; data[i+3]=255; if(black) packed[y*widthBytes+(x>>3)]|=0x80>>(x&7); } }
+      const W=PRINTER_WIDTH;
+      for(let y=0;y<h;y++){ for(let x=0;x<W;x++){ const p=y*W+x; let black; if(diffuse){ const oldVal=lum[p]; const newVal=oldVal<threshold?0:255; const err=oldVal-newVal; if(atkinson){ const e=err/8; if(x+1<W) lum[p+1]+=e; if(x+2<W) lum[p+2]+=e; if(y+1<h){ if(x>0) lum[p+W-1]+=e; lum[p+W]+=e; if(x+1<W) lum[p+W+1]+=e; } if(y+2<h) lum[p+2*W]+=e; } else { if(x+1<W) lum[p+1]+=err*7/16; if(y+1<h){ if(x>0) lum[p+W-1]+=err*3/16; lum[p+W]+=err*5/16; if(x+1<W) lum[p+W+1]+=err*1/16; } } black=newVal===0; } else { black=lum[p]<threshold; } if(m.invert) black=!black; const i=p*4; const out=black?0:255; data[i]=data[i+1]=data[i+2]=out; data[i+3]=255; if(black) packed[y*widthBytes+(x>>3)]|=0x80>>(x&7); } }
       ctx.putImageData(image,0,0);
       m.width=PRINTER_WIDTH; m.height=h; m.data=bytesToBase64(packed); m.previewDataUrl=canvas.toDataURL('image/png');
       this.renderPaper(); this.refreshImageInfo(m); this.refreshWarnings();
       // keep the brighten-region tool's backdrop in sync with the latest dithered output
       if(this.selectedId===id && this.els.inspector){ const bb=this.els.inspector.querySelector('img[data-bright-backdrop="'+id+'"]'); if(bb) bb.src=m.previewDataUrl; }
+      if(typeof done==='function') done(m);
     };
+    img.onerror=()=>{ if(typeof done==='function') done(null); };
     img.src=dataUrl;
   }
+
+  /* ============================================================
+     POLAROID — low-friction single-photo print (for the portable kit).
+     Take/choose a photo -> auto-brighten + Atkinson dither -> one tap Print.
+     Reuses convertDataUrl + printNow with a single transient image module.
+     ============================================================ */
+  autoBrightnessFor(dataUrl, cb){
+    const img=new Image();
+    img.onload=()=>{ try{ const s=64; const c=document.createElement('canvas'); c.width=s; c.height=s; const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(img,0,0,s,s); const d=x.getImageData(0,0,s,s).data; let sum=0,n=0; for(let i=0;i<d.length;i+=4){ sum+=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114; n++; } const mean=sum/Math.max(1,n); cb(Math.max(-100,Math.min(100,Math.round(170-mean)))); }catch(e){ cb(0); } };
+    img.onerror=()=>cb(0);
+    img.src=dataUrl;
+  }
+  setPolaroidStatus(text,cls){ const s=this._pol&&this._pol.status; if(!s) return; s.textContent=text||''; s.style.color=cls==='ok'?'var(--good)':cls==='err'?'var(--bad)':'var(--muted)'; }
+  async printPolaroid(){
+    const m=this._polaroidModule;
+    if(!m||!m.data){ this.setPolaroidStatus('Pick a photo first.','err'); return; }
+    const saved=this.modules, savedSel=this.selectedId; this.modules=[m];
+    this.setPolaroidStatus('Sending to printer…');
+    if(this._pol) this._pol.printBtn.disabled=true;
+    try{ await this.printNow(); this.setPolaroidStatus('Printed! 🎉  Tap a photo to print another.','ok'); }
+    catch(e){ this.setPolaroidStatus(e.message,'err'); }
+    finally{ this.modules=saved; this.selectedId=savedSel; if(this._pol) this._pol.printBtn.disabled=false; }
+  }
+  polaroidSelectFile(file){
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const dataUrl=reader.result;
+      this.setPolaroidStatus('Processing…');
+      this.autoBrightnessFor(dataUrl,(b)=>{
+        const mod=this.withId({ type:'image', dither:'atkinson', brightness:b, threshold:128, maxHeight:1000, scale:100, imgAlign:'center', rotate:0, crop:null, brightRegion:null, invert:false, after:3, filename:file.name||'photo', _sourceDataUrl:dataUrl });
+        this._polaroidModule=mod;
+        if(this._pol){ this._pol.bright.value=String(b); }
+        this.convertDataUrl(dataUrl, mod.id, (mm)=>{
+          if(!mm){ this.setPolaroidStatus('Could not read that image.','err'); return; }
+          if(this._pol){ this._pol.preview.src=mm.previewDataUrl; this._pol.preview.style.display='block'; this._pol.empty.style.display='none'; this._pol.controls.style.display='flex'; this._pol.printBtn.style.display='block'; }
+          this.setPolaroidStatus('Ready — tap Print.','ok');
+          if(this._pol&&this._pol.auto.checked) this.printPolaroid();
+        });
+      });
+    };
+    reader.onerror=()=>this.setPolaroidStatus('Could not read file.','err');
+    reader.readAsDataURL(file);
+  }
+  polaroidRepack(){
+    const m=this._polaroidModule; if(!m||!m._sourceDataUrl) return;
+    clearTimeout(this._polRepackT);
+    this._polRepackT=setTimeout(()=>{ this.convertDataUrl(m._sourceDataUrl, m.id, (mm)=>{ if(mm&&this._pol) this._pol.preview.src=mm.previewDataUrl; }); }, 70);
+  }
+  openPolaroid(){
+    if(this._pol){ this._pol.overlay.style.display='flex'; return; }
+    const pad='max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left))';
+    const overlay=document.createElement('div'); overlay.style.cssText='position:fixed;inset:0;z-index:2000;background:var(--bg);color:var(--text);display:flex;flex-direction:column;gap:12px;padding:'+pad+';';
+    // top bar
+    const top=document.createElement('div'); top.style.cssText='display:flex;align-items:center;gap:10px;';
+    const ttl=document.createElement('div'); ttl.style.cssText='font-size:16px;font-weight:800;letter-spacing:.02em;'; ttl.textContent='📷 Polaroid';
+    const sp=document.createElement('div'); sp.style.flex='1';
+    const closeB=document.createElement('button'); closeB.className='btn ghost'; closeB.textContent='Composer ✕'; closeB.onclick=()=>this.closePolaroid();
+    top.appendChild(ttl); top.appendChild(sp); top.appendChild(closeB); overlay.appendChild(top);
+    // printer row
+    const prow=document.createElement('div'); prow.style.cssText='display:flex;align-items:center;gap:8px;';
+    const plab=document.createElement('span'); plab.className='flab'; plab.textContent='Printer'; plab.style.flex='0 0 auto';
+    const ip=document.createElement('input'); ip.className='tpf'; ip.placeholder='http://192.168.1.123'; ip.style.cssText='flex:1 1 auto;font-family:ui-monospace,monospace;font-size:13px;'; ip.value=(this.els.baseUrl&&this.els.baseUrl.value)||''; ip.oninput=()=>{ if(this.els.baseUrl){ this.els.baseUrl.value=ip.value; } this.onBaseInput(); };
+    prow.appendChild(plab); prow.appendChild(ip); overlay.appendChild(prow);
+    // hidden file input
+    const file=document.createElement('input'); file.type='file'; file.accept='image/*'; file.style.display='none'; file.onchange=()=>{ if(file.files[0]){ this.polaroidSelectFile(file.files[0]); file.value=''; } };
+    overlay.appendChild(file);
+    // stage
+    const stage=document.createElement('div'); stage.style.cssText='flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;overflow:auto;background:#0b0c10;border:1px solid var(--line2);border-radius:12px;padding:12px;';
+    const empty=document.createElement('button'); empty.className='btn'; empty.style.cssText='font-size:17px;font-weight:700;padding:26px 22px;border-style:dashed;border-radius:14px;line-height:1.4;color:var(--text);'; empty.innerHTML='📷&nbsp; Take or choose a photo'; empty.onclick=()=>file.click();
+    const preview=document.createElement('img'); preview.style.cssText='display:none;max-width:100%;max-height:100%;width:auto;height:auto;image-rendering:pixelated;background:#fff;border-radius:4px;box-shadow:0 8px 30px rgba(0,0,0,.5);'; preview.onclick=()=>file.click(); preview.title='Tap to choose a different photo';
+    stage.appendChild(empty); stage.appendChild(preview); overlay.appendChild(stage);
+    // controls (brightness + retake + auto)
+    const controls=document.createElement('div'); controls.style.cssText='display:none;flex-direction:column;gap:10px;';
+    const brow=document.createElement('div'); brow.style.cssText='display:flex;align-items:center;gap:10px;';
+    const bl=document.createElement('span'); bl.className='flab'; bl.textContent='Darker'; bl.style.flex='0 0 auto';
+    const bright=document.createElement('input'); bright.type='range'; bright.min='-100'; bright.max='100'; bright.step='1'; bright.value='0'; bright.style.cssText='flex:1 1 auto;accent-color:var(--accent);cursor:pointer;';
+    const br=document.createElement('span'); br.className='flab'; br.textContent='Lighter'; br.style.flex='0 0 auto';
+    bright.oninput=()=>{ if(this._polaroidModule){ this._polaroidModule.brightness=Math.max(-100,Math.min(100,parseInt(bright.value,10)||0)); this.polaroidRepack(); } };
+    brow.appendChild(bl); brow.appendChild(bright); brow.appendChild(br); controls.appendChild(brow);
+    const arow=document.createElement('div'); arow.style.cssText='display:flex;align-items:center;gap:10px;';
+    const retake=document.createElement('button'); retake.className='btn ghost'; retake.textContent='↻ Choose photo'; retake.onclick=()=>file.click();
+    const autoWrap=document.createElement('label'); autoWrap.style.cssText='margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);cursor:pointer;';
+    const auto=document.createElement('input'); auto.type='checkbox'; auto.style.accentColor='var(--accent)';
+    autoWrap.appendChild(auto); autoWrap.appendChild(document.createTextNode('Auto-print on select'));
+    arow.appendChild(retake); arow.appendChild(autoWrap); controls.appendChild(arow);
+    overlay.appendChild(controls);
+    // footer: status + big print
+    const status=document.createElement('div'); status.style.cssText='font-size:13px;color:var(--muted);min-height:18px;text-align:center;'; overlay.appendChild(status);
+    const printBtn=document.createElement('button'); printBtn.className='btn primary'; printBtn.style.cssText='display:none;font-size:18px;font-weight:800;padding:16px;border-radius:14px;'; printBtn.textContent='🖨  Print'; printBtn.onclick=()=>this.printPolaroid(); overlay.appendChild(printBtn);
+    // Append inside .tp-root so the overlay inherits the --bg/--accent/etc. CSS variables
+    // (they're scoped to .tp-root; appending to document.body would leave them undefined).
+    (document.querySelector('.tp-root')||document.body).appendChild(overlay);
+    this._pol={ overlay, preview, empty, controls, bright, auto, status, printBtn, file };
+    this.setPolaroidStatus('Tap above to pick a photo. It auto-brightens for thermal paper.');
+  }
+  closePolaroid(){ if(this._pol) this._pol.overlay.style.display='none'; if(location.hash==='#polaroid'){ try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){ location.hash=''; } } }
 
   loadDemo(){
     this.modules=[
@@ -1282,6 +1398,7 @@ window.mountThermalComposer = function(els){ return new App(els); };
   on('tpBaseUrl',  'input',  'onBaseInput');
   on('tpSearch',   'input',  'onSearch');
   on('tpPing',     'click',  'onPing');
+  on('tpPolaroid', 'click',  'onPolaroid');
   on('tpPrint',    'click',  'onPrint');
   on('tpDemo',     'click',  'onDemo');
   on('tpClear',    'click',  'onClear');
@@ -1289,6 +1406,51 @@ window.mountThermalComposer = function(els){ return new App(els); };
   on('tpLoad',     'click',  'onLoad');
   on('tpTest',     'click',  'onTest');
   on('tpLoadFile', 'change', 'onLoadFile');
+})();
+
+/* ===== PWA: installable + offline ===== */
+(function () {
+  // Draw a self-contained app icon to a canvas so we ship no external image files.
+  const drawIcon = (size) => {
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const x = c.getContext('2d'); const s = size;
+    x.fillStyle = '#0e0f13'; x.fillRect(0, 0, s, s);
+    const r = s * 0.22, m = s * 0.13, w = s - m * 2;
+    x.fillStyle = '#e8893a';
+    x.beginPath(); x.moveTo(m + r, m); x.arcTo(m + w, m, m + w, m + w, r); x.arcTo(m + w, m + w, m, m + w, r);
+    x.arcTo(m, m + w, m, m, r); x.arcTo(m, m, m + w, m, r); x.closePath(); x.fill();
+    // little white "receipt" with text lines + torn bottom
+    const rw = w * 0.5, rh = w * 0.62, rx = m + (w - rw) / 2, ry = m + (w - rh) / 2 - w * 0.03;
+    x.fillStyle = '#fffdf2'; x.fillRect(rx, ry, rw, rh);
+    x.fillStyle = '#1a1206';
+    for (let i = 0; i < 4; i++) x.fillRect(rx + rw * 0.16, ry + rh * (0.2 + i * 0.16), rw * 0.68, Math.max(1, s * 0.018));
+    const teeth = 6, tw = rw / teeth; x.fillStyle = '#e8893a';
+    for (let i = 0; i < teeth; i++) { x.beginPath(); x.moveTo(rx + i * tw, ry + rh); x.lineTo(rx + i * tw + tw / 2, ry + rh - tw * 0.7); x.lineTo(rx + (i + 1) * tw, ry + rh); x.closePath(); x.fill(); }
+    return c.toDataURL('image/png');
+  };
+  try {
+    const i192 = drawIcon(192), i512 = drawIcon(512), i180 = drawIcon(180);
+    const apple = document.getElementById('tpAppleIcon'); if (apple) apple.href = i180;
+    const fav = document.getElementById('tpFavicon'); if (fav) fav.href = i192;
+    const manifest = {
+      name: 'Thermal Composer', short_name: 'Thermal',
+      description: 'Design and print thermal receipts and photos.',
+      start_url: './', scope: './', display: 'standalone',
+      background_color: '#0e0f13', theme_color: '#0e0f13', orientation: 'portrait',
+      icons: [
+        { src: i192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+        { src: i512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+      ],
+      shortcuts: [{ name: 'Polaroid (quick photo print)', short_name: 'Polaroid', url: './#polaroid' }]
+    };
+    const blobUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+    const link = document.createElement('link'); link.rel = 'manifest'; link.href = blobUrl; document.head.appendChild(link);
+  } catch (e) { /* icon/manifest generation is best-effort */ }
+  // Service worker gives true offline use once installed. Only registers from a secure
+  // origin (https / localhost); harmlessly skipped when opened as a local file.
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
 })();
 </script>
 </body>
