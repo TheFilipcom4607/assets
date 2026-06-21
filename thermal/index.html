@@ -1449,6 +1449,24 @@ window.mountThermalComposer = function(els){ return new App(els); };
   on('tpLoad',     'click',  'onLoad');
   on('tpTest',     'click',  'onTest');
   on('tpLoadFile', 'change', 'onLoadFile');
+
+  /* Mobile only: auto-switch the active pane to match the natural flow.
+     Pure view switching (toggles the CSS-only radios) — does not touch the
+     engine; on desktop the media query hides the tabs so this is a no-op. */
+  (function () {
+    const mq = window.matchMedia('(max-width:760px)');
+    const showPane = (id) => { const r = document.getElementById(id); if (r) r.checked = true; };
+    const lib = document.getElementById('tpLibrary');
+    const paper = document.getElementById('tpPaper');
+    // Adding a block from the library jumps to the paper so you see it land.
+    if (lib) lib.addEventListener('click', (e) => {
+      if (mq.matches && e.target.closest('.tile')) showPane('tpViewPaper');
+    });
+    // Tapping a block on the paper jumps to its editor.
+    if (paper) paper.addEventListener('click', (e) => {
+      if (mq.matches && e.target.closest('.prevItem')) showPane('tpViewInsp');
+    });
+  })();
 })();
 
 /* ===== PWA: installable + offline ===== */
