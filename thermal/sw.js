@@ -2,7 +2,7 @@
    Network-first so an updated app is always preferred when online, with a
    cached copy for offline use. Bump CACHE to force every installed client to
    drop the old cache and pick up the new version. */
-const CACHE = 'thermal-v3-mobile';
+const CACHE = 'thermal-v4-mobile';
 const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', (e) => {
