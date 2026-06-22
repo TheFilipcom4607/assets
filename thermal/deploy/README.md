@@ -16,12 +16,16 @@ device ("mixed content") — that's the `Load failed` / `json` errors you saw.
 The fix is to serve the page over **HTTP from the same origin as the printer**.
 This Pi:
 
-- is its own Wi-Fi access point (named **`dom`**, to match the XIAO's firmware),
-  so it needs no internet,
+- is its own Wi-Fi access point (named **`polaroidkit`** — unique, so it never
+  clashes with a home network), so it needs no internet,
 - serves the composer over HTTP via nginx,
 - **reverse-proxies** `/ping`, `/test` and `/print` to the XIAO, so the browser
-  only ever talks to the Pi — no mixed content, no CORS, no firmware changes, and
+  only ever talks to the Pi — no mixed content, no CORS, and
 - **auto-discovers** the printer, so you never need to know its IP or MAC.
+
+Intended use: **at home you don't need the Pi** (print to the XIAO on your home
+network from your PC); the Pi is the **away** hub. The XIAO lists both networks
+(home + `polaroidkit`) and uses whichever is in range — see [GUIDE.md](GUIDE.md).
 
 The heavy work (dithering the photo, packing the 1-bit raster) happens in the
 phone's browser; the Pi just serves one file and relays bytes, which is why a
@@ -37,23 +41,24 @@ sudo ./install.sh
 sudo reboot
 ```
 
-After reboot the Pi broadcasts Wi-Fi **`dom`** (password `test4test`). Power on
-the XIAO (it joins `dom`), join `dom` on your phone, and open
-`http://192.168.50.1/`. Full details and gotchas are in **[GUIDE.md](GUIDE.md)**.
+After reboot the Pi broadcasts Wi-Fi **`polaroidkit`** (password `test4test`).
+Add that network to the XIAO's firmware (alongside home `dom`), join
+`polaroidkit` on your phone, and open `http://192.168.50.1/`. Full details and
+gotchas are in **[GUIDE.md](GUIDE.md)**.
 
 ## Network at a glance
 
 | Thing | Value |
 |-------|-------|
-| Wi-Fi SSID / password | `dom` / `test4test` (must match the XIAO) |
+| Wi-Fi SSID / password | `polaroidkit` / `test4test` (the XIAO must list this) |
 | Pi (gateway, web UI) | `192.168.50.1` |
 | DHCP range for clients | `192.168.50.10`–`192.168.50.100` |
 | App URL | `http://192.168.50.1/` (or `http://polaroid.box/`) |
 | Status page | `http://192.168.50.1/status` |
 | Printer URL to type in the app | `http://192.168.50.1` |
 
-> ⚠️ If your **home** Wi-Fi is also named `dom`, only use the kit **away from
-> home** — two identical networks in range will fight. See [GUIDE.md](GUIDE.md).
+To rename the kit network, change `ssid=` in `hostapd.conf` and the matching
+entry in the XIAO's firmware — keep it different from your home SSID.
 
 ## Finding the printer — automatic
 
@@ -65,7 +70,7 @@ new IP is picked up automatically. The result is published to `status.json`
 (shown on the status page).
 
 - First print after the XIAO joins may take up to ~10 s while it's discovered.
-- `502 Bad Gateway` = printer not found yet (check it's on and joined `dom`).
+- `502 Bad Gateway` = printer not found yet (check it's on and joined `polaroidkit`).
 
 Inspect live:
 ```bash
@@ -94,7 +99,7 @@ works, but Bullseye Lite is the lighter, better-trodden path on a Zero 1 W.
 |------|---------|
 | `GUIDE.md` | Full first-boot-to-printing walkthrough + troubleshooting |
 | `install.sh` | One-shot setup: installs packages, writes configs, deploys the app |
-| `hostapd.conf` | Wi-Fi access point (SSID `dom` / password / channel) |
+| `hostapd.conf` | Wi-Fi access point (SSID `polaroidkit` / password / channel) |
 | `dnsmasq.conf` | DHCP + DNS for the kit network |
 | `nginx-thermal.conf` | Serves the app + status page, proxies `/ping` `/test` `/print` |
 | `printer-upstream.conf` | Auto-managed pointer to the printer's current address |
