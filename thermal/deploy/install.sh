@@ -10,7 +10,7 @@
 #
 # Run it ONCE while the Pi still has internet (e.g. joined to your home Wi-Fi):
 #   sudo ./install.sh
-# Afterwards the Pi stops being a Wi-Fi client and becomes the "polaroidkit" AP.
+# Afterwards the Pi stops being a Wi-Fi client and becomes the "polaroidpi" AP.
 
 set -euo pipefail
 
@@ -119,8 +119,8 @@ cat <<EOF
 ------------------------------------------------------------
 Done. Reboot once (sudo reboot), then:
 
-  1. Power on the XIAO — it joins Wi-Fi "polaroidkit" on its own.
-  2. On your phone, join Wi-Fi:  polaroidkit   (password: test4test)
+  1. Power on the XIAO — it joins Wi-Fi "polaroidpi" on its own.
+  2. On your phone, join Wi-Fi:  polaroidpi   (password: test4test)
   3. Open  http://${AP_IP}/   (or http://polaroid.box/)
   4. In the app, set the printer URL to  http://${AP_IP}
      (nginx relays /ping, /test and /print to the XIAO).

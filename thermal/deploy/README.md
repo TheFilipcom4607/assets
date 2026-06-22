@@ -16,7 +16,7 @@ device ("mixed content") — that's the `Load failed` / `json` errors you saw.
 The fix is to serve the page over **HTTP from the same origin as the printer**.
 This Pi:
 
-- is its own Wi-Fi access point (named **`polaroidkit`** — unique, so it never
+- is its own Wi-Fi access point (named **`polaroidpi`** — unique, so it never
   clashes with a home network), so it needs no internet,
 - serves the composer over HTTP via nginx,
 - **reverse-proxies** `/ping`, `/test` and `/print` to the XIAO, so the browser
@@ -25,7 +25,7 @@ This Pi:
 
 Intended use: **at home you don't need the Pi** (print to the XIAO on your home
 network from your PC); the Pi is the **away** hub. The XIAO lists both networks
-(home + `polaroidkit`) and uses whichever is in range — see [GUIDE.md](GUIDE.md).
+(home + `polaroidpi`) and uses whichever is in range — see [GUIDE.md](GUIDE.md).
 
 The heavy work (dithering the photo, packing the 1-bit raster) happens in the
 phone's browser; the Pi just serves one file and relays bytes, which is why a
@@ -41,16 +41,16 @@ sudo ./install.sh
 sudo reboot
 ```
 
-After reboot the Pi broadcasts Wi-Fi **`polaroidkit`** (password `test4test`).
+After reboot the Pi broadcasts Wi-Fi **`polaroidpi`** (password `test4test`).
 Add that network to the XIAO's firmware (alongside home `dom`), join
-`polaroidkit` on your phone, and open `http://192.168.50.1/`. Full details and
+`polaroidpi` on your phone, and open `http://192.168.50.1/`. Full details and
 gotchas are in **[GUIDE.md](GUIDE.md)**.
 
 ## Network at a glance
 
 | Thing | Value |
 |-------|-------|
-| Wi-Fi SSID / password | `polaroidkit` / `test4test` (the XIAO must list this) |
+| Wi-Fi SSID / password | `polaroidpi` / `test4test` (the XIAO must list this) |
 | Pi (gateway, web UI) | `192.168.50.1` |
 | DHCP range for clients | `192.168.50.10`–`192.168.50.100` |
 | App URL | `http://192.168.50.1/` (or `http://polaroid.box/`) |
@@ -70,7 +70,7 @@ new IP is picked up automatically. The result is published to `status.json`
 (shown on the status page).
 
 - First print after the XIAO joins may take up to ~10 s while it's discovered.
-- `502 Bad Gateway` = printer not found yet (check it's on and joined `polaroidkit`).
+- `502 Bad Gateway` = printer not found yet (check it's on and joined `polaroidpi`).
 
 Inspect live:
 ```bash
@@ -99,7 +99,7 @@ works, but Bullseye Lite is the lighter, better-trodden path on a Zero 1 W.
 |------|---------|
 | `GUIDE.md` | Full first-boot-to-printing walkthrough + troubleshooting |
 | `install.sh` | One-shot setup: installs packages, writes configs, deploys the app |
-| `hostapd.conf` | Wi-Fi access point (SSID `polaroidkit` / password / channel) |
+| `hostapd.conf` | Wi-Fi access point (SSID `polaroidpi` / password / channel) |
 | `dnsmasq.conf` | DHCP + DNS for the kit network |
 | `nginx-thermal.conf` | Serves the app + status page, proxies `/ping` `/test` `/print` |
 | `printer-upstream.conf` | Auto-managed pointer to the printer's current address |

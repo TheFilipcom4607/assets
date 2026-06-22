@@ -10,17 +10,17 @@ downloads.
 - **At home:** you don't use the Pi at all. The XIAO sits on your home `dom`
   network and you print from the composer on your PC, like you do now.
 - **Away:** the Pi becomes a small self-contained Wi-Fi network called
-  **`polaroidkit`**. The XIAO joins it, your phone joins it, and you print
+  **`polaroidpi`**. The XIAO joins it, your phone joins it, and you print
   through a page the Pi serves.
 
 The one piece that makes both work: the XIAO needs to know **two** networks —
-your home `dom` *and* the kit's `polaroidkit`. It automatically uses whichever
+your home `dom` *and* the kit's `polaroidpi`. It automatically uses whichever
 is in range (Pi away, home router at home). Because the kit name is unique,
 nothing ever clashes with your home network.
 
 > **Why a unique name?** Earlier the kit was named `dom` to match the XIAO, but
 > that's also your home network — two identical networks fight each other. Since
-> you can reflash the XIAO, we give the kit its own name (`polaroidkit`) and just
+> you can reflash the XIAO, we give the kit its own name (`polaroidpi`) and just
 > add it to the XIAO's network list. Clean everywhere.
 
 ---
@@ -54,7 +54,7 @@ nothing ever clashes with your home network.
 5. Write the card. When done, eject it and put it in the Pi.
 
 > Why home Wi-Fi now? The installer downloads nginx/hostapd/dnsmasq from the
-> internet. After it runs, the Pi switches its radio to *be* the `polaroidkit`
+> internet. After it runs, the Pi switches its radio to *be* the `polaroidpi`
 > network and won't be an internet client anymore. So: internet first, AP second.
 
 ---
@@ -100,7 +100,7 @@ sudo ./install.sh
 It will:
 - install `hostapd`, `dnsmasq`, `nginx`, `curl`,
 - give `wlan0` the static IP `192.168.50.1`,
-- write the `polaroidkit` access-point config,
+- write the `polaroidpi` access-point config,
 - deploy the composer + status page to `/var/www/thermal`,
 - set up the printer auto-discovery timer.
 
@@ -111,15 +111,15 @@ sudo reboot
 ```
 
 > After this reboot the Pi **stops** being on your home Wi-Fi and **starts**
-> broadcasting `polaroidkit`. Your SSH session will drop — that's expected. To
-> SSH in again later, join `polaroidkit` from your computer and use
+> broadcasting `polaroidpi`. Your SSH session will drop — that's expected. To
+> SSH in again later, join `polaroidpi` from your computer and use
 > `ssh pi@192.168.50.1`.
 
 ---
 
 ## Phase 5 — Teach the XIAO the kit network
 
-The XIAO must connect to **`polaroidkit` / `test4test`** when it's away, while
+The XIAO must connect to **`polaroidpi` / `test4test`** when it's away, while
 still connecting to your home **`dom`** at home. The exact edit depends on the
 board's firmware; the idea is the same — give it a **list** of networks to try.
 
@@ -129,7 +129,7 @@ board's firmware; the idea is the same — give it a **list** of networks to try
 **CircuitPython (`code.py`), try a list:**
 ```python
 import wifi
-NETWORKS = [("polaroidkit", "test4test"), ("dom", "test4test")]  # kit first
+NETWORKS = [("polaroidpi", "test4test"), ("dom", "test4test")]  # kit first
 for ssid, pw in NETWORKS:
     try:
         wifi.radio.connect(ssid, pw)
@@ -142,13 +142,13 @@ for ssid, pw in NETWORKS:
 ```cpp
 #include <WiFiMulti.h>
 WiFiMulti wifiMulti;
-wifiMulti.addAP("polaroidkit", "test4test");
+wifiMulti.addAP("polaroidpi", "test4test");
 wifiMulti.addAP("dom", "test4test");   // home
 // in setup(): wifiMulti.run();
 ```
 
 Notes:
-- List **`polaroidkit` first** so that during a home test (with the Pi on) the
+- List **`polaroidpi` first** so that during a home test (with the Pi on) the
   board prefers the kit; when the Pi is off at home, it falls back to `dom`.
 - Keep the password whatever you like — it just has to match `hostapd.conf`
   (`test4test` by default).
@@ -163,9 +163,9 @@ Notes:
 You can do this at home **with the home router powered off** (so the XIAO joins
 the kit, not `dom`), or simply away from home.
 
-1. **Power on the XIAO.** It should join `polaroidkit`. Give it ~15 seconds.
+1. **Power on the XIAO.** It should join `polaroidpi`. Give it ~15 seconds.
 2. **On your phone**, open Wi-Fi settings and join:
-   - Network: **`polaroidkit`**
+   - Network: **`polaroidpi`**
    - Password: **`test4test`**
    - iOS will say “No Internet Connection” — that's fine, stay on it.
 3. Open Safari and go to:
@@ -174,7 +174,7 @@ the kit, not `dom`), or simply away from home.
    ```
    - 🟢 **Printer connected** → discovery found the XIAO. 
    - 🟠 **Searching…** → wait ~10 s and let the page refresh; make sure the XIAO
-     is powered and joined `polaroidkit`.
+     is powered and joined `polaroidpi`.
    - Tap **Test printer (/ping)** — `HTTP 200` means the whole path works.
 
 ---
@@ -204,9 +204,9 @@ Lite 32-bit**. This is the #1 Zero 1 W mistake.
 
 **`install.sh` fails on `apt` (“Could not resolve…”, “Unable to fetch”).**
 The Pi has no internet. Run the installer while joined to your **home** Wi-Fi
-(Phase 1–4), not after it has become the `polaroidkit` AP.
+(Phase 1–4), not after it has become the `polaroidpi` AP.
 
-**Wi-Fi `polaroidkit` never appears after reboot.**
+**Wi-Fi `polaroidpi` never appears after reboot.**
 Usually the Wi-Fi country isn't set, so the radio stays blocked. Set it:
 ```bash
 sudo raspi-config   # Localisation Options → WLAN Country
@@ -219,7 +219,7 @@ sudo rfkill unblock wlan
 ```
 
 **The XIAO isn't found (status stays orange, printing gives `502`).**
-- Confirm the XIAO is powered and that its firmware lists `polaroidkit` /
+- Confirm the XIAO is powered and that its firmware lists `polaroidpi` /
   `test4test` exactly as in `hostapd.conf` (same case, no spaces).
 - See what has actually joined:
   ```bash
@@ -231,10 +231,10 @@ sudo rfkill unblock wlan
 
 **During a home test, the XIAO joins `dom` instead of the kit.**
 Both networks are in range, and the board picked home. Either power off your home
-router for the test, or make sure `polaroidkit` is **first** in the XIAO's
+router for the test, or make sure `polaroidpi` is **first** in the XIAO's
 network list (Phase 5). In the field this can't happen — home isn't around.
 
-**iPhone keeps dropping `polaroidkit` / jumping to cellular.**
+**iPhone keeps dropping `polaroidpi` / jumping to cellular.**
 iOS dislikes networks with no internet. Stay on the Wi-Fi screen until the page
 loads; if it keeps bouncing, toggle Airplane mode then Wi-Fi back on, or turn off
 “Auto-Join” for your other known networks while you're using the kit.
@@ -259,7 +259,7 @@ sudo systemctl restart hostapd dnsmasq nginx
 ```
 
 **Lost SSH after setup.**
-Expected — the Pi is now the `polaroidkit` AP. Join `polaroidkit` from your
+Expected — the Pi is now the `polaroidpi` AP. Join `polaroidpi` from your
 computer and `ssh pi@192.168.50.1`.
 
 ---
@@ -287,7 +287,7 @@ sudo /usr/local/bin/find-printer.sh
 
 ## Updating the app later
 
-When `thermal/index.html` changes, copy it over (join `polaroidkit`, SSH to the
+When `thermal/index.html` changes, copy it over (join `polaroidpi`, SSH to the
 Pi):
 
 ```bash
