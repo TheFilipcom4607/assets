@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filament Weight Calculator</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #181b22;
+    --accent: #00c389;
+    --accent-dim: #0a8d63;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --border: #2a2e37;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(circle at top, #1c2029, var(--bg));
+    color: var(--text);
+    padding: 24px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+  }
+  .sub {
+    margin: 0 0 24px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    margin-top: 18px;
+  }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    background: #11141a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  .spool-weight {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .result {
+    margin-top: 28px;
+    padding: 22px;
+    background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+    border-radius: 12px;
+    text-align: center;
+  }
+  .result .label {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .result .value {
+    font-size: 40px;
+    font-weight: 700;
+    margin-top: 4px;
+    color: #fff;
+  }
+  .result .value span { font-size: 20px; font-weight: 500; }
+  .result.invalid {
+    background: #2a2e37;
+  }
+  .result.invalid .value { color: var(--muted); font-size: 24px; }
+  .footnote {
+    margin-top: 22px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .footnote a { color: var(--accent); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Filament Weight Calculator</h1>
+    <p class="sub">Subtracts the empty spool to give you the filament weight only. Metric, in grams.</p>
+
+    <label for="total">Total weight (spool + filament)</label>
+    <input id="total" type="number" inputmode="decimal" min="0" step="0.1" placeholder="e.g. 1245">
+
+    <label for="spool">Spool / refill system</label>
+    <select id="spool"></select>
+    <div class="spool-weight" id="spoolWeight"></div>
+
+    <div class="result invalid" id="result">
+      <div class="label">Filament weight</div>
+      <div class="value" id="value">—</div>
+    </div>
+
+    <p class="footnote">
+      Empty-spool weights are typical averages for each brand's reusable/refillable
+      spool and can vary by colour and batch &mdash; weigh your own empty spool for
+      best accuracy. Choose <strong>Custom</strong> to enter an exact value.
+    </p>
+  </div>
+
+<script>
+  // Empty spool weights (grams) for manufacturers offering refillable / reusable spools.
+  // Figures are typical averages compiled from manufacturer pages and community spool databases.
+  const SPOOLS = [
+    { name: "Bambu Lab Reusable Spool", weight: 250 },
+    { name: "Bambu Lab (standard, white)", weight: 245 },
+    { name: "Polymaker Reusable Master Spool", weight: 210 },
+    { name: "Sunlu Reusable Spool", weight: 197 },
+    { name: "eSUN Reusable Spool", weight: 220 },
+    { name: "Prusament Spool", weight: 200 },
+    { name: "Overture Spool", weight: 235 },
+    { name: "Creality Reusable Spool", weight: 180 },
+    { name: "Hatchbox Spool", weight: 235 },
+    { name: "Custom (enter weight)", weight: null }
+  ];
+
+  const DEFAULT = "Bambu Lab Reusable Spool";
+
+  const select = document.getElementById("spool");
+  const totalInput = document.getElementById("total");
+  const spoolWeightEl = document.getElementById("spoolWeight");
+  const resultEl = document.getElementById("result");
+  const valueEl = document.getElementById("value");
+
+  SPOOLS.forEach((s, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = s.name + (s.weight !== null ? "  —  " + s.weight + " g" : "");
+    if (s.name === DEFAULT) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  let customWeight = 250;
+
+  function currentSpoolWeight() {
+    const s = SPOOLS[select.value];
+    return s.weight !== null ? s.weight : customWeight;
+  }
+
+  function renderSpoolControl() {
+    const s = SPOOLS[select.value];
+    if (s.weight === null) {
+      spoolWeightEl.innerHTML =
+        'Empty spool weight (g): <input id="customSpool" type="number" min="0" step="0.1" ' +
+        'value="' + customWeight + '" style="width:120px;display:inline-block;padding:6px 8px;font-size:14px;margin-top:6px;">';
+      const ci = document.getElementById("customSpool");
+      ci.addEventListener("input", () => {
+        customWeight = parseFloat(ci.value) || 0;
+        calculate();
+      });
+    } else {
+      spoolWeightEl.textContent = "Empty spool weight: " + s.weight + " g";
+    }
+  }
+
+  function calculate() {
+    const total = parseFloat(totalInput.value);
+    const spool = currentSpoolWeight();
+    if (isNaN(total) || totalInput.value.trim() === "") {
+      resultEl.classList.add("invalid");
+      valueEl.textContent = "—";
+      return;
+    }
+    const filament = total - spool;
+    if (filament < 0) {
+      resultEl.classList.add("invalid");
+      valueEl.textContent = "Total is less than spool";
+      return;
+    }
+    resultEl.classList.remove("invalid");
+    const rounded = Math.round(filament * 10) / 10;
+    valueEl.innerHTML = rounded.toLocaleString() + ' <span>g</span>';
+  }
+
+  select.addEventListener("change", () => { renderSpoolControl(); calculate(); });
+  totalInput.addEventListener("input", calculate);
+
+  renderSpoolControl();
+  calculate();
+</script>
+</body>
+</html>
