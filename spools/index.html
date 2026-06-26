@@ -115,12 +115,12 @@
 
     <div class="result invalid" id="result">
       <div class="label">Filament weight</div>
-      <div class="value" id="value">—</div>
+      <div class="value" id="value">-</div>
     </div>
 
     <p class="footnote">
       Empty-spool weights are typical averages for each brand's reusable/refillable
-      spool and can vary by colour and batch &mdash; weigh your own empty spool for
+      spool and can vary by colour and batch, so weigh your own empty spool for
       best accuracy. Choose <strong>Custom</strong> to enter an exact value.
     </p>
   </div>
@@ -139,7 +139,8 @@
       { name: "Prusament Spool", weight: 200 },
       { name: "Overture Spool", weight: 235 },
       { name: "Creality Reusable Spool", weight: 180 },
-      { name: "Hatchbox Spool", weight: 235 }
+      { name: "Hatchbox Spool", weight: 235 },
+      { name: "Fiberlogy Reusable Spool", weight: 250 }
     ]},
     { label: "More refillable brands", items: [
       { name: "Elegoo Reusable Spool", weight: 200 },
@@ -179,7 +180,7 @@
     group.items.forEach(s => {
       const opt = document.createElement("option");
       opt.value = flatIndex++;
-      opt.textContent = s.name + (s.weight !== null ? "  —  " + s.weight + " g" : "");
+      opt.textContent = s.name + (s.weight !== null ? "  -  " + s.weight + " g" : "");
       if (s.name === DEFAULT) opt.selected = true;
       parent.appendChild(opt);
     });
@@ -213,7 +214,7 @@
     const spool = currentSpoolWeight();
     if (isNaN(total) || totalInput.value.trim() === "") {
       resultEl.classList.add("invalid");
-      valueEl.textContent = "—";
+      valueEl.textContent = "-";
       return;
     }
     const filament = total - spool;
