@@ -128,18 +128,40 @@
 <script>
   // Empty spool weights (grams) for manufacturers offering refillable / reusable spools.
   // Figures are typical averages compiled from manufacturer pages and community spool databases.
-  const SPOOLS = [
-    { name: "Bambu Lab Reusable Spool", weight: 250 },
-    { name: "Bambu Lab (standard, white)", weight: 245 },
-    { name: "Polymaker Reusable Master Spool", weight: 210 },
-    { name: "Sunlu Reusable Spool", weight: 197 },
-    { name: "eSUN Reusable Spool", weight: 220 },
-    { name: "Prusament Spool", weight: 200 },
-    { name: "Overture Spool", weight: 235 },
-    { name: "Creality Reusable Spool", weight: 180 },
-    { name: "Hatchbox Spool", weight: 235 },
-    { name: "Custom (enter weight)", weight: null }
+  // Grouped: the first group is the common brands, "More refillable brands" holds the rest.
+  const GROUPS = [
+    { label: null, items: [
+      { name: "Bambu Lab Reusable Spool", weight: 250 },
+      { name: "Bambu Lab (standard, white)", weight: 245 },
+      { name: "Polymaker Reusable Master Spool", weight: 210 },
+      { name: "Sunlu Reusable Spool", weight: 197 },
+      { name: "eSUN Reusable Spool", weight: 220 },
+      { name: "Prusament Spool", weight: 200 },
+      { name: "Overture Spool", weight: 235 },
+      { name: "Creality Reusable Spool", weight: 180 },
+      { name: "Hatchbox Spool", weight: 235 }
+    ]},
+    { label: "More refillable brands", items: [
+      { name: "Elegoo Reusable Spool", weight: 200 },
+      { name: "Anycubic Reusable Spool", weight: 130 },
+      { name: "Jayo Reusable Spool", weight: 130 },
+      { name: "Inland Reusable Spool", weight: 200 },
+      { name: "3D Fuel Master Spool", weight: 230 },
+      { name: "Atomic Filament Master Spool", weight: 230 },
+      { name: "Proto-pasta Master Spool", weight: 230 },
+      { name: "Fillamentum Spool", weight: 235 },
+      { name: "MatterHackers Master Spool", weight: 230 },
+      { name: "Eryone Reusable Spool", weight: 190 },
+      { name: "Kingroon Reusable Spool", weight: 180 },
+      { name: "GreenGate3D Master Spool", weight: 230 }
+    ]},
+    { label: null, items: [
+      { name: "Custom (enter weight)", weight: null }
+    ]}
   ];
+
+  // Flatten so the rest of the code can index spools by select value.
+  const SPOOLS = GROUPS.flatMap(g => g.items);
 
   const DEFAULT = "Bambu Lab Reusable Spool";
 
@@ -149,12 +171,18 @@
   const resultEl = document.getElementById("result");
   const valueEl = document.getElementById("value");
 
-  SPOOLS.forEach((s, i) => {
-    const opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = s.name + (s.weight !== null ? "  —  " + s.weight + " g" : "");
-    if (s.name === DEFAULT) opt.selected = true;
-    select.appendChild(opt);
+  let flatIndex = 0;
+  GROUPS.forEach(group => {
+    const parent = group.label
+      ? select.appendChild(Object.assign(document.createElement("optgroup"), { label: group.label }))
+      : select;
+    group.items.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = flatIndex++;
+      opt.textContent = s.name + (s.weight !== null ? "  —  " + s.weight + " g" : "");
+      if (s.name === DEFAULT) opt.selected = true;
+      parent.appendChild(opt);
+    });
   });
 
   let customWeight = 250;
