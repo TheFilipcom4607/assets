@@ -10,17 +10,17 @@
 <style>
 
   /* ============== demo page chrome — simulates a real site around the widget, not part of the embed ============== */
-  html,body{ margin:0; height:100%; }
+  html,body{ margin:0; min-height:100%; }
   body{ font-family:'Roboto',Arial,sans-serif; background:#fff; color:#202124; }
-  .demo-shell{ max-width:400px; margin:0 auto; padding:64px 24px 80px; }
+  .demo-shell{ width:min(calc(100% - 48px), 400px); margin:0 auto; padding:64px 0 80px; }
   .demo-shell h1{ font-size:20px; font-weight:500; margin:0 0 4px; }
   .demo-sub{ font-size:13px; color:#5f6368; margin:0 0 28px; }
   .demo-field{ margin-bottom:16px; }
   .demo-field label{ display:block; font-size:13px; color:#3c4043; margin-bottom:6px; }
-  .demo-field input{ width:100%; padding:10px 12px; font-size:14px; border:1px solid #DADCE0; border-radius:4px; font-family:inherit; }
+  .demo-field input{ width:100%; min-height:44px; padding:10px 12px; font-size:16px; border:1px solid #DADCE0; border-radius:4px; font-family:inherit; }
   .demo-field input:focus{ outline:2px solid #4285F4; outline-offset:-1px; border-color:transparent; }
-  .demo-captcha-slot{ margin:22px 0; }
-  .demo-submit{ width:100%; padding:11px; font-size:14px; font-weight:500; border-radius:4px; border:none; background:#DADCE0; color:#80838B; cursor:not-allowed; transition:background .15s ease, color .15s ease; }
+  .demo-captcha-slot{ margin:22px 0; display:flex; justify-content:center; }
+  .demo-submit{ width:100%; min-height:44px; padding:11px; font-size:14px; font-weight:500; border-radius:4px; border:none; background:#DADCE0; color:#80838B; cursor:not-allowed; transition:background .15s ease, color .15s ease; }
   .demo-submit.is-enabled{ background:#4285F4; color:#fff; cursor:pointer; }
   .demo-submit.is-enabled:hover{ background:#3367D6; }
   .demo-success{ display:none; align-items:center; gap:8px; font-size:14px; color:#188038; margin-top:14px; }
@@ -35,9 +35,9 @@
      be copy-pasted into any other page without a CSS reset or extra setup.
      ============================================================================ */
   #pcap-root, #pcap-root *{ box-sizing:border-box; }
-  #pcap-root{ font-family:'Roboto',Arial,sans-serif; position:relative; display:inline-block; }
+  #pcap-root{ font-family:'Roboto',Arial,sans-serif; position:relative; display:inline-block; width:300px; max-width:100%; }
 
-  .pcap-box{ width:300px; max-width:100%; height:74px; background:#fff; border:1px solid #d3d3d3; border-radius:3px; box-shadow:0 0 0 1px rgba(0,0,0,0.03); display:flex; align-items:center; padding:0 14px; gap:10px; cursor:pointer; user-select:none; }
+  .pcap-box{ width:100%; min-height:74px; background:#fff; border:1px solid #d3d3d3; border-radius:3px; box-shadow:0 0 0 1px rgba(0,0,0,0.03); display:flex; align-items:center; padding:0 14px; gap:10px; cursor:pointer; user-select:none; }
   .pcap-box:hover{ border-color:#b3b3b3; }
   .pcap-checkbox{ position:relative; width:28px; height:28px; border:2px solid #c1c1c1; border-radius:3px; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, background .15s ease; }
   .pcap-checkbox svg{ width:18px; height:18px; color:#fff; opacity:0; transition:opacity .1s ease; }
@@ -90,7 +90,7 @@
   .pcap-canvas-wrap{ background:#F8FAFF; border:1px solid #DADCE0; border-radius:4px; padding:6px; margin-bottom:12px; }
   .pcap-canvas{ width:100%; display:block; }
 
-  .pcap-drop-btn{ width:100%; font-family:'Roboto',Arial,sans-serif; font-size:13.5px; font-weight:500; padding:9px 16px; border-radius:4px; border:none; cursor:pointer; background:#4285F4; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px; transition:background .15s ease, opacity .15s ease; }
+  .pcap-drop-btn{ width:100%; min-height:42px; font-family:'Roboto',Arial,sans-serif; font-size:13.5px; font-weight:500; padding:9px 16px; border-radius:4px; border:none; cursor:pointer; background:#4285F4; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px; transition:background .15s ease, opacity .15s ease; }
   .pcap-drop-btn svg{ width:15px; height:15px; }
   .pcap-drop-btn:hover{ background:#3367D6; }
   .pcap-drop-btn:disabled{ cursor:not-allowed; background:#9AA0A6; opacity:.85; }
@@ -106,6 +106,48 @@
 
   .pcap-footer{ border-top:1px solid #DADCE0; padding:7px 14px; font-size:10.5px; color:#9aa0a6; text-align:center; }
   .pcap-sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+
+  @media (max-width:480px){
+    body{ background:#FAFBFF; }
+    .demo-shell{ width:min(calc(100% - 32px), 400px); padding:28px 0 48px; }
+    .demo-shell h1{ font-size:19px; }
+    .demo-sub{ margin-bottom:22px; line-height:1.45; }
+    .demo-field{ margin-bottom:14px; }
+    .demo-captcha-slot{ margin:18px 0; }
+    .demo-note{ margin-top:28px; padding-top:16px; line-height:1.5; }
+
+    #pcap-root{ width:min(100%, 300px); }
+    .pcap-box{ min-height:72px; padding:0 12px; gap:9px; background:#fff; }
+    .pcap-checkbox{ width:30px; height:30px; }
+    .pcap-label{ font-size:14px; }
+    .pcap-brand{ width:58px; }
+    .pcap-brand-legal{ font-size:7px; }
+
+    .pcap-popup{ position:fixed; left:12px; right:12px; top:auto; bottom:12px; width:auto; max-width:none; max-height:calc(100vh - 24px); max-height:calc(100dvh - 24px); overflow:auto; border-radius:10px; transform:translateY(12px) scale(.98); }
+    .pcap-popup.is-open{ transform:translateY(0) scale(1); }
+    .pcap-popup::before{ display:none; }
+    .pcap-header{ position:sticky; top:0; z-index:1; padding:11px 12px; border-radius:10px 10px 0 0; }
+    .pcap-icon-btn{ width:34px; height:34px; }
+    .pcap-icon-btn svg{ width:17px; height:17px; }
+    .pcap-body{ padding:12px; }
+    .pcap-sub{ margin-bottom:10px; }
+    .pcap-code-wrap{ padding:10px; }
+    .pcap-code-row{ gap:5px; }
+    .pcap-cbox{ width:31px; height:38px; font-size:15px; }
+    .pcap-aim-row{ gap:10px; margin-bottom:11px; }
+    .pcap-aim-row svg{ width:18px; height:18px; }
+    .pcap-slider{ height:6px; }
+    .pcap-slider::-webkit-slider-thumb{ width:22px; height:22px; }
+    .pcap-slider::-moz-range-thumb{ width:22px; height:22px; }
+    .pcap-canvas-wrap{ padding:5px; margin-bottom:10px; }
+    .pcap-drop-btn{ min-height:44px; font-size:14px; }
+  }
+
+  @media (max-width:340px){
+    .pcap-cbox{ width:28px; height:36px; }
+    .pcap-code-row{ gap:4px; }
+    .pcap-brand{ width:54px; }
+  }
 
   @media (prefers-reduced-motion:reduce){
     .pcap-popup, .pcap-cbox, .pcap-feedback, .pcap-success{ transition:none !important; }
