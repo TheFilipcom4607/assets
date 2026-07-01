@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plinko captcha — embeddable widget demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+
+  /* ============== demo page chrome — simulates a real site around the widget, not part of the embed ============== */
+  html,body{ margin:0; height:100%; }
+  body{ font-family:'Roboto',Arial,sans-serif; background:#fff; color:#202124; }
+  .demo-shell{ max-width:400px; margin:0 auto; padding:64px 24px 80px; }
+  .demo-shell h1{ font-size:20px; font-weight:500; margin:0 0 4px; }
+  .demo-sub{ font-size:13px; color:#5f6368; margin:0 0 28px; }
+  .demo-field{ margin-bottom:16px; }
+  .demo-field label{ display:block; font-size:13px; color:#3c4043; margin-bottom:6px; }
+  .demo-field input{ width:100%; padding:10px 12px; font-size:14px; border:1px solid #DADCE0; border-radius:4px; font-family:inherit; }
+  .demo-field input:focus{ outline:2px solid #4285F4; outline-offset:-1px; border-color:transparent; }
+  .demo-captcha-slot{ margin:22px 0; }
+  .demo-submit{ width:100%; padding:11px; font-size:14px; font-weight:500; border-radius:4px; border:none; background:#DADCE0; color:#80838B; cursor:not-allowed; transition:background .15s ease, color .15s ease; }
+  .demo-submit.is-enabled{ background:#4285F4; color:#fff; cursor:pointer; }
+  .demo-submit.is-enabled:hover{ background:#3367D6; }
+  .demo-success{ display:none; align-items:center; gap:8px; font-size:14px; color:#188038; margin-top:14px; }
+  .demo-success svg{ width:18px; height:18px; }
+  .demo-note{ margin-top:40px; padding-top:20px; border-top:1px solid #EEE; font-size:12px; color:#9aa0a6; line-height:1.6; }
+
+  /* ============================================================================
+     PLINKO CAPTCHA WIDGET
+     Everything between the two "EMBEDDABLE WIDGET" markers below (this style
+     block, plus the matching HTML block and the <script> at the bottom) is
+     self-contained: it only touches #pcap-root and its descendants, so it can
+     be copy-pasted into any other page without a CSS reset or extra setup.
+     ============================================================================ */
+  #pcap-root, #pcap-root *{ box-sizing:border-box; }
+  #pcap-root{ font-family:'Roboto',Arial,sans-serif; position:relative; display:inline-block; }
+
+  .pcap-box{ width:300px; max-width:100%; height:74px; background:#fff; border:1px solid #d3d3d3; border-radius:3px; box-shadow:0 0 0 1px rgba(0,0,0,0.03); display:flex; align-items:center; padding:0 14px; gap:10px; cursor:pointer; user-select:none; }
+  .pcap-box:hover{ border-color:#b3b3b3; }
+  .pcap-checkbox{ position:relative; width:28px; height:28px; border:2px solid #c1c1c1; border-radius:3px; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, background .15s ease; }
+  .pcap-checkbox svg{ width:18px; height:18px; color:#fff; opacity:0; transition:opacity .1s ease; }
+  .pcap-checkbox.is-checked{ background:#34A853; border-color:#34A853; }
+  .pcap-checkbox.is-checked svg{ opacity:1; }
+  .pcap-checkbox.is-loading{ border-color:#fff; }
+  .pcap-spinner{ position:absolute; width:18px; height:18px; border:2px solid #E8F0FE; border-top-color:#4285F4; border-radius:50%; opacity:0; }
+  .pcap-checkbox.is-loading .pcap-spinner{ opacity:1; animation:pcap-spin .7s linear infinite; }
+  @keyframes pcap-spin{ to{ transform:rotate(360deg); } }
+  .pcap-label{ font-size:14px; color:#3c4043; flex:1; line-height:1.3; }
+  .pcap-brand{ display:flex; flex-direction:column; align-items:center; gap:2px; width:64px; flex-shrink:0; text-align:center; }
+  .pcap-brand svg{ width:26px; height:26px; color:#4285F4; }
+  .pcap-brand-name{ font-size:8.5px; font-weight:500; letter-spacing:.03em; color:#9aa0a6; }
+  .pcap-brand-legal{ font-size:7.5px; line-height:1.1; color:#c8ccd0; white-space:nowrap; }
+
+  .pcap-popup{ position:absolute; top:calc(100% + 10px); left:0; width:320px; max-width:calc(100vw - 32px); background:#fff; border:1px solid #DADCE0; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.22), 0 1px 3px rgba(0,0,0,.15); opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none; transition:opacity .18s ease, transform .18s ease; z-index:1000; overflow:visible; text-align:left; }
+  .pcap-popup.is-open{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+  .pcap-popup::before{ content:''; position:absolute; top:-5px; left:24px; width:10px; height:10px; background:#4285F4; border-radius:2px 0 0 0; transform:rotate(45deg); }
+
+  .pcap-header{ background:#4285F4; color:#fff; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-radius:8px 8px 0 0; }
+  .pcap-header h2{ font-size:14px; font-weight:500; margin:0; }
+  .pcap-header-actions{ display:flex; gap:2px; }
+  .pcap-icon-btn{ background:transparent; border:none; color:#fff; cursor:pointer; width:26px; height:26px; border-radius:4px; display:flex; align-items:center; justify-content:center; transition:background .15s ease; padding:0; }
+  .pcap-icon-btn svg{ width:15px; height:15px; }
+  .pcap-icon-btn:hover{ background:rgba(255,255,255,0.16); }
+
+  .pcap-body{ padding:16px; border-radius:0 0 8px 8px; overflow:hidden; }
+  .pcap-sub{ font-size:12.5px; line-height:1.5; margin:0 0 12px; color:#5f6368; }
+
+  .pcap-code-wrap{ background-color:#F8FAFF; background-image:linear-gradient(#E1E8F5 1px, transparent 1px), linear-gradient(90deg, #E1E8F5 1px, transparent 1px); background-size:16px 16px; border:1px solid #DADCE0; border-radius:4px; padding:12px; margin-bottom:10px; }
+  .pcap-code-row{ display:flex; gap:6px; justify-content:center; }
+  .pcap-cbox{ width:32px; height:40px; border:1px solid #DADCE0; border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:'Roboto Mono','Courier New',monospace; font-size:16px; font-weight:500; color:#202124; background:#fff; transition:box-shadow .15s ease, border-color .15s ease, background .15s ease, color .15s ease; }
+  .pcap-cbox.is-current{ border-color:#4285F4; background:#E8F0FE; box-shadow:0 0 0 1px #4285F4; color:#3367D6; }
+  .pcap-cbox.is-done{ border-color:#34A853; background:#E6F4EA; color:#34A853; }
+  @keyframes pcap-pop{ 0%{ transform:scale(.5); opacity:0; } 60%{ transform:scale(1.1); } 100%{ transform:scale(1); opacity:1; } }
+  .pcap-cbox.pcap-pop{ animation:pcap-pop .3s ease !important; }
+  @keyframes pcap-shake{ 0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-4px); } 75%{ transform:translateX(4px); } }
+  .pcap-cbox.pcap-shake{ animation:pcap-shake .3s ease !important; }
+
+  .pcap-feedback{ min-height:15px; font-size:12px; margin:0 0 10px; color:#5f6368; text-align:center; }
+  .pcap-feedback.is-success{ color:#34A853; }
+  .pcap-feedback.is-miss{ color:#EA4335; }
+
+  .pcap-aim-row{ display:flex; align-items:center; gap:8px; margin-bottom:10px; color:#5f6368; }
+  .pcap-aim-row svg{ width:15px; height:15px; flex-shrink:0; }
+  .pcap-slider{ flex:1; -webkit-appearance:none; appearance:none; height:4px; background:#DADCE0; border-radius:2px; outline:none; }
+  .pcap-slider::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:#4285F4; cursor:pointer; border:2px solid #fff; box-shadow:0 0 0 1px #DADCE0; }
+  .pcap-slider::-moz-range-thumb{ width:15px; height:15px; border-radius:50%; background:#4285F4; cursor:pointer; border:2px solid #fff; box-shadow:0 0 0 1px #DADCE0; }
+
+  .pcap-canvas-wrap{ background:#F8FAFF; border:1px solid #DADCE0; border-radius:4px; padding:6px; margin-bottom:12px; }
+  .pcap-canvas{ width:100%; display:block; }
+
+  .pcap-drop-btn{ width:100%; font-family:'Roboto',Arial,sans-serif; font-size:13.5px; font-weight:500; padding:9px 16px; border-radius:4px; border:none; cursor:pointer; background:#4285F4; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px; transition:background .15s ease, opacity .15s ease; }
+  .pcap-drop-btn svg{ width:15px; height:15px; }
+  .pcap-drop-btn:hover{ background:#3367D6; }
+  .pcap-drop-btn:disabled{ cursor:not-allowed; background:#9AA0A6; opacity:.85; }
+  .pcap-drop-btn:disabled:hover{ background:#9AA0A6; }
+  .pcap-drop-btn:focus-visible{ outline:2px solid #4285F4; outline-offset:2px; }
+  .pcap-slider:disabled{ cursor:not-allowed; opacity:.6; }
+
+  .pcap-success{ display:none; text-align:center; padding:8px 0 4px; opacity:0; transform:translateY(4px); transition:opacity .25s ease, transform .25s ease; }
+  .pcap-success.is-show{ opacity:1; transform:translateY(0); }
+  .pcap-success-badge{ width:38px; height:38px; border-radius:50%; background:#E6F4EA; color:#34A853; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; }
+  .pcap-success-badge svg{ width:20px; height:20px; }
+  .pcap-success p{ margin:0; font-size:13.5px; color:#202124; font-weight:500; }
+
+  .pcap-footer{ border-top:1px solid #DADCE0; padding:7px 14px; font-size:10.5px; color:#9aa0a6; text-align:center; }
+  .pcap-sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+
+  @media (prefers-reduced-motion:reduce){
+    .pcap-popup, .pcap-cbox, .pcap-feedback, .pcap-success{ transition:none !important; }
+  }
+  /* ============================== END WIDGET STYLES ============================== */
+
+</style>
+</head>
+<body>
+
+<div class="demo-shell">
+  <h1>Create an account</h1>
+  <p class="demo-sub">This page stands in for a real site, so you can see the widget sitting in an actual form.</p>
+
+  <div class="demo-field">
+    <label for="demoName">Name</label>
+    <input id="demoName" type="text" placeholder="Jane Cooper">
+  </div>
+  <div class="demo-field">
+    <label for="demoEmail">Email</label>
+    <input id="demoEmail" type="email" placeholder="jane@example.com">
+  </div>
+
+  <div class="demo-captcha-slot">
+
+    <!-- ============================================================================
+         EMBEDDABLE WIDGET — copy this div (and the matching <style> block above,
+         and the <script> block at the bottom of the page) into any other page.
+         ============================================================================ -->
+    <div id="pcap-root">
+
+      <div class="pcap-box" id="pcapBox" role="checkbox" aria-checked="false" tabindex="0" aria-label="I'm not a robot">
+        <div class="pcap-checkbox" id="pcapCheckbox">
+          <div class="pcap-spinner" id="pcapSpinner"></div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <span class="pcap-label">I'm not a robot</span>
+        <div class="pcap-brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          <span class="pcap-brand-name">PLINKO</span>
+          <span class="pcap-brand-legal">Privacy &middot; Terms</span>
+        </div>
+      </div>
+
+      <div class="pcap-popup" id="pcapPopup" role="dialog" aria-modal="false" aria-label="Human verification challenge" aria-hidden="true">
+        <div class="pcap-header">
+          <h2>Prove you're human</h2>
+          <div class="pcap-header-actions">
+            <button class="pcap-icon-btn" id="pcapReload" type="button" aria-label="New code" title="New code">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </button>
+            <button class="pcap-icon-btn" id="pcapClose" type="button" aria-label="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="pcap-body">
+          <p class="pcap-sub">Match the code below by dropping a ball into each number, in order.</p>
+
+          <div class="pcap-code-wrap">
+            <div class="pcap-code-row" id="pcapCodeRow"></div>
+          </div>
+          <p class="pcap-feedback" id="pcapFeedback" aria-hidden="true"></p>
+
+          <div class="pcap-aim-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="7 8 3 12 7 16"/><polyline points="17 8 21 12 17 16"/></svg>
+            <input type="range" class="pcap-slider" id="pcapSlider" min="0" max="100" value="50" step="1" aria-label="Aim position">
+          </div>
+
+          <div class="pcap-canvas-wrap" id="pcapCanvasWrap">
+            <canvas class="pcap-canvas" id="pcapCanvas"></canvas>
+          </div>
+
+          <button class="pcap-drop-btn" id="pcapDropBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            <span id="pcapDropLabel">Drop ball</span>
+          </button>
+
+          <div class="pcap-success" id="pcapSuccess">
+            <div class="pcap-success-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <p>Verified</p>
+          </div>
+
+          <p class="pcap-sr-only" id="pcapStatus" aria-live="polite"></p>
+        </div>
+
+        <div class="pcap-footer">protected by plinko verification</div>
+      </div>
+
+    </div>
+    <!-- ============================== END EMBEDDABLE WIDGET ============================== -->
+
+  </div>
+
+  <button class="demo-submit" id="demoSubmit" disabled>Create account</button>
+  <div class="demo-success" id="demoSuccess">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    Account created
+  </div>
+
+  <p class="demo-note">Click the checkbox to open the challenge. Solving it is wired up to enable the "Create account" button above, just to show the widget doing real work on a page — swap that part out for your own form logic when embedding.</p>
+</div>
+
+<script>
+(function(){
+  var BOARD_W=272, BOARD_H=240;
+  var BIN_COUNT=10, BIN_W=BOARD_W/BIN_COUNT;
+  var PEG_ROWS=7, ROW_SPACING=22, TOP_MARGIN=22;
+  var PEG_R=3.5, BALL_R=5.5;
+  var BIN_TOP=TOP_MARGIN+(PEG_ROWS-1)*ROW_SPACING+14;
+  var FLOOR_Y=BOARD_H-34;
+  var CUP_WALL_W=4;
+  var GRAVITY=0.42, RESTITUTION=0.55;
+
+  var pegs=[];
+  for(var i=0;i<PEG_ROWS;i++){
+    var n=3+i;
+    var rowW=(n-1)*BIN_W;
+    var startX=(BOARD_W-rowW)/2;
+    var y=TOP_MARGIN+i*ROW_SPACING;
+    for(var k=0;k<n;k++){ pegs.push({x:startX+k*BIN_W, y:y}); }
+  }
+
+  var state={code:[], progress:0, ball:null, flash:null, finished:false, animating:false, misses:0, coolingDown:false, cooldownTimer:null, cooldownInterval:null, cooldownEndsAt:0};
+  var ctx=null;
+
+  var pcapRoot=document.getElementById('pcap-root');
+  var pcapBox=document.getElementById('pcapBox');
+  var pcapCheckbox=document.getElementById('pcapCheckbox');
+  var pcapPopup=document.getElementById('pcapPopup');
+
+  function generateCode(){
+    var c=[];
+    for(var i=0;i<6;i++) c.push(Math.floor(Math.random()*10));
+    return c;
+  }
+
+  function buildCodeRow(){
+    var row=document.getElementById('pcapCodeRow');
+    row.innerHTML='';
+    for(var i=0;i<6;i++){
+      var box=document.createElement('div');
+      box.className='pcap-cbox';
+      box.id='pcap-cbox'+i;
+      row.appendChild(box);
+    }
+  }
+
+  function updateCodeUI(){
+    for(var i=0;i<6;i++){
+      var box=document.getElementById('pcap-cbox'+i);
+      box.textContent=state.code[i];
+      box.classList.remove('is-current','is-done');
+      if(i<state.progress) box.classList.add('is-done');
+      else if(i===state.progress) box.classList.add('is-current');
+    }
+  }
+
+  function setFeedback(text, kind){
+    var el=document.getElementById('pcapFeedback');
+    el.textContent=text;
+    el.classList.remove('is-success','is-miss');
+    if(kind) el.classList.add(kind);
+  }
+
+  function setDropLabel(text){
+    var label=document.getElementById('pcapDropLabel');
+    if(label) label.textContent=text;
+  }
+
+  function setControlsLocked(locked){
+    var btn=document.getElementById('pcapDropBtn');
+    var slider=document.getElementById('pcapSlider');
+    if(btn) btn.disabled=locked;
+    if(slider) slider.disabled=locked;
+  }
+
+  function clearCooldown(){
+    if(state.cooldownTimer) clearTimeout(state.cooldownTimer);
+    if(state.cooldownInterval) clearInterval(state.cooldownInterval);
+    state.cooldownTimer=null;
+    state.cooldownInterval=null;
+    state.cooldownEndsAt=0;
+    state.coolingDown=false;
+    setControlsLocked(false);
+    setDropLabel('Drop ball');
+  }
+
+  function updateCooldownLabel(){
+    var remaining=Math.max(0, state.cooldownEndsAt-Date.now());
+    setDropLabel('Try again in '+(remaining/1000).toFixed(1)+'s');
+  }
+
+  function beginMissCooldown(){
+    clearCooldown();
+    var delay=Math.min(2200, 700+Math.max(0,state.misses-1)*300);
+    state.coolingDown=true;
+    state.cooldownEndsAt=Date.now()+delay;
+    setControlsLocked(true);
+    updateCooldownLabel();
+    state.cooldownInterval=setInterval(updateCooldownLabel, 100);
+    state.cooldownTimer=setTimeout(clearCooldown, delay);
+  }
+
+  function announce(text){
+    document.getElementById('pcapStatus').textContent=text;
+  }
+
+  function resetChallenge(){
+    clearCooldown();
+    state.code=generateCode();
+    state.progress=0;
+    state.ball=null;
+    state.flash=null;
+    state.finished=false;
+    state.animating=false;
+    state.misses=0;
+    setFeedback('', '');
+    updateCodeUI();
+  }
+
+  function initBoard(){
+    var canvas=document.getElementById('pcapCanvas');
+    var dpr=window.devicePixelRatio||1;
+    canvas.width=BOARD_W*dpr;
+    canvas.height=BOARD_H*dpr;
+    canvas.style.aspectRatio=BOARD_W+'/'+BOARD_H;
+    ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    draw();
+  }
+
+  function draw(){
+    if(!ctx) return;
+    ctx.clearRect(0,0,BOARD_W,BOARD_H);
+    var pegColor='#A9B8D8';
+    var borderColor='#DADCE0';
+    var cupWallColor='#B8C4D9';
+    var textColor='#5F6368';
+    var successColor='#34A853';
+    var dangerColor='#EA4335';
+    var ballColor='#4285F4';
+
+    ctx.fillStyle='rgba(255,255,255,0.58)';
+    ctx.fillRect(0, BIN_TOP, BOARD_W, FLOOR_Y-BIN_TOP);
+
+    if(state.flash && state.flash.alpha>0){
+      ctx.globalAlpha=state.flash.alpha*0.3;
+      ctx.fillStyle= state.flash.kind==='miss' ? dangerColor : successColor;
+      ctx.fillRect(state.flash.bin*BIN_W, BIN_TOP, BIN_W, FLOOR_Y-BIN_TOP);
+      ctx.globalAlpha=1;
+    }
+
+    ctx.fillStyle=pegColor;
+    pegs.forEach(function(p){
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,PEG_R,0,Math.PI*2);
+      ctx.fill();
+    });
+
+    ctx.strokeStyle=borderColor;
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(0, BIN_TOP);
+    ctx.lineTo(BOARD_W, BIN_TOP);
+    ctx.stroke();
+
+    ctx.fillStyle=cupWallColor;
+    for(var kk=0;kk<=BIN_COUNT;kk++){
+      var wallX=kk*BIN_W-CUP_WALL_W/2;
+      if(kk===0) wallX=0;
+      if(kk===BIN_COUNT) wallX=BOARD_W-CUP_WALL_W;
+      ctx.fillRect(wallX, BIN_TOP, CUP_WALL_W, FLOOR_Y-BIN_TOP+CUP_WALL_W);
+    }
+    ctx.fillRect(0, FLOOR_Y, BOARD_W, CUP_WALL_W);
+
+    ctx.font="500 11px 'Roboto Mono', monospace";
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    for(var b=0;b<BIN_COUNT;b++){
+      var isFlash = state.flash && state.flash.bin===b && state.flash.alpha>0.3;
+      ctx.fillStyle = isFlash ? (state.flash.kind==='miss'?dangerColor:successColor) : textColor;
+      ctx.fillText(String(b), (b+0.5)*BIN_W, FLOOR_Y+13);
+    }
+
+    if(state.ball){
+      ctx.fillStyle=ballColor;
+      ctx.beginPath();
+      ctx.arc(state.ball.x, state.ball.y, BALL_R, 0, Math.PI*2);
+      ctx.fill();
+    } else if(!state.finished){
+      var slider=document.getElementById('pcapSlider');
+      var pct=slider?Number(slider.value):50;
+      var x=BALL_R+(BOARD_W-2*BALL_R)*(pct/100);
+      ctx.globalAlpha=0.3;
+      ctx.fillStyle=ballColor;
+      ctx.beginPath();
+      ctx.arc(x,5,BALL_R,0,Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha=1;
+    }
+  }
+
+  function stepPhysics(ball){
+    var prevX=ball.x;
+    ball.vy+=GRAVITY;
+    ball.x+=ball.vx;
+    ball.y+=ball.vy;
+    if(ball.x-BALL_R<0){ ball.x=BALL_R; ball.vx=Math.abs(ball.vx)*RESTITUTION; }
+    if(ball.x+BALL_R>BOARD_W){ ball.x=BOARD_W-BALL_R; ball.vx=-Math.abs(ball.vx)*RESTITUTION; }
+    for(var i=0;i<pegs.length;i++){
+      var p=pegs[i];
+      var dx=ball.x-p.x, dy=ball.y-p.y;
+      var dist=Math.sqrt(dx*dx+dy*dy);
+      var minDist=BALL_R+PEG_R;
+      if(dist>0 && dist<minDist){
+        var nx=dx/dist, ny=dy/dist;
+        var overlap=minDist-dist;
+        ball.x+=nx*overlap;
+        ball.y+=ny*overlap;
+        var dot=ball.vx*nx+ball.vy*ny;
+        ball.vx=(ball.vx-2*dot*nx)*RESTITUTION+(Math.random()-0.5)*1.1;
+        ball.vy=(ball.vy-2*dot*ny)*RESTITUTION;
+      }
+    }
+    if(ball.y+BALL_R>BIN_TOP && ball.y-BALL_R<FLOOR_Y+CUP_WALL_W){
+      var wallHalf=CUP_WALL_W/2;
+      for(var w=1;w<BIN_COUNT;w++){
+        var cupWallX=w*BIN_W;
+        if(Math.abs(ball.x-cupWallX)<BALL_R+wallHalf){
+          if(prevX<cupWallX || (prevX===cupWallX && ball.vx<=0)){
+            ball.x=cupWallX-BALL_R-wallHalf;
+            ball.vx=-Math.abs(ball.vx)*RESTITUTION;
+          } else {
+            ball.x=cupWallX+BALL_R+wallHalf;
+            ball.vx=Math.abs(ball.vx)*RESTITUTION;
+          }
+          ball.vy*=0.96;
+        }
+      }
+    }
+    ball.vx=Math.max(-4.5, Math.min(4.5, ball.vx));
+    ball.vy=Math.max(-8, Math.min(8, ball.vy));
+    if(ball.y+BALL_R>=FLOOR_Y){
+      ball.y=FLOOR_Y-BALL_R;
+      ball.vy=0;
+      ball.vx*=0.75;
+      if(Math.abs(ball.vx)<0.08){
+        ball.vx=0;
+        ball.settled=true;
+      }
+    }
+  }
+
+  function onLanded(ball){
+    var bin=Math.max(0, Math.min(BIN_COUNT-1, Math.floor(ball.x/BIN_W)));
+    var target=state.code[state.progress];
+    state.animating=false;
+    if(bin===target){
+      state.misses=0;
+      state.flash={bin:bin, alpha:1, kind:'success'};
+      var box=document.getElementById('pcap-cbox'+state.progress);
+      state.progress++;
+      updateCodeUI();
+      box.classList.add('pcap-pop');
+      setTimeout(function(){ box.classList.remove('pcap-pop'); }, 300);
+      if(state.progress>=6){
+        state.finished=true;
+        setFeedback('', '');
+        announce('All six digits matched. Verified.');
+        setTimeout(showSuccessPanel, 350);
+        setTimeout(function(){ closePopup(); setChecked(true); }, 1400);
+      } else {
+        setFeedback('Correct — next digit.', 'is-success');
+        announce('Correct. '+state.progress+' of 6 matched.');
+      }
+    } else {
+      state.misses++;
+      state.flash={bin:bin, alpha:1, kind:'miss'};
+      setFeedback('Not quite — re-aim, then try again.', 'is-miss');
+      announce('Missed. Aim for '+target+'. Try again shortly.');
+      var curBox=document.getElementById('pcap-cbox'+state.progress);
+      curBox.classList.add('pcap-shake');
+      setTimeout(function(){ curBox.classList.remove('pcap-shake'); }, 300);
+      beginMissCooldown();
+    }
+  }
+
+  function tick(){
+    if(state.ball){
+      stepPhysics(state.ball);
+      if(state.ball.settled){
+        onLanded(state.ball);
+        state.ball=null;
+      }
+    }
+    if(state.flash){
+      state.flash.alpha-=0.035;
+      if(state.flash.alpha<=0) state.flash=null;
+    }
+    draw();
+    requestAnimationFrame(tick);
+  }
+
+  function dropBall(){
+    if(state.animating || state.finished || state.coolingDown) return;
+    var slider=document.getElementById('pcapSlider');
+    var pct=Number(slider.value);
+    var x=BALL_R+(BOARD_W-2*BALL_R)*(pct/100);
+    state.ball={x:x, y:5, vx:(Math.random()-0.5)*0.8, vy:0};
+    state.animating=true;
+  }
+
+  function showSuccessPanel(){
+    document.querySelector('.pcap-aim-row').style.display='none';
+    document.getElementById('pcapCanvasWrap').style.display='none';
+    document.getElementById('pcapDropBtn').style.display='none';
+    document.querySelector('.pcap-code-wrap').style.display='none';
+    document.getElementById('pcapFeedback').style.display='none';
+    var sr=document.getElementById('pcapSuccess');
+    sr.style.display='block';
+    requestAnimationFrame(function(){ sr.classList.add('is-show'); });
+  }
+
+  function hideSuccessPanel(){
+    var sr=document.getElementById('pcapSuccess');
+    sr.classList.remove('is-show');
+    sr.style.display='none';
+    document.querySelector('.pcap-aim-row').style.display='flex';
+    document.getElementById('pcapCanvasWrap').style.display='block';
+    document.getElementById('pcapDropBtn').style.display='inline-flex';
+    document.querySelector('.pcap-code-wrap').style.display='block';
+    document.getElementById('pcapFeedback').style.display='block';
+  }
+
+  function setChecked(val){
+    if(val){
+      pcapCheckbox.classList.remove('is-loading');
+      pcapCheckbox.classList.add('is-checked');
+      pcapBox.setAttribute('aria-checked','true');
+    } else {
+      pcapCheckbox.classList.remove('is-checked');
+      pcapBox.setAttribute('aria-checked','false');
+    }
+    updateDemoSubmitState();
+  }
+
+  function updateDemoSubmitState(){
+    var submit=document.getElementById('demoSubmit');
+    if(!submit) return;
+    if(pcapCheckbox.classList.contains('is-checked')){
+      submit.disabled=false;
+      submit.classList.add('is-enabled');
+    } else {
+      submit.disabled=true;
+      submit.classList.remove('is-enabled');
+    }
+  }
+
+  function openPopup(){
+    hideSuccessPanel();
+    resetChallenge();
+    pcapPopup.classList.add('is-open');
+    pcapPopup.setAttribute('aria-hidden','false');
+    document.getElementById('pcapDropBtn').focus();
+  }
+
+  function closePopup(){
+    pcapPopup.classList.remove('is-open');
+    pcapPopup.setAttribute('aria-hidden','true');
+  }
+
+  function startVerification(){
+    pcapCheckbox.classList.add('is-loading');
+    setTimeout(function(){
+      pcapCheckbox.classList.remove('is-loading');
+      openPopup();
+    }, 500);
+  }
+
+  pcapBox.addEventListener('click', function(){
+    if(pcapCheckbox.classList.contains('is-loading')) return;
+    if(pcapCheckbox.classList.contains('is-checked')){
+      setChecked(false);
+      return;
+    }
+    startVerification();
+  });
+  pcapBox.addEventListener('keydown', function(e){
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); pcapBox.click(); }
+  });
+
+  document.getElementById('pcapClose').addEventListener('click', function(e){
+    e.stopPropagation();
+    closePopup();
+  });
+  document.getElementById('pcapReload').addEventListener('click', function(e){
+    e.stopPropagation();
+    resetChallenge();
+  });
+  document.getElementById('pcapDropBtn').addEventListener('click', dropBall);
+  document.getElementById('pcapSlider').addEventListener('input', draw);
+
+  document.addEventListener('click', function(e){
+    if(!pcapRoot.contains(e.target)){ closePopup(); }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape') closePopup();
+  });
+
+  var demoSubmit=document.getElementById('demoSubmit');
+  demoSubmit.addEventListener('click', function(){
+    if(this.disabled) return;
+    document.querySelectorAll('.demo-field, .demo-captcha-slot, #demoSubmit').forEach(function(el){ el.style.display='none'; });
+    document.getElementById('demoSuccess').style.display='flex';
+  });
+
+  buildCodeRow();
+  resetChallenge();
+  initBoard();
+  requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
