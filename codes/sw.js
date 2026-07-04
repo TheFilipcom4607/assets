@@ -1,5 +1,5 @@
 /* Cache-first service worker so the app works fully offline. */
-var CACHE = 'codes-v2';
+var CACHE = 'codes-v3';
 var ASSETS = [
   '/codes/',
   '/codes/index.html',

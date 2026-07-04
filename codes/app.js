@@ -4,6 +4,16 @@
 
   qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
 
+  var ICONS = {
+    qr: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1 1h6v6H1V1zm2 2v2h2V3H3zM9 1h6v6H9V1zm2 2v2h2V3h-2zM1 9h6v6H1V9zm2 2v2h2v-2H3zm6-2h3v3H9V9zm4 0h2v2h-2V9zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/></svg>',
+    bars: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1 2h2v12H1V2zm3 0h1v12H4V2zm2 0h2v12H6V2zm3 0h1v12H9V2zm2 0h1v12h-1V2zm2 0h2v12h-2V2z"/></svg>',
+    text: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 3h12v2H2V3zm0 4h12v2H2V7zm0 4h8v2H2v-2z"/></svg>',
+    wifi: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 13.6a1.6 1.6 0 110-3.2 1.6 1.6 0 010 3.2zM4.6 9.3L3.2 7.9a6.8 6.8 0 019.6 0l-1.4 1.4a4.8 4.8 0 00-6.8 0zM1.9 6.5L.5 5.1a10.6 10.6 0 0115 0l-1.4 1.4a8.6 8.6 0 00-12.2 0z"/></svg>',
+    tel: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.6 1.7c.4-.4 1.1-.4 1.5 0l2 2c.4.4.4 1.1 0 1.5l-1 1c-.2.2-.3.6-.1.9a10 10 0 002.9 2.9c.3.2.7.1.9-.1l1-1c.4-.4 1.1-.4 1.5 0l2 2c.4.4.4 1.1 0 1.5l-1.1 1.1c-.7.7-1.7 1-2.7.6A14.7 14.7 0 011.9 5.5c-.4-1-.1-2 .6-2.7l1.1-1.1z"/></svg>',
+    sms: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10a2 2 0 012 2v6a2 2 0 01-2 2H7l-4 3v-3H3a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg>',
+    email: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 3h12a1 1 0 011 1v.4L8 8.9 1 4.4V4a1 1 0 011-1zm-1 3.2l6.6 4.2c.2.2.6.2.8 0L15 6.2V12a1 1 0 01-1 1H2a1 1 0 01-1-1V6.2z"/></svg>'
+  };
+
   var TYPES = [
     { id: 'qr', label: 'QR Code' },
     { id: 'CODE128', label: 'Code 128', hint: 'Any text — letters, digits, symbols.', placeholder: 'Example1234' },
@@ -26,11 +36,18 @@
     { id: 'email', label: 'Email' }
   ];
 
+  var COLOR_PRESETS = ['#000000', '#0a84ff', '#5e5ce6', '#34c759', '#ff3b30', '#ff9500'];
+
+  var savedColor = null;
+  try { savedColor = localStorage.getItem('codeColor'); } catch (e) {}
+  if (!/^#[0-9a-f]{6}$/i.test(savedColor || '')) savedColor = null;
+
   var state = {
     type: 'qr',
     qrPreset: 'text',
     qrEc: 'M',
     showText: true,
+    color: savedColor || '#000000',
     values: {}
   };
 
@@ -53,13 +70,15 @@
 
   /* ---------- UI building ---------- */
 
-  function makeChip(label, selected, onTap) {
+  function makeChip(label, icon, selected, onTap) {
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'chip';
     b.setAttribute('role', 'tab');
     b.setAttribute('aria-selected', selected ? 'true' : 'false');
-    b.textContent = label;
+    // Icons come from the hardcoded ICONS map only, never from user input.
+    b.innerHTML = icon || '';
+    b.appendChild(document.createTextNode(label));
     b.addEventListener('click', onTap);
     return b;
   }
@@ -67,7 +86,8 @@
   function renderTypeRow() {
     els.typeRow.innerHTML = '';
     TYPES.forEach(function (t) {
-      els.typeRow.appendChild(makeChip(t.label, state.type === t.id, function () {
+      var icon = t.id === 'qr' ? ICONS.qr : ICONS.bars;
+      els.typeRow.appendChild(makeChip(t.label, icon, state.type === t.id, function () {
         state.type = t.id;
         state.values = {};
         renderAll();
@@ -77,7 +97,8 @@
     if (state.type === 'qr') {
       els.qrPresetRow.innerHTML = '';
       QR_PRESETS.forEach(function (p) {
-        els.qrPresetRow.appendChild(makeChip(p.label, state.qrPreset === p.id, function () {
+        var icon = ICONS[p.id] || ICONS.text;
+        els.qrPresetRow.appendChild(makeChip(p.label, icon, state.qrPreset === p.id, function () {
           state.qrPreset = p.id;
           state.values = {};
           renderAll();
@@ -184,6 +205,54 @@
     }
   }
 
+  function setColor(color) {
+    state.color = color;
+    try { localStorage.setItem('codeColor', color); } catch (e) {}
+    updateSwatches();
+    scheduleGenerate();
+  }
+
+  function updateSwatches() {
+    var matched = false;
+    els.options.querySelectorAll('.swatch[data-color]').forEach(function (b) {
+      var sel = b.dataset.color.toLowerCase() === state.color.toLowerCase();
+      b.classList.toggle('selected', sel);
+      if (sel) matched = true;
+    });
+    var custom = els.options.querySelector('.swatch.custom');
+    if (custom) custom.classList.toggle('selected', !matched);
+  }
+
+  function renderColorRow() {
+    var row = document.createElement('div');
+    row.className = 'color-row';
+    var label = document.createElement('span');
+    label.className = 'row-label';
+    label.textContent = 'Code color';
+    row.appendChild(label);
+    COLOR_PRESETS.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'swatch';
+      b.dataset.color = c;
+      b.style.background = c;
+      b.setAttribute('aria-label', 'Color ' + c);
+      b.addEventListener('click', function () { setColor(c); });
+      row.appendChild(b);
+    });
+    var custom = document.createElement('label');
+    custom.className = 'swatch custom';
+    custom.setAttribute('aria-label', 'Custom color');
+    var input = document.createElement('input');
+    input.type = 'color';
+    input.value = state.color;
+    input.addEventListener('input', function () { setColor(input.value); });
+    custom.appendChild(input);
+    row.appendChild(custom);
+    els.options.appendChild(row);
+    updateSwatches();
+  }
+
   function renderOptions() {
     els.options.innerHTML = '';
     if (state.type === 'qr') {
@@ -220,6 +289,7 @@
       wrap.appendChild(span);
       els.options.appendChild(wrap);
     }
+    renderColorRow();
   }
 
   function renderAll() {
@@ -274,10 +344,28 @@
     debounceTimer = setTimeout(generate, 150);
   }
 
-  function setHint(msg, isError) {
+  function setHint(msg, kind) {
     var t = typeDef();
     els.hint.textContent = msg || t.hint || '';
-    els.hint.classList.toggle('error', !!isError);
+    els.hint.classList.toggle('error', kind === 'error');
+    els.hint.classList.toggle('warn', kind === 'warn');
+  }
+
+  // WCAG contrast ratio of the code color against the white background.
+  function contrastVsWhite(hex) {
+    var lin = function (c) {
+      c /= 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    var L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    return 1.05 / (L + 0.05);
+  }
+
+  function contrastWarning() {
+    return contrastVsWhite(state.color) < 2 ? 'Light colors may not scan reliably — pick a darker one.' : null;
   }
 
   function showEmpty() {
@@ -291,7 +379,10 @@
 
   function showResult() {
     currentDataUrl = canvas.toDataURL('image/png');
+    els.preview.classList.remove('pop');
+    void els.preview.offsetWidth; // restart the pop animation
     els.preview.src = currentDataUrl;
+    els.preview.classList.add('pop');
     els.preview.hidden = false;
     els.placeholder.hidden = true;
     els.saveTip.hidden = false;
@@ -312,7 +403,7 @@
     var ctx = canvas.getContext('2d');
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = state.color;
     for (var r = 0; r < count; r++) {
       for (var c = 0; c < count; c++) {
         if (qr.isDark(r, c)) {
@@ -333,10 +424,12 @@
       }
       try {
         drawQr(payload);
-        setHint(payload.length > 60 ? payload.slice(0, 60) + '…' : payload);
+        var warn = contrastWarning();
+        if (warn) setHint(warn, 'warn');
+        else setHint(payload.length > 60 ? payload.slice(0, 60) + '…' : payload);
         showResult();
       } catch (e) {
-        setHint('Too much data for a QR code — try shorter text or lower error correction.', true);
+        setHint('Too much data for a QR code — try shorter text or lower error correction.', 'error');
         showEmpty();
       }
       return;
@@ -359,12 +452,14 @@
         fontSize: 28,
         font: '-apple-system, Segoe UI, Roboto, sans-serif',
         background: '#ffffff',
-        lineColor: '#000000'
+        lineColor: state.color
       });
-      setHint('');
+      var warn = contrastWarning();
+      if (warn) setHint(warn, 'warn');
+      else setHint('');
       showResult();
     } catch (e) {
-      setHint(t.hint || 'Invalid value for this barcode type.', true);
+      setHint(t.hint || 'Invalid value for this barcode type.', 'error');
       showEmpty();
     }
   }
