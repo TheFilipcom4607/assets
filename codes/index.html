@@ -19,7 +19,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Codes">
-  <link rel="stylesheet" href="/codes/styles.css">
+  <link rel="stylesheet" href="/codes/styles.css?v=4">
 </head>
 <body>
   <header class="app-header">
@@ -29,7 +29,7 @@
 
   <main>
     <section class="card" aria-label="Code type">
-      <div class="chip-row" id="typeRow" role="tablist" aria-label="Code type"></div>
+      <div id="typeRow" aria-label="Code type"></div>
       <div class="chip-row chip-row-sub" id="qrPresetRow" role="tablist" aria-label="QR content type" hidden></div>
     </section>
 
@@ -60,10 +60,10 @@
     <button class="banner-close" id="installDismiss" aria-label="Dismiss">&times;</button>
   </div>
 
-  <footer class="app-footer">Works fully offline · Nothing leaves your device</footer>
+  <footer class="app-footer">Works fully offline · Nothing leaves your device · v4</footer>
 
-  <script src="/codes/vendor/qrcode.js"></script>
-  <script src="/codes/vendor/jsbarcode.all.min.js"></script>
-  <script src="/codes/app.js"></script>
+  <script src="/codes/vendor/qrcode.js?v=4"></script>
+  <script src="/codes/vendor/jsbarcode.all.min.js?v=4"></script>
+  <script src="/codes/app.js?v=4"></script>
 </body>
 </html>

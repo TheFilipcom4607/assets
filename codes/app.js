@@ -44,6 +44,7 @@
 
   var state = {
     type: 'qr',
+    lastBarcode: 'CODE128',
     qrPreset: 'text',
     qrEc: 'M',
     showText: true,
@@ -85,14 +86,53 @@
 
   function renderTypeRow() {
     els.typeRow.innerHTML = '';
-    TYPES.forEach(function (t) {
-      var icon = t.id === 'qr' ? ICONS.qr : ICONS.bars;
-      els.typeRow.appendChild(makeChip(t.label, icon, state.type === t.id, function () {
-        state.type = t.id;
+    var seg = document.createElement('div');
+    seg.className = 'segmented';
+    [
+      { qr: true, label: 'QR Code', icon: ICONS.qr },
+      { qr: false, label: 'Barcode', icon: ICONS.bars }
+    ].forEach(function (m) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'seg-btn';
+      b.setAttribute('aria-selected', m.qr === (state.type === 'qr') ? 'true' : 'false');
+      b.innerHTML = m.icon;
+      b.appendChild(document.createTextNode(m.label));
+      b.addEventListener('click', function () {
+        if (m.qr === (state.type === 'qr')) return;
+        state.type = m.qr ? 'qr' : state.lastBarcode;
         state.values = {};
         renderAll();
-      }));
+      });
+      seg.appendChild(b);
     });
+    els.typeRow.appendChild(seg);
+
+    if (state.type !== 'qr') {
+      state.lastBarcode = state.type;
+      var wrap = document.createElement('div');
+      wrap.className = 'field format-field';
+      var label = document.createElement('label');
+      label.textContent = 'Barcode format';
+      wrap.appendChild(label);
+      var sel = document.createElement('select');
+      TYPES.forEach(function (t) {
+        if (t.id === 'qr') return;
+        var o = document.createElement('option');
+        o.value = t.id;
+        o.textContent = t.label;
+        sel.appendChild(o);
+      });
+      sel.value = state.type;
+      sel.addEventListener('change', function () {
+        state.type = sel.value;
+        state.values = {};
+        renderAll();
+      });
+      wrap.appendChild(sel);
+      els.typeRow.appendChild(wrap);
+    }
+
     els.qrPresetRow.hidden = state.type !== 'qr';
     if (state.type === 'qr') {
       els.qrPresetRow.innerHTML = '';
@@ -523,8 +563,20 @@
   /* ---------- Service worker ---------- */
 
   if ('serviceWorker' in navigator) {
+    // When an updated service worker takes over, reload once to pick up
+    // the new assets. Skipped on first install (no previous controller).
+    var hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!hadController) {
+        hadController = true;
+        return;
+      }
+      window.location.reload();
+    });
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/codes/sw.js').catch(function () {});
+      navigator.serviceWorker.register('/codes/sw.js').then(function (reg) {
+        reg.update();
+      }).catch(function () {});
     });
   }
 

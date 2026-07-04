@@ -79,19 +79,57 @@ main {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
-/* Type chips */
-.chip-row {
+/* Mode segmented control */
+.segmented {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  gap: 3px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 14px;
   padding: 3px;
 }
 
-.chip-row::-webkit-scrollbar { display: none; }
+.seg-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: none;
+  border-radius: 11px;
+  padding: 11px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 
-.chip-row-sub { margin-top: 10px; }
+.seg-btn svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.seg-btn[aria-selected="true"] {
+  background: var(--accent);
+  color: var(--accent-text);
+  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.45);
+}
+
+.format-field { margin: 12px 0 0 !important; }
+
+/* QR preset chips */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 3px;
+}
+
+.chip-row-sub { margin-top: 12px; }
 
 .chip {
   flex: 0 0 auto;
@@ -391,6 +429,10 @@ body.has-banner .app-footer { padding-bottom: 110px; }
   }
 
   .chip[aria-selected="true"] { transform: scale(1.05); }
+
+  .seg-btn {
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
 
   .btn {
     transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease;
