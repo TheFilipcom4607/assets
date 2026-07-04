@@ -2,18 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <script>
+    // Normalize /codes -> /codes/ so the service worker scope covers the page.
+    if (location.pathname.slice(-6) === '/codes') {
+      location.replace(location.pathname + '/' + location.search + location.hash);
+    }
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Code Maker — QR &amp; Barcode Generator</title>
   <meta name="description" content="Generate QR codes and barcodes (EAN, UPC, Code 128, Code 39 and more). Works offline, installable.">
   <meta name="theme-color" content="#0f1115">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon-192.png" type="image/png">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="/codes/manifest.webmanifest">
+  <link rel="icon" href="/codes/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/codes/icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Codes">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/codes/styles.css">
 </head>
 <body>
   <header class="app-header">
@@ -56,8 +62,8 @@
 
   <footer class="app-footer">Works fully offline · Nothing leaves your device</footer>
 
-  <script src="vendor/qrcode.js"></script>
-  <script src="vendor/jsbarcode.all.min.js"></script>
-  <script src="app.js"></script>
+  <script src="/codes/vendor/qrcode.js"></script>
+  <script src="/codes/vendor/jsbarcode.all.min.js"></script>
+  <script src="/codes/app.js"></script>
 </body>
 </html>

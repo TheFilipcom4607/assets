@@ -1,17 +1,17 @@
 /* Cache-first service worker so the app works fully offline. */
-var CACHE = 'codes-v1';
+var CACHE = 'codes-v2';
 var ASSETS = [
-  './',
-  './index.html',
-  './styles.css',
-  './app.js',
-  './manifest.webmanifest',
-  './vendor/qrcode.js',
-  './vendor/jsbarcode.all.min.js',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png'
+  '/codes/',
+  '/codes/index.html',
+  '/codes/styles.css',
+  '/codes/app.js',
+  '/codes/manifest.webmanifest',
+  '/codes/vendor/qrcode.js',
+  '/codes/vendor/jsbarcode.all.min.js',
+  '/codes/icons/icon-192.png',
+  '/codes/icons/icon-512.png',
+  '/codes/icons/icon-maskable-512.png',
+  '/codes/icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', function (e) {
@@ -54,7 +54,7 @@ self.addEventListener('fetch', function (e) {
         }
         return res;
       }).catch(function () {
-        if (e.request.mode === 'navigate') return caches.match('./index.html');
+        if (e.request.mode === 'navigate') return caches.match('/codes/index.html');
       });
     })
   );
