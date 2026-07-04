@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Code Maker — QR &amp; Barcode Generator</title>
+  <meta name="description" content="Generate QR codes and barcodes (EAN, UPC, Code 128, Code 39 and more). Works offline, installable.">
+  <meta name="theme-color" content="#0f1115">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Codes">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Code Maker</h1>
+    <p class="subtitle">QR codes &amp; barcodes, made offline on your device</p>
+  </header>
+
+  <main>
+    <section class="card" aria-label="Code type">
+      <div class="chip-row" id="typeRow" role="tablist" aria-label="Code type"></div>
+      <div class="chip-row chip-row-sub" id="qrPresetRow" role="tablist" aria-label="QR content type" hidden></div>
+    </section>
+
+    <section class="card" aria-label="Content">
+      <div id="fields"></div>
+      <div class="options" id="options"></div>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <section class="card preview-card" aria-label="Preview">
+      <div class="preview-frame" id="previewFrame">
+        <img id="preview" alt="Generated code" hidden>
+        <div class="placeholder" id="placeholder">Your code will appear here</div>
+      </div>
+      <p class="save-tip" id="saveTip" hidden>Tip: long-press the code to save or copy it</p>
+      <div class="actions">
+        <button class="btn primary" id="saveBtn" disabled>Save PNG</button>
+        <button class="btn" id="shareBtn" disabled>Share</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="install-banner" id="installBanner" hidden>
+    <div>
+      <strong>Install this app</strong>
+      <span>Tap <span class="share-glyph" aria-label="Share button">&#x2191;</span> Share, then “Add to Home Screen”</span>
+    </div>
+    <button class="banner-close" id="installDismiss" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <footer class="app-footer">Works fully offline · Nothing leaves your device</footer>
+
+  <script src="vendor/qrcode.js"></script>
+  <script src="vendor/jsbarcode.all.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
