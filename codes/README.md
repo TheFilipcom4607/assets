@@ -1,4 +1,4 @@
-# Code Maker
+# Codes
 
 A tiny offline-first PWA for generating QR codes and barcodes.
 
