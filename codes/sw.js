@@ -3,7 +3,7 @@
      the next launch; the cached copy is only used when offline.
    - Static assets are cache-first with versioned URLs (?v=N), so bumping
      the version in index.html + this file rolls everything forward. */
-var VERSION = '5';
+var VERSION = '6';
 var CACHE = 'codes-v' + VERSION;
 var ASSETS = [
   '/codes/',
