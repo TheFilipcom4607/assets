@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Scan a 3×3 Rubik's Cube with your camera and get a provably shortest solution.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CubeScan">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>CubeScan</title>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <button id="homeButton" class="icon-button hidden" type="button" aria-label="Go home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <a class="brand" href="#home" aria-label="CubeScan home">
+        <span class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span>CubeScan</span>
+      </a>
+      <button id="installButton" class="install-button" type="button">Install</button>
+    </header>
+
+    <main>
+      <section id="homeView" class="view active" aria-labelledby="homeTitle">
+        <div class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Camera-powered 3×3 solver</p>
+            <h1 id="homeTitle">Point. Scan. Solve.</h1>
+            <p class="hero-text">Capture all six faces, correct any uncertain stickers, then let the app prove the shortest possible solution and guide you through it. Everything runs locally in your browser.</p>
+            <div class="hero-actions">
+              <button id="startButton" class="button primary large" type="button">Scan my cube</button>
+              <button id="resumeButton" class="button secondary large hidden" type="button">Resume scan</button>
+            </div>
+            <div class="privacy-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-2.9 8.6-7 10-4.1-1.4-7-5.4-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+              <span>No photos leave your device. Only nine tiny color samples per face are retained.</span>
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="cube-hero">
+              <div class="cube-face cube-front">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <div class="cube-face cube-top">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <div class="cube-face cube-right">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="how-grid">
+          <article class="info-card">
+            <span class="step-number">1</span>
+            <h2>Align</h2>
+            <p>Hold each face inside the 3×3 guide with the requested neighboring color at the top.</p>
+          </article>
+          <article class="info-card">
+            <span class="step-number">2</span>
+            <h2>Review</h2>
+            <p>The app balances all six colors automatically. Tap any sticker that needs correction.</p>
+          </article>
+          <article class="info-card">
+            <span class="step-number">3</span>
+            <h2>Solve</h2>
+            <p>The app checks solutions in increasing length until it can prove that no shorter sequence exists.</p>
+          </article>
+        </div>
+
+        <aside class="compat-card">
+          <div>
+            <strong>Camera requirement</strong>
+            <span>Open through HTTPS or localhost. Safari and Chromium-based mobile browsers are supported.</span>
+          </div>
+          <span id="solverStatus" class="status-pill loading">Preparing optimal solver…</span>
+        </aside>
+      </section>
+
+      <section id="scanView" class="view scan-view" aria-labelledby="scanTitle">
+        <div class="scan-header">
+          <div>
+            <p id="scanProgress" class="eyebrow">Face 1 of 6</p>
+            <h1 id="scanTitle">Scan the white face</h1>
+            <p id="orientationText" class="orientation-text">Keep the blue center at the top edge.</p>
+          </div>
+          <div id="faceBadge" class="face-badge" style="background:#f5f7ff;color:#111522">W</div>
+        </div>
+
+        <div id="cameraStage" class="camera-stage">
+          <video id="camera" autoplay muted playsinline></video>
+          <canvas id="captureCanvas" class="hidden"></canvas>
+          <div class="camera-shade shade-top"></div>
+          <div class="camera-shade shade-bottom"></div>
+          <div class="camera-shade shade-left"></div>
+          <div class="camera-shade shade-right"></div>
+          <div id="scanGrid" class="scan-grid" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <span class="top-marker">TOP</span>
+          </div>
+          <div id="cameraMessage" class="camera-message hidden"></div>
+          <button id="torchButton" class="floating-button torch hidden" type="button" aria-label="Toggle flashlight">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6l1 5-2 3v8a2 2 0 01-4 0v-8L8 7l1-5z"/><path d="M9 14h6"/></svg>
+          </button>
+        </div>
+
+        <div class="scan-controls">
+          <div class="scan-tip"><span>Tip</span> Fill each square with one sticker and avoid reflections.</div>
+          <div class="scan-button-row">
+            <button id="backFaceButton" class="button secondary" type="button">Previous</button>
+            <button id="captureButton" class="capture-button" type="button" aria-label="Capture white face"><span></span></button>
+            <button id="skipToReviewButton" class="button secondary hidden" type="button">Review</button>
+            <div class="control-spacer" aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="reviewView" class="view" aria-labelledby="reviewTitle">
+        <div class="section-heading">
+          <p class="eyebrow">Check the scan</p>
+          <h1 id="reviewTitle">Does this match your cube?</h1>
+          <p>Tap a sticker, then choose its actual face color. Center stickers are fixed because they define the cube.</p>
+        </div>
+
+        <div class="review-layout">
+          <div id="cubeNet" class="cube-net" aria-label="Scanned cube net"></div>
+          <aside class="review-panel">
+            <div class="panel-section">
+              <h2>Selected sticker</h2>
+              <p id="selectedStickerText">Tap any non-center sticker to edit it.</p>
+              <div id="colorPalette" class="color-palette" role="group" aria-label="Choose sticker color"></div>
+            </div>
+            <div class="panel-section">
+              <h2>Color count</h2>
+              <div id="colorCounts" class="color-counts"></div>
+            </div>
+            <div id="validationBox" class="validation-box neutral">
+              <strong>Review the scan</strong>
+              <span>The app will verify that the cube can physically exist.</span>
+            </div>
+            <div class="optimal-note">
+              <strong>Guaranteed shortest in HTM</strong>
+              <span>A 180° turn counts as one move, so every legal state is at most 20 moves away. Proving the exact minimum can still take much longer than an ordinary solver, especially on deeply scrambled cubes.</span>
+            </div>
+            <div id="solveProgress" class="solve-progress hidden" role="status" aria-live="polite">
+              <div class="progress-spinner" aria-hidden="true"></div>
+              <div>
+                <strong id="solveProgressTitle">Preparing optimal search…</strong>
+                <span id="solveProgressDetail">Finding an initial upper bound.</span>
+              </div>
+            </div>
+            <button id="solveButton" class="button primary large full" type="button">Find shortest solution</button>
+            <button id="cancelSolveButton" class="button secondary full hidden" type="button">Cancel optimal search</button>
+            <button id="rescanButton" class="button secondary full" type="button">Rescan a face</button>
+            <button id="clearButton" class="text-button danger" type="button">Clear this scan</button>
+          </aside>
+        </div>
+      </section>
+
+      <section id="solveView" class="view" aria-labelledby="solveTitle">
+        <div class="solve-topline">
+          <div>
+            <p class="eyebrow">Provably optimal solution</p>
+            <h1 id="solveTitle">Follow the moves</h1>
+          </div>
+          <div class="solve-summary">
+            <div id="moveCounter" class="move-counter">0 moves</div>
+            <div id="optimalProof" class="optimal-proof"></div>
+          </div>
+        </div>
+
+        <div id="solvedMessage" class="solved-message hidden">
+          <div class="check-orbit"><span>✓</span></div>
+          <h2>Your cube is already solved.</h2>
+          <p>Either you are exceptionally efficient, or the scan caught a perfect cube.</p>
+        </div>
+
+        <div id="solutionPlayer" class="solution-player hidden">
+          <div class="move-visual-card">
+            <div id="moveNet" class="move-net" aria-hidden="true"></div>
+            <div id="turnArrow" class="turn-arrow" aria-hidden="true">
+              <svg viewBox="0 0 100 100"><path d="M24 65A32 32 0 1 1 75 66"/><path d="M73 54l3 14-14-3"/></svg>
+              <span id="doubleBadge" class="double-badge hidden">×2</span>
+            </div>
+          </div>
+          <div class="move-copy-card">
+            <p id="movePosition" class="eyebrow">Move 1 of 20</p>
+            <div id="moveNotation" class="move-notation">R</div>
+            <h2 id="moveInstruction">Turn the Right face clockwise</h2>
+            <p class="direction-note">Clockwise and counterclockwise are always judged while looking directly at the face being turned.</p>
+            <div class="player-controls">
+              <button id="previousMoveButton" class="button secondary" type="button">Previous</button>
+              <button id="nextMoveButton" class="button primary" type="button">Next move</button>
+            </div>
+          </div>
+        </div>
+
+        <details class="algorithm-card">
+          <summary>Full algorithm</summary>
+          <div id="algorithmText" class="algorithm-text"></div>
+        </details>
+        <button id="newScanButton" class="button secondary" type="button">Scan another cube</button>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="solver/cube.js"></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

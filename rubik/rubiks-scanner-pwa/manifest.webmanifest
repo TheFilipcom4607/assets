@@ -1,0 +1,16 @@
+{
+  "name": "CubeScan – Rubik's Cube Solver",
+  "short_name": "CubeScan",
+  "description": "Scan a 3×3 Rubik's Cube with your camera and get a provably shortest step-by-step solution.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070a12",
+  "theme_color": "#0b1020",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
