@@ -38,6 +38,45 @@ The app stores your Worker URL, token, and a local mirror of your pixels in this
 browser's `localStorage`. Because pixels are also registered on the backend, the
 dashboard works from any device once you enter the same URL + token.
 
+## Is it safe that the page is public?
+
+Yes — **the page being public does not make your data public.** They're two
+different layers:
+
+- The page is just a **UI shell** with no secrets in it. A random visitor sees an
+  empty setup screen.
+- Every data endpoint (`/api/overview`, register, **delete**) requires your
+  **`DASH_TOKEN`** as a Bearer token. That token lives **only in your browser**
+  (localStorage) — it is never baked into the public page. Without it, every
+  `/api/*` call returns `401`, so a stranger **cannot read, create, or delete**
+  your pixels.
+- The only public endpoint is the pixel image (`/p/<id>.gif`), which *must* be
+  public so email clients can load it. It only returns an image and logs an open —
+  it can't read your data, and IDs are random/unguessable.
+
+So "anyone can delete or mess with it" is only true for **someone who has your
+token**. Keep it long, random, and secret. Use the **Disconnect** button
+(Settings) to wipe it from a shared computer.
+
+### Want stronger, login-based protection?
+
+Since your domain is already on Cloudflare, you can add **Cloudflare Access**
+(Zero Trust — free tier) so only *your* login opens the dashboard:
+
+- The clean setup is to serve the dashboard from the **same Cloudflare origin as
+  the API** and put an Access policy over that hostname, **excluding `/p/*`** so
+  emails still load the pixel. Then auth is your Google/email login and there's no
+  shared token at all.
+- Putting Access only over `/api/*` while the page stays on Vercel is awkward,
+  because the browser's cross-origin `fetch()` can't complete Access's interactive
+  login — so the bearer token stays the practical choice for that split.
+- Restricting the Worker's CORS to your origin is possible but **isn't real
+  security** — non-browser clients ignore CORS; the token is what actually gates
+  access.
+
+If you'd like the Access-based setup, it's a small config change plus moving the
+dashboard onto Cloudflare — ask and it can be wired up.
+
 ## How reliable is open tracking, really?
 
 It's a soft signal — the same caveats apply to every email tool:

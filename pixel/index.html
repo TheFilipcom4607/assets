@@ -7,22 +7,22 @@
 <title>Pixel — email open tracking</title>
 <style>
   :root {
-    --bg: #0b0d12;
-    --bg-soft: #12151d;
-    --panel: #161a24;
-    --panel-2: #1b2030;
-    --line: #262c3a;
-    --line-soft: #1f2431;
-    --text: #e7ebf3;
-    --muted: #8b93a7;
-    --faint: #5c6478;
-    --accent: #6c8cff;
-    --accent-2: #8a6cff;
-    --good: #3ecf8e;
-    --warn: #ffcf5c;
-    --bad: #ff6b6b;
-    --radius: 14px;
-    --shadow: 0 10px 40px -12px rgba(0,0,0,.55);
+    --bg: #000000;
+    --bg-soft: #0a0a0a;
+    --panel: #0d0d0d;
+    --panel-2: #161616;
+    --line: #242424;
+    --line-soft: #1a1a1a;
+    --text: #fafafa;
+    --muted: #8f8f8f;
+    --faint: #565656;
+    --accent: #ededed;     /* mono "accent" — soft white for focus/links */
+    --accent-2: #bdbdbd;
+    --good: #ffffff;       /* opened / connected — pure white in monochrome */
+    --warn: #a8a8a8;       /* advisory notes — light gray, no hue */
+    --bad: #e6e6e6;        /* errors — near white, meaning carried by text */
+    --radius: 12px;
+    --shadow: 0 8px 30px -14px rgba(0,0,0,.8);
     --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
@@ -30,8 +30,7 @@
   html, body { margin: 0; padding: 0; }
   body {
     background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(108,140,255,.10), transparent 60%),
-      radial-gradient(900px 500px at 0% 0%, rgba(138,108,255,.08), transparent 55%),
+      radial-gradient(1100px 520px at 50% -20%, rgba(255,255,255,.035), transparent 60%),
       var(--bg);
     color: var(--text);
     font-family: var(--sans);
@@ -50,14 +49,14 @@
     margin-bottom: 26px;
   }
   .logo {
-    width: 40px; height: 40px; border-radius: 11px; flex: none;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    display: grid; place-items: center; box-shadow: var(--shadow);
+    width: 40px; height: 40px; border-radius: 10px; flex: none;
+    background: var(--panel-2); border: 1px solid var(--line);
+    display: grid; place-items: center;
     position: relative;
   }
   .logo::after {
-    content: ""; width: 9px; height: 9px; border-radius: 50%;
-    background: #fff; box-shadow: 0 0 0 4px rgba(255,255,255,.18);
+    content: ""; width: 10px; height: 10px; border-radius: 2px;
+    background: #fff;
   }
   .brand h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
   .brand p { margin: 0; color: var(--muted); font-size: 12.5px; }
@@ -70,7 +69,7 @@
   }
   .icon-btn:hover { border-color: var(--accent); background: var(--panel-2); }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
-  .dot.ok { background: var(--good); box-shadow: 0 0 10px var(--good); }
+  .dot.ok { background: var(--good); box-shadow: 0 0 8px rgba(255,255,255,.4); }
   .dot.bad { background: var(--bad); }
 
   /* Panels */
@@ -87,7 +86,7 @@
 
   .banner {
     border: 1px solid var(--line);
-    background: linear-gradient(180deg, rgba(108,140,255,.10), rgba(108,140,255,.02));
+    background: rgba(255,255,255,.03);
     border-radius: var(--radius); padding: 18px 20px; margin-bottom: 20px;
     display: flex; gap: 14px; align-items: flex-start;
   }
@@ -109,12 +108,12 @@
   @media (max-width: 620px) { .row { grid-template-columns: 1fr; } }
 
   button.primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #fff; border: none; border-radius: 10px; padding: 11px 18px;
+    background: #ffffff;
+    color: #0a0a0a; border: none; border-radius: 9px; padding: 11px 18px;
     font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--sans);
-    transition: transform .08s, filter .15s;
+    transition: transform .08s, filter .15s, background .15s;
   }
-  button.primary:hover { filter: brightness(1.08); }
+  button.primary:hover { background: #e2e2e2; }
   button.primary:active { transform: translateY(1px); }
   button.primary:disabled { opacity: .5; cursor: not-allowed; filter: none; }
   button.ghost {
@@ -129,8 +128,8 @@
   .result { margin-top: 18px; border-top: 1px solid var(--line-soft); padding-top: 18px; display: none; }
   .result.show { display: block; }
   .codebox {
-    background: #0a0c11; border: 1px solid var(--line); border-radius: 10px;
-    padding: 12px 14px; font-family: var(--mono); font-size: 12.5px; color: #cfd6e6;
+    background: #000; border: 1px solid var(--line); border-radius: 9px;
+    padding: 12px 14px; font-family: var(--mono); font-size: 12.5px; color: #d4d4d4;
     overflow-x: auto; white-space: pre; margin: 8px 0 6px;
   }
   .code-label { font-size: 12px; color: var(--muted); margin: 14px 0 2px; display: flex; justify-content: space-between; align-items: center; }
@@ -159,12 +158,12 @@
     border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; overflow: hidden;
     background: var(--bg-soft); transition: border-color .15s;
   }
-  .pixel-card:hover { border-color: #313a4f; }
+  .pixel-card:hover { border-color: #3a3a3a; }
   .pixel-main {
     display: flex; align-items: center; gap: 14px; padding: 15px 16px; cursor: pointer;
   }
-  .pixel-status { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--faint); }
-  .pixel-status.opened { background: var(--good); box-shadow: 0 0 10px rgba(62,207,142,.6); }
+  .pixel-status { width: 10px; height: 10px; border-radius: 50%; flex: none; background: transparent; border: 1.5px solid var(--faint); box-sizing: border-box; }
+  .pixel-status.opened { background: var(--good); border-color: var(--good); box-shadow: 0 0 8px rgba(255,255,255,.45); }
   .pixel-info { flex: 1; min-width: 0; }
   .pixel-info .pl { font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pixel-info .pr { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -175,8 +174,8 @@
     display: inline-block; font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
     text-transform: uppercase; letter-spacing: .04em;
   }
-  .badge.opened { background: rgba(62,207,142,.14); color: var(--good); }
-  .badge.waiting { background: rgba(139,147,167,.14); color: var(--muted); }
+  .badge.opened { background: rgba(255,255,255,.13); color: #fff; }
+  .badge.waiting { background: rgba(255,255,255,.05); color: var(--muted); border: 1px solid var(--line); }
   .chev { color: var(--faint); transition: transform .2s; flex: none; }
   .pixel-card.open .chev { transform: rotate(90deg); }
 
@@ -201,7 +200,7 @@
 
   /* Modal */
   .modal-bg {
-    position: fixed; inset: 0; background: rgba(4,6,10,.66); backdrop-filter: blur(3px);
+    position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(3px);
     display: none; align-items: center; justify-content: center; padding: 20px; z-index: 50;
   }
   .modal-bg.show { display: flex; }
@@ -218,7 +217,7 @@
   details.help { margin-top: 16px; border-top: 1px solid var(--line-soft); padding-top: 14px; }
   details.help summary { cursor: pointer; color: var(--accent); font-size: 13px; }
   details.help ol { padding-left: 18px; color: var(--muted); font-size: 12.5px; line-height: 1.7; }
-  details.help code { background: var(--bg); padding: 1px 6px; border-radius: 5px; font-family: var(--mono); font-size: 11.5px; color: #cfd6e6; }
+  details.help code { background: var(--panel-2); padding: 1px 6px; border-radius: 5px; font-family: var(--mono); font-size: 11.5px; color: #d4d4d4; }
 
   .note {
     font-size: 12px; color: var(--faint); margin-top: 22px; line-height: 1.65;
@@ -343,8 +342,14 @@
       <span class="lab">Dashboard token <span style="color:var(--faint)">(your DASH_TOKEN)</span></span>
       <input type="password" id="setToken" placeholder="the long random password you set" />
     </label>
+    <p style="color:var(--faint);font-size:11.5px;margin:-6px 0 14px;line-height:1.5">
+      This token is what keeps your data private — anyone without it just sees an empty app and
+      can't read, add, or delete your pixels. Use a long, random value. On a shared computer, hit
+      <b style="color:var(--muted)">Disconnect</b> when you're done.
+    </p>
     <div class="test-result" id="testResult"></div>
     <div class="modal-actions">
+      <button class="ghost danger" id="disconnectBtn" style="margin-right:auto">Disconnect</button>
       <button class="ghost" id="testConn">Test connection</button>
       <button class="ghost" id="cancelSet">Cancel</button>
       <button class="primary" id="saveSet">Save</button>
@@ -663,7 +668,20 @@
     closeModal();
     refreshUI();
     load();
-    toast("Saved");
+    if (token && token.length < 16) toast("Saved — tip: a longer, random token is safer");
+    else toast("Saved");
+  }
+
+  // Clear everything from THIS browser (e.g. a shared computer). Data on the
+  // backend is untouched — reconnecting with the same token restores the view.
+  function disconnect() {
+    if (!confirm("Disconnect from this browser? Your backend URL, token, and local pixel list will be cleared here. Your data on the backend stays intact and comes back when you reconnect.")) return;
+    [LS.backend, LS.token, LS.pixels].forEach((k) => { try { localStorage.removeItem(k); } catch {} });
+    backend = ""; token = ""; localPixels = []; overview = null;
+    closeModal();
+    refreshUI();
+    render();
+    toast("Disconnected from this browser");
   }
 
   function refreshUI() {
@@ -677,6 +695,7 @@
   $("openSetup").addEventListener("click", openModal);
   $("cancelSet").addEventListener("click", closeModal);
   $("saveSet").addEventListener("click", saveSettings);
+  $("disconnectBtn").addEventListener("click", disconnect);
   $("testConn").addEventListener("click", testConn);
   $("modalBg").addEventListener("click", (e) => { if (e.target === $("modalBg")) closeModal(); });
 
