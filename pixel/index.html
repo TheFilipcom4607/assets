@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Pixel — email open tracking</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --bg-soft: #12151d;
+    --panel: #161a24;
+    --panel-2: #1b2030;
+    --line: #262c3a;
+    --line-soft: #1f2431;
+    --text: #e7ebf3;
+    --muted: #8b93a7;
+    --faint: #5c6478;
+    --accent: #6c8cff;
+    --accent-2: #8a6cff;
+    --good: #3ecf8e;
+    --warn: #ffcf5c;
+    --bad: #ff6b6b;
+    --radius: 14px;
+    --shadow: 0 10px 40px -12px rgba(0,0,0,.55);
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(108,140,255,.10), transparent 60%),
+      radial-gradient(900px 500px at 0% 0%, rgba(138,108,255,.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  /* Header */
+  header.top {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 26px;
+  }
+  .logo {
+    width: 40px; height: 40px; border-radius: 11px; flex: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center; box-shadow: var(--shadow);
+    position: relative;
+  }
+  .logo::after {
+    content: ""; width: 9px; height: 9px; border-radius: 50%;
+    background: #fff; box-shadow: 0 0 0 4px rgba(255,255,255,.18);
+  }
+  .brand h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+  .brand p { margin: 0; color: var(--muted); font-size: 12.5px; }
+  .top .spacer { flex: 1; }
+  .icon-btn {
+    background: var(--panel); border: 1px solid var(--line); color: var(--text);
+    border-radius: 10px; padding: 8px 12px; font-size: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px; font-family: var(--sans);
+    transition: border-color .15s, background .15s;
+  }
+  .icon-btn:hover { border-color: var(--accent); background: var(--panel-2); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
+  .dot.ok { background: var(--good); box-shadow: 0 0 10px var(--good); }
+  .dot.bad { background: var(--bad); }
+
+  /* Panels */
+  .panel {
+    background: linear-gradient(180deg, var(--panel), var(--bg-soft));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 16px; letter-spacing: -0.01em; }
+  .panel .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+
+  .banner {
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(108,140,255,.10), rgba(108,140,255,.02));
+    border-radius: var(--radius); padding: 18px 20px; margin-bottom: 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .banner .b-emoji { font-size: 22px; line-height: 1.3; }
+  .banner h3 { margin: 0 0 4px; font-size: 15px; }
+  .banner p { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+
+  /* Forms */
+  label.field { display: block; margin-bottom: 14px; }
+  label.field .lab { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+  input[type=text], input[type=url], input[type=password] {
+    width: 100%; background: var(--bg); border: 1px solid var(--line);
+    color: var(--text); border-radius: 10px; padding: 11px 13px; font-size: 14px;
+    font-family: var(--sans); transition: border-color .15s;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  input::placeholder { color: var(--faint); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 620px) { .row { grid-template-columns: 1fr; } }
+
+  button.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; border: none; border-radius: 10px; padding: 11px 18px;
+    font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--sans);
+    transition: transform .08s, filter .15s;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+  button.primary:active { transform: translateY(1px); }
+  button.primary:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+  button.ghost {
+    background: var(--panel); color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 15px; font-size: 13px; cursor: pointer;
+    font-family: var(--sans); transition: border-color .15s, background .15s;
+  }
+  button.ghost:hover { border-color: var(--accent); background: var(--panel-2); }
+  button.ghost.danger:hover { border-color: var(--bad); color: var(--bad); }
+
+  /* Generated output */
+  .result { margin-top: 18px; border-top: 1px solid var(--line-soft); padding-top: 18px; display: none; }
+  .result.show { display: block; }
+  .codebox {
+    background: #0a0c11; border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; font-family: var(--mono); font-size: 12.5px; color: #cfd6e6;
+    overflow-x: auto; white-space: pre; margin: 8px 0 6px;
+  }
+  .code-label { font-size: 12px; color: var(--muted); margin: 14px 0 2px; display: flex; justify-content: space-between; align-items: center; }
+  .copy-btn {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 8px; padding: 4px 10px; font-size: 11.5px; cursor: pointer; font-family: var(--sans);
+  }
+  .copy-btn:hover { border-color: var(--accent); }
+  .copy-btn.copied { color: var(--good); border-color: var(--good); }
+
+  /* Dashboard */
+  .dash-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .dash-head h2 { margin: 0; flex: 1; }
+  .toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); cursor: pointer; user-select: none; }
+  .toggle input { accent-color: var(--accent); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+  @media (max-width: 620px) { .stat-row { grid-template-columns: 1fr 1fr; } }
+  .stat {
+    background: var(--bg); border: 1px solid var(--line-soft); border-radius: 12px; padding: 14px 16px;
+  }
+  .stat .n { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+  .stat .l { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+
+  .pixel-card {
+    border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; overflow: hidden;
+    background: var(--bg-soft); transition: border-color .15s;
+  }
+  .pixel-card:hover { border-color: #313a4f; }
+  .pixel-main {
+    display: flex; align-items: center; gap: 14px; padding: 15px 16px; cursor: pointer;
+  }
+  .pixel-status { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--faint); }
+  .pixel-status.opened { background: var(--good); box-shadow: 0 0 10px rgba(62,207,142,.6); }
+  .pixel-info { flex: 1; min-width: 0; }
+  .pixel-info .pl { font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pixel-info .pr { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pixel-meta { text-align: right; flex: none; }
+  .pixel-meta .big { font-weight: 700; font-size: 16px; }
+  .pixel-meta .small { color: var(--muted); font-size: 11.5px; }
+  .badge {
+    display: inline-block; font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .badge.opened { background: rgba(62,207,142,.14); color: var(--good); }
+  .badge.waiting { background: rgba(139,147,167,.14); color: var(--muted); }
+  .chev { color: var(--faint); transition: transform .2s; flex: none; }
+  .pixel-card.open .chev { transform: rotate(90deg); }
+
+  .pixel-detail { display: none; border-top: 1px solid var(--line-soft); padding: 4px 16px 14px; }
+  .pixel-card.open .pixel-detail { display: block; }
+  .opens-list { margin-top: 8px; }
+  .open-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px;
+  }
+  .open-item:last-child { border-bottom: none; }
+  .open-time { width: 92px; flex: none; color: var(--text); }
+  .open-time .abs { color: var(--faint); font-size: 11px; display: block; }
+  .open-body { flex: 1; min-width: 0; }
+  .open-where { color: var(--muted); }
+  .open-client { font-size: 12px; }
+  .open-note { font-size: 11.5px; color: var(--warn); margin-top: 2px; }
+  .pixel-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .kv { font-family: var(--mono); font-size: 11.5px; color: var(--muted); word-break: break-all; }
+
+  .empty { text-align: center; color: var(--muted); padding: 34px 10px; }
+  .empty .big { font-size: 34px; margin-bottom: 8px; }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(4,6,10,.66); backdrop-filter: blur(3px);
+    display: none; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    max-width: 520px; width: 100%; padding: 24px; box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto;
+  }
+  .modal h2 { margin: 0 0 4px; font-size: 17px; }
+  .modal .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
+  .test-result { font-size: 12.5px; margin-top: 10px; min-height: 18px; }
+  .test-result.ok { color: var(--good); }
+  .test-result.bad { color: var(--bad); }
+  details.help { margin-top: 16px; border-top: 1px solid var(--line-soft); padding-top: 14px; }
+  details.help summary { cursor: pointer; color: var(--accent); font-size: 13px; }
+  details.help ol { padding-left: 18px; color: var(--muted); font-size: 12.5px; line-height: 1.7; }
+  details.help code { background: var(--bg); padding: 1px 6px; border-radius: 5px; font-family: var(--mono); font-size: 11.5px; color: #cfd6e6; }
+
+  .note {
+    font-size: 12px; color: var(--faint); margin-top: 22px; line-height: 1.65;
+    border-top: 1px solid var(--line-soft); padding-top: 16px;
+  }
+  .note b { color: var(--muted); }
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 10px 18px; border-radius: 10px; font-size: 13px; box-shadow: var(--shadow);
+    opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 60;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .spin { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--faint); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="logo"></div>
+    <div class="brand">
+      <h1>Pixel</h1>
+      <p>Know when your emails get opened.</p>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="settingsBtn">
+      <span class="dot" id="connDot"></span> Settings
+    </button>
+  </header>
+
+  <!-- Setup banner (shown when no backend configured) -->
+  <div class="banner" id="setupBanner" style="display:none">
+    <div class="b-emoji">👋</div>
+    <div style="flex:1">
+      <h3>One-time setup: connect your tracker</h3>
+      <p>A tracking pixel needs a tiny server to record opens. Deploy the free Cloudflare Worker
+         included in <code style="font-family:var(--mono);font-size:11.5px">pixel/backend/</code> (about 3 minutes, no credit card),
+         then paste its URL and token below.</p>
+      <button class="primary" id="openSetup">Connect tracker</button>
+    </div>
+  </div>
+
+  <!-- Generator -->
+  <section class="panel" id="genPanel">
+    <h2>Create a tracking pixel</h2>
+    <p class="sub">Give it a name so you'll recognise it in the dashboard, then paste the snippet into your email as HTML.</p>
+    <div class="row">
+      <label class="field">
+        <span class="lab">Label <span style="color:var(--faint)">(what/who is this for)</span></span>
+        <input type="text" id="genLabel" placeholder="Follow-up to Acme Corp" maxlength="120" />
+      </label>
+      <label class="field">
+        <span class="lab">Recipient <span style="color:var(--faint)">(optional)</span></span>
+        <input type="text" id="genRecipient" placeholder="jane@acme.com" maxlength="120" />
+      </label>
+    </div>
+    <button class="primary" id="createBtn">Generate pixel</button>
+
+    <div class="result" id="genResult">
+      <div class="code-label">Paste this into your email (as HTML)
+        <button class="copy-btn" data-copy="snippet">Copy</button>
+      </div>
+      <div class="codebox" id="snippetBox"></div>
+
+      <div class="code-label">Or just the image URL
+        <button class="copy-btn" data-copy="url">Copy</button>
+      </div>
+      <div class="codebox" id="urlBox"></div>
+
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <button class="ghost" id="testBtn">Send a test open</button>
+        <span style="font-size:12px;color:var(--faint);align-self:center" id="testHint"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard -->
+  <section class="panel">
+    <div class="dash-head">
+      <h2>Dashboard</h2>
+      <label class="toggle"><input type="checkbox" id="autoRefresh" /> Auto-refresh</label>
+      <button class="ghost" id="refreshBtn">Refresh</button>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat"><div class="n" id="statPixels">—</div><div class="l">Pixels</div></div>
+      <div class="stat"><div class="n" id="statOpened">—</div><div class="l">Opened</div></div>
+      <div class="stat"><div class="n" id="statOpens">—</div><div class="l">Total opens</div></div>
+    </div>
+
+    <div id="dashBody">
+      <div class="empty"><div class="big">📭</div>Loading…</div>
+    </div>
+  </section>
+
+  <div class="note">
+    <b>How reliable is this?</b> Email open tracking is a soft signal, not a guarantee — the same
+    caveats apply to every big email tool.
+    <br>• <b>Apple Mail Privacy Protection</b> pre-loads images the moment mail arrives, so those show as "opened"
+    even if unread, from an Apple relay location.
+    <br>• <b>Gmail &amp; most webmail</b> fetch images through a proxy, so the IP/location you see is the mail
+    provider's, not the reader's, and caching means you'll usually catch the first open more reliably than repeats.
+    <br>• <b>Image blocking</b> means some real opens are never recorded.
+    <br><b>Please use responsibly.</b> Tracking whether someone opened an email may require disclosure or consent in
+    some places (e.g. the EU/UK). Track your own correspondence, not people who'd object.
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2>Connect your tracker</h2>
+    <p class="sub">These are stored only in this browser (localStorage). Deploy the Worker in
+       <code style="font-family:var(--mono);font-size:11.5px">pixel/backend/</code> first.</p>
+    <label class="field">
+      <span class="lab">Backend URL <span style="color:var(--faint)">(your Worker)</span></span>
+      <input type="url" id="setBackend" placeholder="https://pixel-track.yourname.workers.dev" />
+    </label>
+    <label class="field">
+      <span class="lab">Dashboard token <span style="color:var(--faint)">(your DASH_TOKEN)</span></span>
+      <input type="password" id="setToken" placeholder="the long random password you set" />
+    </label>
+    <div class="test-result" id="testResult"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="testConn">Test connection</button>
+      <button class="ghost" id="cancelSet">Cancel</button>
+      <button class="primary" id="saveSet">Save</button>
+    </div>
+
+    <details class="help">
+      <summary>How do I deploy the backend? (3 minutes, free)</summary>
+      <ol>
+        <li>Create a free <a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener">Cloudflare account</a> (no card needed).</li>
+        <li><b>Workers &amp; Pages → Create → Worker</b>. Name it e.g. <code>pixel-track</code>, Deploy.</li>
+        <li><b>Edit code</b>, delete the sample, paste in <code>pixel/backend/worker.js</code>, <b>Save &amp; Deploy</b>.</li>
+        <li>Create a KV namespace: <b>Storage &amp; Databases → KV → Create</b>, call it <code>pixel_data</code>.</li>
+        <li>Back in the Worker: <b>Settings → Bindings → Add → KV namespace</b>. Variable name <code>PIXELS</code>, pick <code>pixel_data</code>.</li>
+        <li><b>Settings → Variables → Add</b> <code>DASH_TOKEN</code> = a long random password.</li>
+        <li>Copy your Worker URL (<code>https://pixel-track.<i>you</i>.workers.dev</code>) and the token into the fields above.</li>
+      </ol>
+      <p style="color:var(--faint)">Full walkthrough: <code>pixel/backend/README.md</code></p>
+    </details>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ── Storage ────────────────────────────────────────────────────────────────
+  const LS = {
+    backend: "pixeltrack.backend",
+    token: "pixeltrack.token",
+    pixels: "pixeltrack.pixels",   // local cache/mirror of created pixels
+    auto: "pixeltrack.auto",
+  };
+  const get = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
+  const set = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+
+  let backend = (get(LS.backend, "") || "").replace(/\/+$/, "");
+  let token = get(LS.token, "") || "";
+  let localPixels = JSON.parse(get(LS.pixels, "[]") || "[]");
+  let overview = null;         // last fetched { pixels: [...] }
+  let refreshTimer = null;
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove("show"), 1800);
+  }
+
+  function flag(cc) {
+    if (!cc || cc.length !== 2) return "";
+    return String.fromCodePoint(...[...cc.toUpperCase()].map((c) => 127397 + c.charCodeAt(0)));
+  }
+
+  function ago(ts) {
+    const s = (Date.now() - ts) / 1000;
+    if (s < 45) return "just now";
+    if (s < 90) return "1m ago";
+    const m = s / 60;
+    if (m < 60) return Math.floor(m) + "m ago";
+    const h = m / 60;
+    if (h < 24) return Math.floor(h) + "h ago";
+    const d = h / 24;
+    if (d < 30) return Math.floor(d) + "d ago";
+    return new Date(ts).toLocaleDateString();
+  }
+  const absTime = (ts) => new Date(ts).toLocaleString();
+
+  // Best-effort description of who/what loaded the pixel, from the user-agent.
+  function describeClient(ev) {
+    const ua = ev.ua || "";
+    if (/GoogleImageProxy/i.test(ua))
+      return { name: "Gmail (via Google image proxy)", note: "Proxied by Google — location shown is Google's, and Gmail may pre-fetch." };
+    if (/YahooMailProxy/i.test(ua))
+      return { name: "Yahoo Mail (via proxy)", note: "Proxied by Yahoo — location is Yahoo's, not the reader's." };
+    if (/Outlook|Microsoft Office|MicrosoftPreview|SkypeUriPreview/i.test(ua))
+      return { name: "Outlook / Microsoft", note: "" };
+    if (/AppleWebKit/i.test(ua) && /Mobile/i.test(ua) && !/Chrome/i.test(ua))
+      return { name: "Apple Mail / iOS", note: "Apple Mail Privacy Protection may pre-load images before it's actually read." };
+    if (/Thunderbird/i.test(ua)) return { name: "Thunderbird", note: "" };
+    let b = "Email client";
+    if (/Firefox/i.test(ua)) b = "Firefox";
+    else if (/Edg/i.test(ua)) b = "Edge";
+    else if (/Chrome/i.test(ua)) b = "Chrome";
+    else if (/Safari/i.test(ua)) b = "Safari";
+    return { name: b, note: "" };
+  }
+
+  // ── API ────────────────────────────────────────────────────────────────────
+  function api(path, opts = {}) {
+    if (!backend) return Promise.reject(new Error("no backend configured"));
+    return fetch(backend + path, {
+      ...opts,
+      headers: { Authorization: "Bearer " + token, ...(opts.headers || {}) },
+    });
+  }
+
+  async function fetchOverview() {
+    const r = await api("/api/overview");
+    if (r.status === 401) throw new Error("Wrong token (401).");
+    if (!r.ok) throw new Error("Backend error (" + r.status + ").");
+    return r.json();
+  }
+
+  // ── Pixel creation ─────────────────────────────────────────────────────────
+  function newId() {
+    const a = new Uint8Array(9);
+    crypto.getRandomValues(a);
+    return "px" + [...a].map((b) => "0123456789abcdefghijklmnopqrstuvwxyz"[b % 36]).join("");
+  }
+  const pixelUrl = (id) => backend + "/p/" + id + ".gif";
+  const snippetFor = (id) =>
+    '<img src="' + pixelUrl(id) + '" alt="" width="1" height="1" style="display:none;width:1px;height:1px;border:0" />';
+
+  let lastCreated = null;
+
+  async function createPixel() {
+    if (!backend) { openModal(); return; }
+    const label = $("genLabel").value.trim() || "Untitled pixel";
+    const recipient = $("genRecipient").value.trim();
+    const id = newId();
+    const pixel = { id, label, recipient, created: Date.now() };
+
+    // Save locally immediately so nothing is lost if the network hiccups.
+    localPixels.unshift(pixel);
+    set(LS.pixels, JSON.stringify(localPixels.slice(0, 500)));
+
+    // Register with the backend (so it appears from any device too).
+    try {
+      await api("/api/pixels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, label, recipient }),
+      });
+    } catch (e) {
+      toast("Saved locally — couldn't reach backend to register.");
+    }
+
+    lastCreated = pixel;
+    $("snippetBox").textContent = snippetFor(id);
+    $("urlBox").textContent = pixelUrl(id);
+    $("genResult").classList.add("show");
+    $("testHint").textContent = "";
+    $("genLabel").value = "";
+    $("genRecipient").value = "";
+    render();
+    load();
+  }
+
+  function sendTestOpen() {
+    if (!lastCreated) return;
+    const hint = $("testHint");
+    hint.innerHTML = '<span class="spin"></span> pinging…';
+    const img = new Image();
+    const done = () => {
+      hint.textContent = "✓ hit sent — refreshing in a moment";
+      setTimeout(load, 1400);
+    };
+    img.onload = done;
+    img.onerror = done; // transparent gif sometimes counts as error in-browser; hit still landed
+    img.src = pixelUrl(lastCreated.id) + "?t=" + Date.now();
+  }
+
+  async function deletePixel(id) {
+    if (!confirm("Delete this pixel and all of its recorded opens?")) return;
+    localPixels = localPixels.filter((p) => p.id !== id);
+    set(LS.pixels, JSON.stringify(localPixels));
+    try { await api("/api/pixels?id=" + encodeURIComponent(id), { method: "DELETE" }); } catch {}
+    toast("Deleted");
+    load();
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────────────────
+  // Merge backend pixels (authoritative, carry opens) with local-only ones.
+  function mergedPixels() {
+    const byId = {};
+    localPixels.forEach((p) => { byId[p.id] = { ...p, opens: 0, firstOpen: null, lastOpen: null, events: [], synced: false }; });
+    if (overview && overview.pixels) {
+      overview.pixels.forEach((p) => {
+        byId[p.id] = { ...(byId[p.id] || {}), ...p, synced: true };
+      });
+    }
+    return Object.values(byId).sort((a, b) => (b.created || 0) - (a.created || 0));
+  }
+
+  function render() {
+    const pixels = mergedPixels();
+    const opened = pixels.filter((p) => p.opens > 0).length;
+    const totalOpens = pixels.reduce((s, p) => s + (p.opens || 0), 0);
+    $("statPixels").textContent = pixels.length;
+    $("statOpened").textContent = opened;
+    $("statOpens").textContent = totalOpens;
+
+    const body = $("dashBody");
+    if (!pixels.length) {
+      body.innerHTML = '<div class="empty"><div class="big">📭</div>No pixels yet — create one above.</div>';
+      return;
+    }
+
+    body.innerHTML = pixels.map((p) => {
+      const isOpen = p.opens > 0;
+      const events = (p.events || []).slice();
+      const detail = events.length
+        ? '<div class="opens-list">' + events.map((ev) => {
+            const c = describeClient(ev);
+            const loc = [ev.city, ev.country && (flag(ev.country) + " " + ev.country)].filter(Boolean).join(", ");
+            return (
+              '<div class="open-item">' +
+                '<div class="open-time">' + esc(ago(ev.ts)) + '<span class="abs">' + esc(new Date(ev.ts).toLocaleTimeString()) + '</span></div>' +
+                '<div class="open-body">' +
+                  '<div class="open-client">' + esc(c.name) + (loc ? ' · <span class="open-where">' + esc(loc) + '</span>' : '') + '</div>' +
+                  (ev.ip ? '<div class="kv">' + esc(ev.ip) + '</div>' : '') +
+                  (c.note ? '<div class="open-note">⚠ ' + esc(c.note) + '</div>' : '') +
+                '</div>' +
+              '</div>'
+            );
+          }).join("") + '</div>'
+        : '<div style="color:var(--muted);font-size:13px;padding:10px 0">No opens recorded yet.</div>';
+
+      const recip = p.recipient ? esc(p.recipient) + ' · ' : '';
+      const notSynced = p.synced === false ? ' <span style="color:var(--warn);font-size:11px">(not synced to backend)</span>' : '';
+
+      return (
+        '<div class="pixel-card" data-id="' + esc(p.id) + '">' +
+          '<div class="pixel-main" data-toggle>' +
+            '<div class="pixel-status ' + (isOpen ? 'opened' : '') + '"></div>' +
+            '<div class="pixel-info">' +
+              '<div class="pl">' + esc(p.label || 'Untitled') + notSynced + '</div>' +
+              '<div class="pr">' + recip + 'created ' + esc(ago(p.created)) + '</div>' +
+            '</div>' +
+            '<div class="pixel-meta">' +
+              (isOpen
+                ? '<div class="big">' + p.opens + '</div><div class="small">' +
+                  (p.opens === 1 ? 'open' : 'opens') + ' · last ' + esc(ago(p.lastOpen)) + '</div>'
+                : '<span class="badge waiting">Not opened</span>') +
+            '</div>' +
+            '<div class="chev">›</div>' +
+          '</div>' +
+          '<div class="pixel-detail">' +
+            (isOpen ? '<div style="margin-top:10px"><span class="badge opened">Opened</span> ' +
+                      '<span style="color:var(--muted);font-size:12.5px">first ' + esc(absTime(p.firstOpen)) + '</span></div>' : '') +
+            detail +
+            '<div class="pixel-actions">' +
+              '<button class="ghost" data-copysnip="' + esc(p.id) + '">Copy snippet</button>' +
+              '<button class="ghost danger" data-del="' + esc(p.id) + '">Delete</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  async function load() {
+    if (!backend) { render(); return; }
+    const btn = $("refreshBtn");
+    const prev = btn.textContent;
+    btn.innerHTML = '<span class="spin"></span>';
+    try {
+      overview = await fetchOverview();
+      setConn(true);
+    } catch (e) {
+      setConn(false);
+      toast(e.message || "Couldn't reach backend");
+    } finally {
+      btn.textContent = prev;
+      render();
+    }
+  }
+
+  function setConn(ok) {
+    const dot = $("connDot");
+    dot.className = "dot " + (ok ? "ok" : (backend ? "bad" : ""));
+  }
+
+  // ── Settings modal ─────────────────────────────────────────────────────────
+  function openModal() {
+    $("setBackend").value = backend;
+    $("setToken").value = token;
+    $("testResult").textContent = "";
+    $("testResult").className = "test-result";
+    $("modalBg").classList.add("show");
+  }
+  function closeModal() { $("modalBg").classList.remove("show"); }
+
+  async function testConn() {
+    const b = $("setBackend").value.trim().replace(/\/+$/, "");
+    const t = $("setToken").value.trim();
+    const el = $("testResult");
+    if (!b) { el.className = "test-result bad"; el.textContent = "Enter your backend URL."; return; }
+    el.className = "test-result"; el.innerHTML = '<span class="spin"></span> testing…';
+    try {
+      const r = await fetch(b + "/api/overview", { headers: { Authorization: "Bearer " + t } });
+      if (r.status === 401) { el.className = "test-result bad"; el.textContent = "Reached it, but the token is wrong (401)."; return; }
+      if (!r.ok) { el.className = "test-result bad"; el.textContent = "Reached it, but got HTTP " + r.status + "."; return; }
+      const j = await r.json();
+      el.className = "test-result ok";
+      el.textContent = "✓ Connected — " + ((j.pixels || []).length) + " pixel(s) on the backend.";
+    } catch (e) {
+      el.className = "test-result bad";
+      el.textContent = "Couldn't reach it. Check the URL is your Worker's https URL.";
+    }
+  }
+
+  function saveSettings() {
+    backend = $("setBackend").value.trim().replace(/\/+$/, "");
+    token = $("setToken").value.trim();
+    set(LS.backend, backend);
+    set(LS.token, token);
+    closeModal();
+    refreshUI();
+    load();
+    toast("Saved");
+  }
+
+  function refreshUI() {
+    const configured = !!backend;
+    $("setupBanner").style.display = configured ? "none" : "flex";
+    setConn(false);
+  }
+
+  // ── Events ─────────────────────────────────────────────────────────────────
+  $("settingsBtn").addEventListener("click", openModal);
+  $("openSetup").addEventListener("click", openModal);
+  $("cancelSet").addEventListener("click", closeModal);
+  $("saveSet").addEventListener("click", saveSettings);
+  $("testConn").addEventListener("click", testConn);
+  $("modalBg").addEventListener("click", (e) => { if (e.target === $("modalBg")) closeModal(); });
+
+  $("createBtn").addEventListener("click", createPixel);
+  $("testBtn").addEventListener("click", sendTestOpen);
+  $("refreshBtn").addEventListener("click", load);
+
+  $("autoRefresh").checked = get(LS.auto, "0") === "1";
+  function applyAuto() {
+    clearInterval(refreshTimer);
+    if ($("autoRefresh").checked) refreshTimer = setInterval(load, 15000);
+  }
+  $("autoRefresh").addEventListener("change", () => {
+    set(LS.auto, $("autoRefresh").checked ? "1" : "0");
+    applyAuto();
+  });
+
+  // Copy buttons in the generator.
+  document.querySelectorAll(".copy-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const which = btn.getAttribute("data-copy");
+      const text = which === "snippet" ? $("snippetBox").textContent : $("urlBox").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = "Copied ✓"; btn.classList.add("copied");
+        setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1400);
+      });
+    });
+  });
+
+  // Delegated clicks inside the dashboard (expand, copy, delete).
+  $("dashBody").addEventListener("click", (e) => {
+    const toggle = e.target.closest("[data-toggle]");
+    if (toggle) { toggle.closest(".pixel-card").classList.toggle("open"); return; }
+    const del = e.target.closest("[data-del]");
+    if (del) { deletePixel(del.getAttribute("data-del")); return; }
+    const cp = e.target.closest("[data-copysnip]");
+    if (cp) {
+      navigator.clipboard.writeText(snippetFor(cp.getAttribute("data-copysnip")));
+      toast("Snippet copied");
+    }
+  });
+
+  // ── Boot ───────────────────────────────────────────────────────────────────
+  refreshUI();
+  applyAuto();
+  render();
+  if (backend) load();
+})();
+</script>
+</body>
+</html>
