@@ -11,27 +11,37 @@ that piece: a single-file Cloudflare Worker (`worker.js`) plus free KV storage.
 
 ---
 
-## Deploy it (dashboard clicks, ~3 minutes)
+## Deploy it (dashboard clicks, ~5 minutes)
 
-1. **Sign up** for Cloudflare (free): https://dash.cloudflare.com/sign-up
-2. **Create the Worker.** Left sidebar → **Workers & Pages** → **Create** →
-   **Worker**. Name it something like `pixel-track`, click **Deploy**.
-3. **Paste the code.** Open the Worker → **Edit code**. Delete the sample and
-   paste the entire contents of [`worker.js`](./worker.js). Click **Deploy**.
-4. **Create KV storage.** Left sidebar → **Storage & Databases** → **KV** →
-   **Create a namespace**. Name it `pixel_data`.
-5. **Bind KV to the Worker.** Worker → **Settings** → **Bindings** → **Add** →
-   **KV namespace**. Set:
-   - Variable name: `PIXELS`  ← must be exactly this
-   - KV namespace: `pixel_data`
-   Save.
+Order matters: **create the KV storage first**, because you can only bind a KV
+namespace to the Worker once it exists.
+
+1. **Sign up** for Cloudflare (free, no card): https://dash.cloudflare.com/sign-up
+2. **Create the KV storage first.** Left sidebar → **Storage & Databases** →
+   **KV** → **Create** a namespace. Name it `pixel_data`. (Just create it —
+   nothing to configure inside.)
+3. **Create the Worker.** Left sidebar → **Workers & Pages** → **Create** →
+   **Worker** → **Start with Hello World**. Name it `pixel-track` → **Deploy**.
+   - ⚠️ Do **not** use the "Upload/Import files" option — that's the *static-site*
+     uploader and it will warn about a "build process" and won't run the script.
+     You want the Hello World starter, then paste the code.
+4. **Paste the code.** Open the Worker → **Edit code**. Select all the sample code,
+   delete it, and paste the entire contents of [`worker.js`](./worker.js) (or copy
+   from the raw file on GitHub). Click **Deploy**.
+5. **Bind the KV storage.** Worker → **Settings** → **Bindings** → **Add** →
+   **KV namespace**. There are **two fields** — fill them like this:
+   - **Variable name:** `PIXELS`  ← must be exactly this (it's what the code reads)
+   - **KV namespace:** select `pixel_data` (the storage from step 2)
+   Click **Add Binding** / Deploy. (Common mistake: typing `pixel_data` into the
+   *Variable name* field — that field must be `PIXELS`.)
 6. **Set your dashboard password.** Worker → **Settings** → **Variables and
    Secrets** → **Add**:
-   - Name: `DASH_TOKEN`
-   - Value: a long random string (this protects your data — treat it like a
-     password). Save & deploy.
-7. **Grab your URL.** It's shown on the Worker's page, like
-   `https://pixel-track.<your-subdomain>.workers.dev`.
+   - **Name:** `DASH_TOKEN`
+   - **Value:** a long random string (this protects your data — treat it like a
+     password). Deploy.
+7. **Grab your URL.** It's on the Worker's page, like
+   `https://pixel-track.<your-subdomain>.workers.dev`. Sanity-check it by opening
+   `<that URL>/health` — it should say `pixel tracker: ok`.
 
 Now open `assets.thefilip.com/pixel`, click **Settings**, and paste the Worker
 URL + your `DASH_TOKEN`. Hit **Test connection** — you should see ✓ Connected.

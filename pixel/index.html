@@ -285,6 +285,9 @@
       <p>Know when your emails get opened.</p>
     </div>
     <div class="spacer"></div>
+    <a class="icon-btn" id="ghLink" href="https://github.com/thefilipcom4607/pixel" target="_blank" rel="noopener" title="View source on GitHub" aria-label="View source on GitHub">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    </a>
     <button class="icon-btn" id="settingsBtn">
       <span class="dot" id="connDot"></span> Settings
     </button>
@@ -420,18 +423,69 @@
     </div>
 
     <details class="help">
-      <summary>How do I deploy the backend? (3 minutes, free)</summary>
+      <summary>How do I deploy the backend? (~5 minutes, free)</summary>
+      <p style="color:var(--faint);margin:4px 0 6px">Create the KV storage <b>first</b> — you can only bind it to the Worker once it exists.</p>
       <ol>
         <li>Create a free <a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener">Cloudflare account</a> (no card needed).</li>
-        <li><b>Workers &amp; Pages → Create → Worker</b>. Name it e.g. <code>pixel-track</code>, Deploy.</li>
-        <li><b>Edit code</b>, delete the sample, paste in <code>pixel/backend/worker.js</code>, <b>Save &amp; Deploy</b>.</li>
-        <li>Create a KV namespace: <b>Storage &amp; Databases → KV → Create</b>, call it <code>pixel_data</code>.</li>
-        <li>Back in the Worker: <b>Settings → Bindings → Add → KV namespace</b>. Variable name <code>PIXELS</code>, pick <code>pixel_data</code>.</li>
-        <li><b>Settings → Variables → Add</b> <code>DASH_TOKEN</code> = a long random password.</li>
-        <li>Copy your Worker URL (<code>https://pixel-track.<i>you</i>.workers.dev</code>) and the token into the fields above.</li>
+        <li><b>Storage &amp; Databases → KV → Create</b> a namespace called <code>pixel_data</code>.</li>
+        <li><b>Workers &amp; Pages → Create → Worker → Start with Hello World</b>. Name it <code>pixel-track</code>, Deploy. <i>(Don't use "Upload files" — that's the static-site uploader.)</i></li>
+        <li><b>Edit code</b>, select-all &amp; delete the sample, paste in <code>worker.js</code>, <b>Deploy</b>.</li>
+        <li><b>Settings → Bindings → Add → KV namespace</b>. Two fields: <b>Variable name</b> = <code>PIXELS</code> (exactly), <b>KV namespace</b> = <code>pixel_data</code>.</li>
+        <li><b>Settings → Variables and Secrets → Add</b> <code>DASH_TOKEN</code> = a long random password.</li>
+        <li>Copy your Worker URL (<code>https://pixel-track.<i>you</i>.workers.dev</code>); test it at <code>/health</code>. Paste the URL + token above.</li>
       </ol>
       <p style="color:var(--faint)">Full walkthrough: <code>pixel/backend/README.md</code></p>
     </details>
+
+    <div style="border-top:1px solid var(--line-soft);margin-top:16px;padding-top:14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+      <button class="ghost" id="replayOnboard">Replay welcome / setup guide</button>
+      <a href="https://github.com/thefilipcom4607/pixel" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Source on GitHub
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Onboarding / welcome modal -->
+<div class="modal-bg" id="onboardBg">
+  <div class="modal">
+    <h2>Welcome to Pixel 👋</h2>
+    <p class="sub">An open-source, privacy-focused email tracking-pixel generator. Here's the gist.</p>
+
+    <h3 style="font-size:14px;margin:16px 0 6px">How it works</h3>
+    <ol style="padding-left:18px;color:var(--muted);font-size:13px;line-height:1.7;margin:0">
+      <li>Create a pixel (and optional tracked links) here.</li>
+      <li>Paste the snippet into your email as HTML, and send.</li>
+      <li>Come back to see opens &amp; clicks — with Apple/scanner <b>prefetches filtered out</b> so the numbers mean something.</li>
+    </ol>
+
+    <h3 style="font-size:14px;margin:18px 0 6px">You'll need a free Cloudflare Worker</h3>
+    <p style="color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 8px">
+      A static site can show a pixel but can't <i>record</i> who loaded it — so tracking runs on a tiny
+      Cloudflare Worker you deploy once (free, no credit card, ~5 min). Nothing runs on our servers.
+    </p>
+    <button class="ghost" id="onboardGuide">Show the setup guide</button>
+
+    <h3 style="font-size:14px;margin:18px 0 6px">One quick permission</h3>
+    <p style="color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 12px">
+      For the best experience, allow Pixel to look up <b>your own public IP</b> via
+      <a href="https://www.ipify.org" target="_blank" rel="noopener">ipify</a> (a free service). It's used
+      only in your browser to hide hits that came from <b>you</b> (your own testing / opening your own mail),
+      so the dashboard shows real recipient activity. <b>Your IP is never sent to us — we don't collect
+      anything.</b> You can decline, but we don't recommend it (your own opens will clutter the results).
+    </p>
+    <div class="modal-actions">
+      <button class="ghost" id="onboardDecline">Decline</button>
+      <button class="primary" id="onboardAllow">Allow &amp; get started</button>
+    </div>
+
+    <p style="text-align:center;margin:16px 0 0">
+      <a href="https://github.com/thefilipcom4607/pixel" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Open source on GitHub
+      </a>
+    </p>
   </div>
 </div>
 
@@ -447,6 +501,8 @@
     token: "pixeltrack.token",
     pixels: "pixeltrack.pixels",   // local cache/mirror of created pixels
     auto: "pixeltrack.auto",
+    onboarded: "pixeltrack.onboarded",
+    ipconsent: "pixeltrack.ipconsent", // "yes" | "no"
   };
   const get = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
   const set = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
@@ -715,11 +771,29 @@
     );
   }
 
+  // Per-pixel tallies computed from the returned events, EXCLUDING hits from your
+  // own IP (those are folded away and don't count toward confirmed opens/clicks).
+  function computeCounts(p) {
+    const evs = p.events || [];
+    const isSelf = (e) => !!(myIp && e.ip && e.ip === myIp);
+    const self = evs.filter(isSelf);
+    const others = evs.filter((e) => !isSelf(e));
+    let confirmed = 0, machine = 0, clicks = 0, firstOpen = null, lastActivity = null;
+    for (const e of others) {
+      const human = e.category !== "machine"; // human unless explicitly flagged machine
+      if (e.type === "click") { if (human) clicks++; }
+      else if (human) { confirmed++; if (firstOpen === null || e.ts < firstOpen) firstOpen = e.ts; }
+      else machine++;
+      if (human && (lastActivity === null || e.ts > lastActivity)) lastActivity = e.ts;
+    }
+    return { confirmed, machine, clicks, self, others, firstOpen, lastActivity };
+  }
+
   function render() {
     const pixels = mergedPixels();
     $("statPixels").textContent = pixels.length;
-    $("statConfirmed").textContent = pixels.reduce((s, p) => s + (p.opensHuman || 0), 0);
-    $("statClicks").textContent = pixels.reduce((s, p) => s + (p.clicksHuman || 0), 0);
+    $("statConfirmed").textContent = pixels.reduce((s, p) => s + computeCounts(p).confirmed, 0);
+    $("statClicks").textContent = pixels.reduce((s, p) => s + computeCounts(p).clicks, 0);
 
     const body = $("dashBody");
     if (!pixels.length) {
@@ -728,9 +802,9 @@
     }
 
     body.innerHTML = pixels.map((p) => {
-      const confirmed = p.opensHuman || 0;
-      const machine = p.opensMachine || 0;
-      const clicks = p.clicksHuman || 0;
+      const c = computeCounts(p);
+      const confirmed = c.confirmed, machine = c.machine, clicks = c.clicks;
+      const firstOpen = c.firstOpen, lastActivity = c.lastActivity;
       const engaged = confirmed > 0 || clicks > 0;
 
       // Right-side headline: clicks win (strongest), then confirmed opens.
@@ -739,10 +813,10 @@
         meta = '<div class="big">' + clicks + '</div><div class="small">' +
                (clicks === 1 ? 'click' : 'clicks') +
                (confirmed ? ' · ' + confirmed + ' open' + (confirmed > 1 ? 's' : '') : '') +
-               ' · ' + esc(ago(p.lastActivity)) + '</div>';
+               (lastActivity ? ' · ' + esc(ago(lastActivity)) : '') + '</div>';
       } else if (confirmed > 0) {
         meta = '<div class="big">' + confirmed + '</div><div class="small">confirmed open' + (confirmed > 1 ? 's' : '') +
-               (machine ? ' · ' + machine + ' machine' : '') + ' · ' + esc(ago(p.lastActivity || p.firstOpen)) + '</div>';
+               (machine ? ' · ' + machine + ' machine' : '') + (lastActivity ? ' · ' + esc(ago(lastActivity)) : '') + '</div>';
       } else if (machine > 0) {
         meta = '<span class="badge waiting">Prefetch only</span>';
       } else {
@@ -760,23 +834,20 @@
         '</div>' +
         '<div style="color:var(--faint);font-size:11.5px;margin-bottom:4px">' +
           (p.sentAt ? 'sent ' + esc(absTime(p.sentAt)) : 'send time not set — set one to sharpen prefetch detection') +
-          (p.firstOpen ? ' · first confirmed open ' + esc(absTime(p.firstOpen)) : '') +
+          (firstOpen ? ' · first confirmed open ' + esc(absTime(firstOpen)) : '') +
         '</div>';
 
-      const events = (p.events || []).slice();
-      const self = myIp ? events.filter((e) => e.ip && e.ip === myIp) : [];
-      const others = myIp ? events.filter((e) => !(e.ip && e.ip === myIp)) : events;
       let detail;
-      if (!events.length) {
+      if (!(p.events || []).length) {
         detail = '<div style="color:var(--muted);font-size:13px;padding:10px 0">Nothing recorded yet.</div>';
       } else {
         detail =
-          (others.length
-            ? renderEventList(others)
+          (c.others.length
+            ? renderEventList(c.others)
             : '<div style="color:var(--muted);font-size:12.5px;padding:8px 0 2px">No hits yet except from your own IP.</div>') +
-          (self.length
-            ? '<details class="self-hits"><summary>' + self.length + ' hit' + (self.length > 1 ? 's' : '') +
-              ' from your IP · show</summary>' + renderEventList(self) + '</details>'
+          (c.self.length
+            ? '<details class="self-hits"><summary>' + c.self.length + ' hit' + (c.self.length > 1 ? 's' : '') +
+              ' from your IP · show</summary>' + renderEventList(c.self) + '</details>'
             : '');
       }
 
@@ -846,6 +917,16 @@
   }
   function closeModal() { $("modalBg").classList.remove("show"); }
 
+  // ── Onboarding / welcome ────────────────────────────────────────────────────
+  function openOnboard() { $("onboardBg").classList.add("show"); }
+  function closeOnboard() { $("onboardBg").classList.remove("show"); }
+  function finishOnboard(consent) {
+    set(LS.ipconsent, consent ? "yes" : "no");
+    set(LS.onboarded, "1");
+    closeOnboard();
+    if (consent) detectMyIp(); else render();
+  }
+
   async function testConn() {
     const b = $("setBackend").value.trim().replace(/\/+$/, "");
     const t = $("setToken").value.trim();
@@ -902,6 +983,13 @@
   $("saveSet").addEventListener("click", saveSettings);
   $("disconnectBtn").addEventListener("click", disconnect);
   $("testConn").addEventListener("click", testConn);
+  $("onboardAllow").addEventListener("click", () => finishOnboard(true));
+  $("onboardDecline").addEventListener("click", () => finishOnboard(false));
+  $("onboardGuide").addEventListener("click", () => {
+    closeOnboard(); openModal();
+    const d = document.querySelector("details.help"); if (d) d.open = true;
+  });
+  $("replayOnboard").addEventListener("click", () => { closeModal(); openOnboard(); });
   $("modalBg").addEventListener("click", (e) => { if (e.target === $("modalBg")) closeModal(); });
 
   $("createBtn").addEventListener("click", createPixel);
@@ -961,7 +1049,8 @@
   refreshUI();
   applyAuto();
   render();
-  detectMyIp();
+  if (get(LS.ipconsent, "") === "yes") detectMyIp(); // only with consent
+  if (get(LS.onboarded, "") !== "1") openOnboard();   // first visit -> welcome
   if (backend) load();
 })();
 </script>
