@@ -221,6 +221,12 @@
   .open-note { font-size: 11.5px; color: var(--warn); margin-top: 2px; }
   .pixel-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
   .kv { font-family: var(--mono); font-size: 11.5px; color: var(--muted); word-break: break-all; }
+  .self-hits { margin-top: 4px; }
+  .self-hits > summary { cursor: pointer; color: var(--muted); font-size: 12px; padding: 8px 0; list-style: none; user-select: none; }
+  .self-hits > summary::-webkit-details-marker { display: none; }
+  .self-hits > summary::before { content: "▸"; color: var(--faint); margin-right: 6px; display: inline-block; }
+  .self-hits[open] > summary::before { content: "▾"; }
+  .self-hits[open] > summary { color: var(--text); }
 
   .empty { text-align: center; color: var(--muted); padding: 34px 10px; }
   .empty .big { font-size: 34px; margin-bottom: 8px; }
@@ -310,15 +316,10 @@
         <input type="text" id="genRecipient" placeholder="jane@acme.com" maxlength="120" />
       </label>
     </div>
-    <label class="field">
-      <span class="lab">When are you sending it? <span style="color:var(--faint)">(optional, recommended)</span></span>
-      <input type="datetime-local" id="genSentAt" />
-      <span style="display:block;font-size:11.5px;color:var(--faint);margin-top:6px;line-height:1.5">
-        Recommended — it lets the dashboard flag opens that fire seconds after you send as automated
-        prefetches (Apple Mail, security scanners) rather than counting them as a real read. You can
-        leave this blank now and set it later on the pixel's card, right after you actually send the email.
-      </span>
-    </label>
+    <p class="sub" style="margin:-4px 0 16px">
+      Tip: after you actually send the email, open its card below and set the <b>send time</b> —
+      that's what lets the dashboard tell real opens from automated prefetches.
+    </p>
     <button class="primary" id="createBtn">Generate pixel</button>
 
     <div class="result" id="genResult">
@@ -455,6 +456,8 @@
   let localPixels = JSON.parse(get(LS.pixels, "[]") || "[]");
   let overview = null;         // last fetched { pixels: [...] }
   let refreshTimer = null;
+  let myIp = "";               // your own public IP, so we can fold "from your IP" hits
+  const deletedIds = new Set(); // hide these even if a stale (KV-lagged) overview still lists them
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const $ = (id) => document.getElementById(id);
@@ -487,6 +490,17 @@
     return new Date(ts).toLocaleDateString();
   }
   const absTime = (ts) => new Date(ts).toLocaleString();
+
+  // Find your own public IP (free, no key) so hits you triggered yourself — testing
+  // the pixel, opening your own sent mail — can be folded away as noise.
+  async function detectMyIp() {
+    try {
+      const r = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
+      const j = await r.json();
+      if (j && j.ip) { myIp = j.ip; render(); }
+    } catch (_) { /* offline / blocked — folding just won't apply */ }
+  }
+
   // Format a timestamp for a datetime-local input's value (local time, minute precision).
   const toLocalInput = (ts) => {
     if (!ts) return "";
@@ -552,10 +566,9 @@
     if (!backend) { openModal(); return; }
     const label = $("genLabel").value.trim() || "Untitled pixel";
     const recipient = $("genRecipient").value.trim();
-    const sentRaw = $("genSentAt").value;
-    const sentAt = sentRaw ? new Date(sentRaw).getTime() : null;
     const id = newId();
-    const pixel = { id, label, recipient, sentAt, created: Date.now() };
+    // Send time is set later, from the pixel's card, after the email is actually sent.
+    const pixel = { id, label, recipient, sentAt: null, created: Date.now() };
 
     // Save locally immediately so nothing is lost if the network hiccups.
     localPixels.unshift(pixel);
@@ -566,7 +579,7 @@
       await api("/api/pixels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, label, recipient, sentAt }),
+        body: JSON.stringify({ id, label, recipient }),
       });
     } catch (e) {
       toast("Saved locally — couldn't reach backend to register.");
@@ -648,10 +661,16 @@
 
   async function deletePixel(id) {
     if (!confirm("Delete this pixel and all of its recorded opens, clicks, and links?")) return;
+    // Hide it immediately. Cloudflare KV is eventually consistent, so the
+    // overview fetched right after DELETE can still list it for a moment —
+    // deletedIds keeps it out of view until the backend catches up.
+    deletedIds.add(id);
     localPixels = localPixels.filter((p) => p.id !== id);
     set(LS.pixels, JSON.stringify(localPixels));
-    try { await api("/api/pixels?id=" + encodeURIComponent(id), { method: "DELETE" }); } catch {}
+    render();            // instant removal, regardless of the auto-refresh setting
     toast("Deleted");
+    try { await api("/api/pixels?id=" + encodeURIComponent(id), { method: "DELETE" }); }
+    catch { toast("Deleted here, but couldn't reach the backend"); }
     load();
   }
 
@@ -659,14 +678,17 @@
   // Merge backend pixels (authoritative, carry counts) with local-only ones.
   function mergedPixels() {
     const byId = {};
-    localPixels.forEach((p) => { byId[p.id] = { ...emptyCounts(), ...p, events: [], synced: false }; });
+    localPixels.forEach((p) => { if (!deletedIds.has(p.id)) byId[p.id] = { ...emptyCounts(), ...p, events: [], synced: false }; });
     if (overview && overview.pixels) {
       overview.pixels.forEach((p) => {
+        if (deletedIds.has(p.id)) return;
         byId[p.id] = { ...(byId[p.id] || {}), ...p, synced: true };
       });
     }
     return Object.values(byId).sort((a, b) => (b.created || 0) - (a.created || 0));
   }
+
+  const renderEventList = (evs) => '<div class="opens-list">' + evs.map(renderEvent).join("") + '</div>';
 
   // One recorded event (open or click), with its Confirmed/Machine tag + reason.
   function renderEvent(ev) {
@@ -742,9 +764,21 @@
         '</div>';
 
       const events = (p.events || []).slice();
-      const detail = events.length
-        ? '<div class="opens-list">' + events.map((ev) => renderEvent(ev)).join("") + '</div>'
-        : '<div style="color:var(--muted);font-size:13px;padding:10px 0">Nothing recorded yet.</div>';
+      const self = myIp ? events.filter((e) => e.ip && e.ip === myIp) : [];
+      const others = myIp ? events.filter((e) => !(e.ip && e.ip === myIp)) : events;
+      let detail;
+      if (!events.length) {
+        detail = '<div style="color:var(--muted);font-size:13px;padding:10px 0">Nothing recorded yet.</div>';
+      } else {
+        detail =
+          (others.length
+            ? renderEventList(others)
+            : '<div style="color:var(--muted);font-size:12.5px;padding:8px 0 2px">No hits yet except from your own IP.</div>') +
+          (self.length
+            ? '<details class="self-hits"><summary>' + self.length + ' hit' + (self.length > 1 ? 's' : '') +
+              ' from your IP · show</summary>' + renderEventList(self) + '</details>'
+            : '');
+      }
 
       const recip = p.recipient ? esc(p.recipient) + ' · ' : '';
       const notSynced = p.synced === false ? ' <span style="color:var(--warn);font-size:11px">(not synced)</span>' : '';
@@ -927,6 +961,7 @@
   refreshUI();
   applyAuto();
   render();
+  detectMyIp();
   if (backend) load();
 })();
 </script>

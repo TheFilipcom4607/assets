@@ -27,9 +27,13 @@ whether they read it or not. This tool copies what serious email tools do:
   timing. Apple MPP, corporate scanners, and anything firing within ~2 minutes of
   your send time are shown as **machine/prefetch** and kept out of the confirmed
   count.
-- **Send time (optional, recommended).** Tell the generator when you're sending;
-  it sharpens the timing check so instant prefetches are caught even when the ASN
-  isn't obviously a bot.
+- **Send time (optional, recommended).** After you actually send the email, open
+  the pixel's card and set when you sent it; it sharpens the timing check so
+  instant prefetches are caught even when the ASN isn't obviously a bot.
+- **Your own hits are folded away.** The dashboard looks up your public IP (via
+  ipify) and tucks hits that came from you — testing the pixel, opening your own
+  sent mail — behind a collapsed "from your IP" toggle, so the list focuses on the
+  recipient. (They're still counted in the totals.)
 - **Tracked links = the reliable signal.** Apple and most scanners don't follow
   links, so a click is almost always a real person. Build a tracked link in the
   generator and use it instead of the bare URL.
