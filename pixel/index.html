@@ -5,26 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex" />
 <title>Pixel — email open tracking</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%23000'/%3E%3Crect%20x='11'%20y='11'%20width='10'%20height='10'%20rx='2'%20fill='%23fff'/%3E%3C/svg%3E" />
 <style>
+  /* Geist — Vercel's typeface (self-hosted, SIL OFL). Variable, latin subset. */
+  @font-face {
+    font-family: "Geist";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/pixel/fonts/geist-latin.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Geist Mono";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/pixel/fonts/geist-mono-latin.woff2") format("woff2");
+  }
   :root {
+    /* Vercel / Geist dark palette */
     --bg: #000000;
     --bg-soft: #0a0a0a;
-    --panel: #0d0d0d;
-    --panel-2: #161616;
-    --line: #242424;
-    --line-soft: #1a1a1a;
-    --text: #fafafa;
-    --muted: #8f8f8f;
-    --faint: #565656;
-    --accent: #ededed;     /* mono "accent" — soft white for focus/links */
-    --accent-2: #bdbdbd;
-    --good: #ffffff;       /* opened / connected — pure white in monochrome */
-    --warn: #a8a8a8;       /* advisory notes — light gray, no hue */
-    --bad: #e6e6e6;        /* errors — near white, meaning carried by text */
-    --radius: 12px;
-    --shadow: 0 8px 30px -14px rgba(0,0,0,.8);
-    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --panel: #0a0a0a;
+    --panel-2: #1a1a1a;
+    --line: #2e2e2e;
+    --line-soft: #1f1f1f;
+    --text: #ededed;
+    --muted: #a1a1a1;
+    --faint: #6e6e6e;
+    --accent: #ffffff;
+    --accent-2: #ededed;
+    --good: #ffffff;       /* opened / connected */
+    --warn: #a1a1a1;       /* advisory notes — gray, no hue */
+    --bad: #ededed;        /* errors — meaning carried by text */
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 8px 30px -16px rgba(0,0,0,.9);
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -58,30 +76,29 @@
     content: ""; width: 10px; height: 10px; border-radius: 2px;
     background: #fff;
   }
-  .brand h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+  .brand h1 { font-size: 19px; margin: 0; font-weight: 600; letter-spacing: -0.02em; }
   .brand p { margin: 0; color: var(--muted); font-size: 12.5px; }
   .top .spacer { flex: 1; }
   .icon-btn {
-    background: var(--panel); border: 1px solid var(--line); color: var(--text);
-    border-radius: 10px; padding: 8px 12px; font-size: 13px; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 7px; font-family: var(--sans);
+    background: transparent; border: 1px solid var(--line); color: var(--text);
+    border-radius: var(--radius-sm); padding: 8px 12px; font-size: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px; font-family: var(--sans); font-weight: 500;
     transition: border-color .15s, background .15s;
   }
-  .icon-btn:hover { border-color: var(--accent); background: var(--panel-2); }
+  .icon-btn:hover { border-color: #454545; background: rgba(255,255,255,.04); }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
   .dot.ok { background: var(--good); box-shadow: 0 0 8px rgba(255,255,255,.4); }
   .dot.bad { background: var(--bad); }
 
   /* Panels */
   .panel {
-    background: linear-gradient(180deg, var(--panel), var(--bg-soft));
+    background: var(--panel);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     padding: 22px;
     margin-bottom: 20px;
-    box-shadow: var(--shadow);
   }
-  .panel h2 { margin: 0 0 4px; font-size: 16px; letter-spacing: -0.01em; }
+  .panel h2 { margin: 0 0 4px; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
   .panel .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
 
   .banner {
@@ -98,37 +115,37 @@
   label.field { display: block; margin-bottom: 14px; }
   label.field .lab { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
   input[type=text], input[type=url], input[type=password] {
-    width: 100%; background: var(--bg); border: 1px solid var(--line);
-    color: var(--text); border-radius: 10px; padding: 11px 13px; font-size: 14px;
-    font-family: var(--sans); transition: border-color .15s;
+    width: 100%; background: var(--bg-soft); border: 1px solid var(--line);
+    color: var(--text); border-radius: var(--radius-sm); padding: 10px 13px; font-size: 14px;
+    font-family: var(--sans); transition: border-color .15s, box-shadow .15s;
   }
-  input:focus { outline: none; border-color: var(--accent); }
+  input:focus { outline: none; border-color: #6e6e6e; box-shadow: 0 0 0 1px #6e6e6e; }
   input::placeholder { color: var(--faint); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 620px) { .row { grid-template-columns: 1fr; } }
 
   button.primary {
     background: #ffffff;
-    color: #0a0a0a; border: none; border-radius: 9px; padding: 11px 18px;
-    font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--sans);
-    transition: transform .08s, filter .15s, background .15s;
+    color: #000; border: 1px solid #fff; border-radius: var(--radius-sm); padding: 9px 15px;
+    font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--sans);
+    transition: background .15s, border-color .15s, opacity .15s;
   }
-  button.primary:hover { background: #e2e2e2; }
-  button.primary:active { transform: translateY(1px); }
-  button.primary:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+  button.primary:hover { background: #ededed; border-color: #ededed; }
+  button.primary:active { opacity: .85; }
+  button.primary:disabled { opacity: .45; cursor: not-allowed; }
   button.ghost {
-    background: var(--panel); color: var(--text); border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 15px; font-size: 13px; cursor: pointer;
-    font-family: var(--sans); transition: border-color .15s, background .15s;
+    background: transparent; color: var(--text); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); padding: 9px 14px; font-size: 13px; cursor: pointer;
+    font-family: var(--sans); font-weight: 500; transition: border-color .15s, background .15s;
   }
-  button.ghost:hover { border-color: var(--accent); background: var(--panel-2); }
+  button.ghost:hover { border-color: #454545; background: rgba(255,255,255,.04); }
   button.ghost.danger:hover { border-color: var(--bad); color: var(--bad); }
 
   /* Generated output */
   .result { margin-top: 18px; border-top: 1px solid var(--line-soft); padding-top: 18px; display: none; }
   .result.show { display: block; }
   .codebox {
-    background: #000; border: 1px solid var(--line); border-radius: 9px;
+    background: #000; border: 1px solid var(--line); border-radius: var(--radius-sm);
     padding: 12px 14px; font-family: var(--mono); font-size: 12.5px; color: #d4d4d4;
     overflow-x: auto; white-space: pre; margin: 8px 0 6px;
   }
@@ -149,14 +166,14 @@
   .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
   @media (max-width: 620px) { .stat-row { grid-template-columns: 1fr 1fr; } }
   .stat {
-    background: var(--bg); border: 1px solid var(--line-soft); border-radius: 12px; padding: 14px 16px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
   }
-  .stat .n { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+  .stat .n { font-size: 24px; font-weight: 600; letter-spacing: -0.03em; }
   .stat .l { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 
   .pixel-card {
-    border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; overflow: hidden;
-    background: var(--bg-soft); transition: border-color .15s;
+    border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; overflow: hidden;
+    background: var(--panel); transition: border-color .15s;
   }
   .pixel-card:hover { border-color: #3a3a3a; }
   .pixel-main {
