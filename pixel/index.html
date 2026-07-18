@@ -315,8 +315,8 @@
       <input type="datetime-local" id="genSentAt" />
       <span style="display:block;font-size:11.5px;color:var(--faint);margin-top:6px;line-height:1.5">
         Recommended — it lets the dashboard flag opens that fire seconds after you send as automated
-        prefetches (Apple Mail, security scanners) rather than counting them as a real read. Set it now
-        and send whenever; leave blank if unsure.
+        prefetches (Apple Mail, security scanners) rather than counting them as a real read. You can
+        leave this blank now and set it later on the pixel's card, right after you actually send the email.
       </span>
     </label>
     <button class="primary" id="createBtn">Generate pixel</button>
@@ -487,6 +487,12 @@
     return new Date(ts).toLocaleDateString();
   }
   const absTime = (ts) => new Date(ts).toLocaleString();
+  // Format a timestamp for a datetime-local input's value (local time, minute precision).
+  const toLocalInput = (ts) => {
+    if (!ts) return "";
+    const d = new Date(ts), p = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  };
   const emptyCounts = () => ({
     opensTotal: 0, opensHuman: 0, opensMachine: 0,
     clicksTotal: 0, clicksHuman: 0, clicksMachine: 0,
@@ -622,6 +628,24 @@
     img.src = pixelUrl(lastCreated.id) + "?t=" + Date.now();
   }
 
+  // Set/clear a pixel's send time after the fact — the natural workflow: make
+  // the pixel, send the email, then come back and stamp when you sent it.
+  async function updateSentAt(id, sentAt) {
+    const lp = localPixels.find((p) => p.id === id);
+    if (lp) { lp.sentAt = sentAt; set(LS.pixels, JSON.stringify(localPixels)); }
+    try {
+      await api("/api/pixels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, sentAt }),
+      });
+      toast(sentAt ? "Send time saved" : "Send time cleared");
+    } catch (e) {
+      toast("Saved locally — couldn't reach backend");
+    }
+    load();
+  }
+
   async function deletePixel(id) {
     if (!confirm("Delete this pixel and all of its recorded opens, clicks, and links?")) return;
     localPixels = localPixels.filter((p) => p.id !== id);
@@ -740,6 +764,12 @@
           '<div class="pixel-detail">' +
             summary +
             detail +
+            '<div class="pixel-actions" style="align-items:center">' +
+              '<span style="font-size:12px;color:var(--muted);align-self:center">Send time</span>' +
+              '<input type="datetime-local" data-sentinput="' + esc(p.id) + '" value="' + esc(toLocalInput(p.sentAt)) + '" style="flex:1;min-width:150px;width:auto" />' +
+              '<button class="ghost" data-savesent="' + esc(p.id) + '">Save</button>' +
+              (p.sentAt ? '<button class="ghost" data-clearsent="' + esc(p.id) + '">Clear</button>' : '') +
+            '</div>' +
             '<div class="pixel-actions">' +
               '<button class="ghost" data-copysnip="' + esc(p.id) + '">Copy snippet</button>' +
               '<button class="ghost danger" data-del="' + esc(p.id) + '">Delete</button>' +
@@ -875,6 +905,17 @@
     if (toggle) { toggle.closest(".pixel-card").classList.toggle("open"); return; }
     const del = e.target.closest("[data-del]");
     if (del) { deletePixel(del.getAttribute("data-del")); return; }
+    const saveSent = e.target.closest("[data-savesent]");
+    if (saveSent) {
+      const id = saveSent.getAttribute("data-savesent");
+      const input = $("dashBody").querySelector('[data-sentinput="' + id + '"]');
+      const v = input && input.value ? new Date(input.value).getTime() : null;
+      if (!v) { toast("Pick a date & time first"); return; }
+      updateSentAt(id, v);
+      return;
+    }
+    const clearSent = e.target.closest("[data-clearsent]");
+    if (clearSent) { updateSentAt(clearSent.getAttribute("data-clearsent"), null); return; }
     const cp = e.target.closest("[data-copysnip]");
     if (cp) {
       navigator.clipboard.writeText(snippetFor(cp.getAttribute("data-copysnip")));

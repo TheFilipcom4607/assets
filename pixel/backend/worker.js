@@ -89,18 +89,22 @@ export default {
       if (given !== token) return cors(json({ error: 'unauthorized' }, 401));
       if (!env.PIXELS) return cors(json({ error: 'KV namespace not bound as PIXELS' }, 500));
 
-      // Register a pixel (optionally with a send time for timing detection).
+      // Register or update a pixel. Merges onto any existing record so a later
+      // "set send time" update (which sends only {id, sentAt}) doesn't wipe the
+      // label / recipient / created.
       if (path === '/api/pixels' && request.method === 'POST') {
         const body = await request.json().catch(() => ({}));
         const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32);
         if (!id) return cors(json({ error: 'missing or invalid id' }, 400));
-        const sentAt = Number(body.sentAt);
+        const existing = (await env.PIXELS.getWithMetadata(`meta:${id}`)).metadata || {};
+        let sentAt = existing.sentAt ?? null;
+        if ('sentAt' in body) { const n = Number(body.sentAt); sentAt = Number.isFinite(n) && n > 0 ? n : null; }
         const meta = {
           id,
-          label: String(body.label || '').slice(0, 200),
-          recipient: String(body.recipient || '').slice(0, 200),
-          sentAt: Number.isFinite(sentAt) && sentAt > 0 ? sentAt : null,
-          created: Date.now(),
+          label: 'label' in body ? String(body.label || '').slice(0, 200) : (existing.label || ''),
+          recipient: 'recipient' in body ? String(body.recipient || '').slice(0, 200) : (existing.recipient || ''),
+          sentAt,
+          created: existing.created || Date.now(),
         };
         await env.PIXELS.put(`meta:${id}`, '', { metadata: meta });
         return cors(json({ ok: true, pixel: meta }));
