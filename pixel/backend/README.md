@@ -81,17 +81,36 @@ added to Cloudflare). Then use that hostname as the Backend URL in the app.
 | Method   | Path                     | Auth        | Purpose                                   |
 |----------|--------------------------|-------------|-------------------------------------------|
 | `GET`    | `/p/<id>.gif`            | none        | The tracking pixel — logs an open, returns a 1×1 GIF |
-| `GET`    | `/api/overview`          | Bearer token| All pixels + their opens (dashboard)      |
-| `POST`   | `/api/pixels`            | Bearer token| Register a pixel `{id,label,recipient}`   |
-| `DELETE` | `/api/pixels?id=<id>`    | Bearer token| Delete a pixel and its opens              |
+| `GET`    | `/c/<linkId>`            | none        | Tracked link — logs a click, then 302-redirects to the stored URL |
+| `GET`    | `/api/overview`          | Bearer token| All pixels + classified opens/clicks (dashboard) |
+| `POST`   | `/api/pixels`            | Bearer token| Register a pixel `{id,label,recipient,sentAt}` |
+| `POST`   | `/api/links`             | Bearer token| Create a tracked link `{pixelId,url}` → `{linkId}` |
+| `DELETE` | `/api/pixels?id=<id>`    | Bearer token| Delete a pixel, its events, and its links |
 | `GET`    | `/` or `/health`         | none        | Health check                              |
 
 Auth is `Authorization: Bearer <DASH_TOKEN>`.
 
+## How events are classified
+
+Every open/click is tagged **confirmed** (a real person) or **machine/prefetch**,
+so inflated numbers don't mislead you:
+
+- **Apple Mail Privacy Protection** → ASN `714` / org "Apple" (pre-loads on delivery).
+- **Security scanners** (Proofpoint, Mimecast, Barracuda, …) → matched by AS org.
+- **Timing** → if you gave a send time, anything firing within ~2 min of it
+  (`PREFETCH_WINDOW_MS`) is treated as an automated prefetch.
+- **Gmail/Yahoo proxies** → still counted as real opens (a human triggered them),
+  but flagged as proxied so you know the location is the provider's.
+
+Cloudflare provides `request.cf.asn` / `asOrganization` for free, which is what
+makes the ASN-based detection reliable.
+
 ## Notes
 
-- Opens auto-expire after 120 days (`EVENT_TTL` in `worker.js`).
-- Free KV tier allows ~1,000 writes/day — plenty for personal email tracking
-  (one write per open).
-- The pixel endpoint is intentionally public and never fails: if logging errors,
-  the recipient still gets a valid image.
+- Opens/clicks auto-expire after 120 days (`EVENT_TTL` in `worker.js`).
+- Free KV tier allows ~1,000 writes/day — plenty for personal use (one write per
+  open or click).
+- `/p` and `/c` are intentionally public and never fail: if logging errors, the
+  recipient still gets a valid image / redirect.
+- Tracked links store the destination server-side, so `/c/<linkId>` can never be
+  turned into an open redirector.

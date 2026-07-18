@@ -56,6 +56,7 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
+    color-scheme: dark;
   }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
@@ -114,7 +115,7 @@
   /* Forms */
   label.field { display: block; margin-bottom: 14px; }
   label.field .lab { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
-  input[type=text], input[type=url], input[type=password] {
+  input[type=text], input[type=url], input[type=password], input[type=datetime-local] {
     width: 100%; background: var(--bg-soft); border: 1px solid var(--line);
     color: var(--text); border-radius: var(--radius-sm); padding: 10px 13px; font-size: 14px;
     font-family: var(--sans); transition: border-color .15s, box-shadow .15s;
@@ -193,6 +194,10 @@
   }
   .badge.opened { background: rgba(255,255,255,.13); color: #fff; }
   .badge.waiting { background: rgba(255,255,255,.05); color: var(--muted); border: 1px solid var(--line); }
+  .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 5px; letter-spacing: .03em; }
+  .tag-type { background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); }
+  .tag-human { background: rgba(255,255,255,.14); color: #fff; }
+  .tag-machine { background: transparent; color: var(--muted); border: 1px solid var(--line); }
   .chev { color: var(--faint); transition: transform .2s; flex: none; }
   .pixel-card.open .chev { transform: rotate(90deg); }
 
@@ -293,6 +298,15 @@
         <input type="text" id="genRecipient" placeholder="jane@acme.com" maxlength="120" />
       </label>
     </div>
+    <label class="field">
+      <span class="lab">When are you sending it? <span style="color:var(--faint)">(optional, recommended)</span></span>
+      <input type="datetime-local" id="genSentAt" />
+      <span style="display:block;font-size:11.5px;color:var(--faint);margin-top:6px;line-height:1.5">
+        Recommended — it lets the dashboard flag opens that fire seconds after you send as automated
+        prefetches (Apple Mail, security scanners) rather than counting them as a real read. Set it now
+        and send whenever; leave blank if unsure.
+      </span>
+    </label>
     <button class="primary" id="createBtn">Generate pixel</button>
 
     <div class="result" id="genResult">
@@ -310,6 +324,24 @@
         <button class="ghost" id="testBtn">Send a test open</button>
         <span style="font-size:12px;color:var(--faint);align-self:center" id="testHint"></span>
       </div>
+
+      <div style="border-top:1px solid var(--line-soft);margin-top:18px;padding-top:16px">
+        <div class="code-label" style="margin-top:0">Track a link click
+          <span style="color:var(--faint);text-transform:none;font-weight:400;letter-spacing:0">optional · most reliable signal</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.5">
+          Clicks beat opens — Apple and most scanners don't follow links, so a click is almost always a real
+          person. Paste a destination to get a tracked link for this email.
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="url" id="linkDest" placeholder="https://example.com/your-page" style="flex:1;min-width:200px" />
+          <button class="ghost" id="buildLinkBtn">Build link</button>
+        </div>
+        <div class="code-label" id="linkOutLabel" style="display:none">Tracked link — use it in place of the real URL
+          <button class="copy-btn" data-copy="link">Copy</button>
+        </div>
+        <div class="codebox" id="linkBox" style="display:none"></div>
+      </div>
     </div>
   </section>
 
@@ -323,8 +355,8 @@
 
     <div class="stat-row">
       <div class="stat"><div class="n" id="statPixels">—</div><div class="l">Pixels</div></div>
-      <div class="stat"><div class="n" id="statOpened">—</div><div class="l">Opened</div></div>
-      <div class="stat"><div class="n" id="statOpens">—</div><div class="l">Total opens</div></div>
+      <div class="stat"><div class="n" id="statConfirmed">—</div><div class="l">Confirmed opens</div></div>
+      <div class="stat"><div class="n" id="statClicks">—</div><div class="l">Clicks</div></div>
     </div>
 
     <div id="dashBody">
@@ -333,15 +365,17 @@
   </section>
 
   <div class="note">
-    <b>How reliable is this?</b> Email open tracking is a soft signal, not a guarantee — the same
-    caveats apply to every big email tool.
-    <br>• <b>Apple Mail Privacy Protection</b> pre-loads images the moment mail arrives, so those show as "opened"
-    even if unread, from an Apple relay location.
-    <br>• <b>Gmail &amp; most webmail</b> fetch images through a proxy, so the IP/location you see is the mail
-    provider's, not the reader's, and caching means you'll usually catch the first open more reliably than repeats.
-    <br>• <b>Image blocking</b> means some real opens are never recorded.
-    <br><b>Please use responsibly.</b> Tracking whether someone opened an email may require disclosure or consent in
-    some places (e.g. the EU/UK). Track your own correspondence, not people who'd object.
+    <b>Confirmed vs machine.</b> Since Apple Mail Privacy Protection (2021) pre-loads every image on delivery,
+    a raw "open" is unreliable — so each hit is classified:
+    <br>• <b>Confirmed</b> — looks like a real person (e.g. opened in Gmail/webmail, or well after you sent it).
+    <br>• <b>Machine / prefetch</b> — Apple MPP, a corporate security scanner, or anything that fired within
+    ~2 min of your send time. These are shown but kept out of the confirmed count.
+    <br>• <b>Clicks</b> are the strongest signal — Apple and most scanners don't follow links, so a click is
+    almost always a real human. Prefer tracked links over opens when you can.
+    <br>• Setting a <b>send time</b> sharpens the timing check; <b>image blocking</b> still means some real opens
+    are never recorded at all. Treat everything as a strong hint, not proof.
+    <br><b>Please use responsibly.</b> Tracking opens/clicks may require disclosure or consent in some places
+    (e.g. the EU/UK). Track your own correspondence, not people who'd object.
   </div>
 </div>
 
@@ -441,6 +475,11 @@
     return new Date(ts).toLocaleDateString();
   }
   const absTime = (ts) => new Date(ts).toLocaleString();
+  const emptyCounts = () => ({
+    opensTotal: 0, opensHuman: 0, opensMachine: 0,
+    clicksTotal: 0, clicksHuman: 0, clicksMachine: 0,
+    firstOpen: null, lastActivity: null,
+  });
 
   // Best-effort description of who/what loaded the pixel, from the user-agent.
   function describeClient(ev) {
@@ -485,8 +524,9 @@
     return "px" + [...a].map((b) => "0123456789abcdefghijklmnopqrstuvwxyz"[b % 36]).join("");
   }
   const pixelUrl = (id) => backend + "/p/" + id + ".gif";
+  // No display:none — some clients skip hidden images; a plain 1x1 loads more reliably.
   const snippetFor = (id) =>
-    '<img src="' + pixelUrl(id) + '" alt="" width="1" height="1" style="display:none;width:1px;height:1px;border:0" />';
+    '<img src="' + pixelUrl(id) + '" width="1" height="1" alt="" style="width:1px;height:1px;border:0;overflow:hidden" />';
 
   let lastCreated = null;
 
@@ -494,8 +534,10 @@
     if (!backend) { openModal(); return; }
     const label = $("genLabel").value.trim() || "Untitled pixel";
     const recipient = $("genRecipient").value.trim();
+    const sentRaw = $("genSentAt").value;
+    const sentAt = sentRaw ? new Date(sentRaw).getTime() : null;
     const id = newId();
-    const pixel = { id, label, recipient, created: Date.now() };
+    const pixel = { id, label, recipient, sentAt, created: Date.now() };
 
     // Save locally immediately so nothing is lost if the network hiccups.
     localPixels.unshift(pixel);
@@ -506,7 +548,7 @@
       await api("/api/pixels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, label, recipient }),
+        body: JSON.stringify({ id, label, recipient, sentAt }),
       });
     } catch (e) {
       toast("Saved locally — couldn't reach backend to register.");
@@ -519,8 +561,39 @@
     $("testHint").textContent = "";
     $("genLabel").value = "";
     $("genRecipient").value = "";
+    // reset the tracked-link builder for this new pixel
+    $("linkDest").value = "";
+    $("linkBox").style.display = "none";
+    $("linkOutLabel").style.display = "none";
     render();
     load();
+  }
+
+  // Build a tracked link tied to the pixel just created. The destination is
+  // stored server-side and we get back a short /c/<id> — clicks are the most
+  // reliable signal since Apple/scanners don't follow links.
+  async function buildLink() {
+    if (!lastCreated) return;
+    const dest = $("linkDest").value.trim();
+    if (!/^https?:\/\//i.test(dest)) { toast("Enter a URL starting with http:// or https://"); return; }
+    const btn = $("buildLinkBtn"); const prev = btn.textContent;
+    btn.innerHTML = '<span class="spin"></span>';
+    try {
+      const r = await api("/api/links", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pixelId: lastCreated.id, url: dest }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.path) throw new Error(j.error || "couldn't build link");
+      $("linkBox").textContent = backend + j.path;
+      $("linkBox").style.display = "block";
+      $("linkOutLabel").style.display = "flex";
+    } catch (e) {
+      toast(e.message || "Couldn't build link");
+    } finally {
+      btn.textContent = prev;
+    }
   }
 
   function sendTestOpen() {
@@ -538,7 +611,7 @@
   }
 
   async function deletePixel(id) {
-    if (!confirm("Delete this pixel and all of its recorded opens?")) return;
+    if (!confirm("Delete this pixel and all of its recorded opens, clicks, and links?")) return;
     localPixels = localPixels.filter((p) => p.id !== id);
     set(LS.pixels, JSON.stringify(localPixels));
     try { await api("/api/pixels?id=" + encodeURIComponent(id), { method: "DELETE" }); } catch {}
@@ -547,10 +620,10 @@
   }
 
   // ── Rendering ──────────────────────────────────────────────────────────────
-  // Merge backend pixels (authoritative, carry opens) with local-only ones.
+  // Merge backend pixels (authoritative, carry counts) with local-only ones.
   function mergedPixels() {
     const byId = {};
-    localPixels.forEach((p) => { byId[p.id] = { ...p, opens: 0, firstOpen: null, lastOpen: null, events: [], synced: false }; });
+    localPixels.forEach((p) => { byId[p.id] = { ...emptyCounts(), ...p, events: [], synced: false }; });
     if (overview && overview.pixels) {
       overview.pixels.forEach((p) => {
         byId[p.id] = { ...(byId[p.id] || {}), ...p, synced: true };
@@ -559,62 +632,101 @@
     return Object.values(byId).sort((a, b) => (b.created || 0) - (a.created || 0));
   }
 
+  // One recorded event (open or click), with its Confirmed/Machine tag + reason.
+  function renderEvent(ev) {
+    const c = describeClient(ev);
+    const loc = [ev.city, ev.country && (flag(ev.country) + " " + ev.country)].filter(Boolean).join(", ");
+    const isClick = ev.type === "click";
+    const machine = ev.category === "machine";
+    const catBadge = machine
+      ? '<span class="tag tag-machine">Machine</span>'
+      : '<span class="tag tag-human">Confirmed</span>';
+    const dest = isClick && ev.u ? '<div class="kv" style="color:var(--muted)">→ ' + esc(ev.u) + '</div>' : '';
+    const line2 = (ev.ip || ev.asOrg)
+      ? '<div class="kv">' + esc(ev.ip || "") + (ev.asOrg ? (ev.ip ? ' · ' : '') + esc(ev.asOrg) : '') + '</div>' : '';
+    const note = ev.reason ? '<div class="open-note">' + (machine ? '⚠ ' : '') + esc(ev.reason) + '</div>' : '';
+    return (
+      '<div class="open-item">' +
+        '<div class="open-time">' + esc(ago(ev.ts)) + '<span class="abs">' + esc(new Date(ev.ts).toLocaleTimeString()) + '</span></div>' +
+        '<div class="open-body">' +
+          '<div class="open-client"><span class="tag tag-type">' + (isClick ? 'CLICK' : 'OPEN') + '</span> ' + catBadge + ' ' +
+            esc(c.name) + (loc ? ' · <span class="open-where">' + esc(loc) + '</span>' : '') + '</div>' +
+          dest + line2 + note +
+        '</div>' +
+      '</div>'
+    );
+  }
+
   function render() {
     const pixels = mergedPixels();
-    const opened = pixels.filter((p) => p.opens > 0).length;
-    const totalOpens = pixels.reduce((s, p) => s + (p.opens || 0), 0);
     $("statPixels").textContent = pixels.length;
-    $("statOpened").textContent = opened;
-    $("statOpens").textContent = totalOpens;
+    $("statConfirmed").textContent = pixels.reduce((s, p) => s + (p.opensHuman || 0), 0);
+    $("statClicks").textContent = pixels.reduce((s, p) => s + (p.clicksHuman || 0), 0);
 
     const body = $("dashBody");
     if (!pixels.length) {
-      body.innerHTML = '<div class="empty"><div class="big">📭</div>No pixels yet — create one above.</div>';
+      body.innerHTML = '<div class="empty"><div class="big">◻</div>No pixels yet — create one above.</div>';
       return;
     }
 
     body.innerHTML = pixels.map((p) => {
-      const isOpen = p.opens > 0;
+      const confirmed = p.opensHuman || 0;
+      const machine = p.opensMachine || 0;
+      const clicks = p.clicksHuman || 0;
+      const engaged = confirmed > 0 || clicks > 0;
+
+      // Right-side headline: clicks win (strongest), then confirmed opens.
+      let meta;
+      if (clicks > 0) {
+        meta = '<div class="big">' + clicks + '</div><div class="small">' +
+               (clicks === 1 ? 'click' : 'clicks') +
+               (confirmed ? ' · ' + confirmed + ' open' + (confirmed > 1 ? 's' : '') : '') +
+               ' · ' + esc(ago(p.lastActivity)) + '</div>';
+      } else if (confirmed > 0) {
+        meta = '<div class="big">' + confirmed + '</div><div class="small">confirmed open' + (confirmed > 1 ? 's' : '') +
+               (machine ? ' · ' + machine + ' machine' : '') + ' · ' + esc(ago(p.lastActivity || p.firstOpen)) + '</div>';
+      } else if (machine > 0) {
+        meta = '<span class="badge waiting">Prefetch only</span>';
+      } else {
+        meta = '<span class="badge waiting">Not opened</span>';
+      }
+
+      const summary =
+        '<div style="margin:10px 0 6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+          (clicks > 0 ? '<span class="badge opened">Clicked</span>' : '') +
+          (confirmed > 0 ? '<span class="badge opened">Opened</span>'
+            : (machine > 0 ? '<span class="badge waiting">Prefetch only</span>' : '<span class="badge waiting">Not opened</span>')) +
+          '<span style="color:var(--muted);font-size:12px">' +
+            confirmed + ' confirmed · ' + machine + ' machine/prefetch · ' + clicks + ' click' + (clicks === 1 ? '' : 's') +
+          '</span>' +
+        '</div>' +
+        '<div style="color:var(--faint);font-size:11.5px;margin-bottom:4px">' +
+          (p.sentAt ? 'sent ' + esc(absTime(p.sentAt)) : 'send time not set — set one to sharpen prefetch detection') +
+          (p.firstOpen ? ' · first confirmed open ' + esc(absTime(p.firstOpen)) : '') +
+        '</div>';
+
       const events = (p.events || []).slice();
       const detail = events.length
-        ? '<div class="opens-list">' + events.map((ev) => {
-            const c = describeClient(ev);
-            const loc = [ev.city, ev.country && (flag(ev.country) + " " + ev.country)].filter(Boolean).join(", ");
-            return (
-              '<div class="open-item">' +
-                '<div class="open-time">' + esc(ago(ev.ts)) + '<span class="abs">' + esc(new Date(ev.ts).toLocaleTimeString()) + '</span></div>' +
-                '<div class="open-body">' +
-                  '<div class="open-client">' + esc(c.name) + (loc ? ' · <span class="open-where">' + esc(loc) + '</span>' : '') + '</div>' +
-                  (ev.ip ? '<div class="kv">' + esc(ev.ip) + '</div>' : '') +
-                  (c.note ? '<div class="open-note">⚠ ' + esc(c.note) + '</div>' : '') +
-                '</div>' +
-              '</div>'
-            );
-          }).join("") + '</div>'
-        : '<div style="color:var(--muted);font-size:13px;padding:10px 0">No opens recorded yet.</div>';
+        ? '<div class="opens-list">' + events.map((ev) => renderEvent(ev)).join("") + '</div>'
+        : '<div style="color:var(--muted);font-size:13px;padding:10px 0">Nothing recorded yet.</div>';
 
       const recip = p.recipient ? esc(p.recipient) + ' · ' : '';
-      const notSynced = p.synced === false ? ' <span style="color:var(--warn);font-size:11px">(not synced to backend)</span>' : '';
+      const notSynced = p.synced === false ? ' <span style="color:var(--warn);font-size:11px">(not synced)</span>' : '';
 
       return (
         '<div class="pixel-card" data-id="' + esc(p.id) + '">' +
           '<div class="pixel-main" data-toggle>' +
-            '<div class="pixel-status ' + (isOpen ? 'opened' : '') + '"></div>' +
+            '<div class="pixel-status ' + (engaged ? 'opened' : '') + '"></div>' +
             '<div class="pixel-info">' +
               '<div class="pl">' + esc(p.label || 'Untitled') + notSynced + '</div>' +
-              '<div class="pr">' + recip + 'created ' + esc(ago(p.created)) + '</div>' +
+              '<div class="pr">' + recip + 'created ' + esc(ago(p.created)) +
+                (p.sentAt ? ' · sent ' + esc(ago(p.sentAt)) : '') + '</div>' +
             '</div>' +
-            '<div class="pixel-meta">' +
-              (isOpen
-                ? '<div class="big">' + p.opens + '</div><div class="small">' +
-                  (p.opens === 1 ? 'open' : 'opens') + ' · last ' + esc(ago(p.lastOpen)) + '</div>'
-                : '<span class="badge waiting">Not opened</span>') +
-            '</div>' +
+            '<div class="pixel-meta">' + meta + '</div>' +
             '<div class="chev">›</div>' +
           '</div>' +
           '<div class="pixel-detail">' +
-            (isOpen ? '<div style="margin-top:10px"><span class="badge opened">Opened</span> ' +
-                      '<span style="color:var(--muted);font-size:12.5px">first ' + esc(absTime(p.firstOpen)) + '</span></div>' : '') +
+            summary +
             detail +
             '<div class="pixel-actions">' +
               '<button class="ghost" data-copysnip="' + esc(p.id) + '">Copy snippet</button>' +
@@ -718,6 +830,7 @@
 
   $("createBtn").addEventListener("click", createPixel);
   $("testBtn").addEventListener("click", sendTestOpen);
+  $("buildLinkBtn").addEventListener("click", buildLink);
   $("refreshBtn").addEventListener("click", load);
 
   $("autoRefresh").checked = get(LS.auto, "0") === "1";
@@ -734,7 +847,9 @@
   document.querySelectorAll(".copy-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const which = btn.getAttribute("data-copy");
-      const text = which === "snippet" ? $("snippetBox").textContent : $("urlBox").textContent;
+      const text = which === "snippet" ? $("snippetBox").textContent
+                 : which === "link" ? $("linkBox").textContent
+                 : $("urlBox").textContent;
       navigator.clipboard.writeText(text).then(() => {
         btn.textContent = "Copied ✓"; btn.classList.add("copied");
         setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1400);

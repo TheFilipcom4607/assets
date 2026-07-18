@@ -1,19 +1,38 @@
-# Pixel — email open tracking
+# Pixel — email open & click tracking
 
-A polished tracking-pixel **generator + dashboard**, served statically at
+A polished tracking **generator + dashboard**, served statically at
 [`assets.thefilip.com/pixel`](https://assets.thefilip.com/pixel). Create a
-tracking pixel, drop the snippet into an email, and see when it's opened.
+tracking pixel (and optional tracked links), drop them into an email, and see who
+opened or clicked — with automated prefetches filtered out.
 
 ## What's here
 
 ```
 pixel/
 ├── index.html        # The app (generator + dashboard). Pure static, self-contained.
+├── fonts/            # Self-hosted Geist (Vercel's typeface, SIL OFL)
 ├── backend/
-│   ├── worker.js     # Cloudflare Worker that logs opens + serves the pixel
-│   └── README.md     # 3-minute deploy guide
+│   ├── worker.js     # Cloudflare Worker: pixel, tracked links, classification
+│   └── README.md     # 3-minute deploy guide + API reference
 └── README.md         # this file
 ```
+
+## Making it reliable
+
+Since Apple Mail Privacy Protection (2021), a raw "open" is unreliable — Apple
+pre-loads every image on delivery, so ~half of recipients "open" instantly
+whether they read it or not. This tool copies what serious email tools do:
+
+- **Confirmed vs machine.** Each hit is classified using Cloudflare's ASN data +
+  timing. Apple MPP, corporate scanners, and anything firing within ~2 minutes of
+  your send time are shown as **machine/prefetch** and kept out of the confirmed
+  count.
+- **Send time (optional, recommended).** Tell the generator when you're sending;
+  it sharpens the timing check so instant prefetches are caught even when the ASN
+  isn't obviously a bot.
+- **Tracked links = the reliable signal.** Apple and most scanners don't follow
+  links, so a click is almost always a real person. Build a tracked link in the
+  generator and use it instead of the bare URL.
 
 ## Why there's a backend
 
