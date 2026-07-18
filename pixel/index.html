@@ -872,6 +872,7 @@
             '<div class="pixel-actions" style="align-items:center">' +
               '<span style="font-size:12px;color:var(--muted);align-self:center">Send time</span>' +
               '<input type="datetime-local" data-sentinput="' + esc(p.id) + '" value="' + esc(toLocalInput(p.sentAt)) + '" style="flex:1;min-width:150px;width:auto" />' +
+              '<button class="ghost" data-nowsent="' + esc(p.id) + '" title="Set to right now">Now</button>' +
               '<button class="ghost" data-savesent="' + esc(p.id) + '">Save</button>' +
               (p.sentAt ? '<button class="ghost" data-clearsent="' + esc(p.id) + '">Clear</button>' : '') +
             '</div>' +
@@ -1036,6 +1037,8 @@
       updateSentAt(id, v);
       return;
     }
+    const nowSent = e.target.closest("[data-nowsent]");
+    if (nowSent) { updateSentAt(nowSent.getAttribute("data-nowsent"), Date.now()); return; }
     const clearSent = e.target.closest("[data-clearsent]");
     if (clearSent) { updateSentAt(clearSent.getAttribute("data-clearsent"), null); return; }
     const cp = e.target.closest("[data-copysnip]");
