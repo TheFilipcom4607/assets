@@ -122,6 +122,11 @@
   }
   input:focus { outline: none; border-color: #6e6e6e; box-shadow: 0 0 0 1px #6e6e6e; }
   input::placeholder { color: var(--faint); }
+  /* iOS Safari centers the value in datetime-local and makes it taller than a
+     text field — normalize so it matches the other inputs (left-aligned). */
+  input[type=datetime-local] { -webkit-appearance: none; appearance: none; text-align: left; min-height: 42px; }
+  input[type=datetime-local]::-webkit-date-and-time-value { text-align: left; }
+  input[type=datetime-local]::-webkit-calendar-picker-indicator { opacity: .55; cursor: pointer; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 620px) { .row { grid-template-columns: 1fr; } }
 
@@ -232,7 +237,14 @@
   }
   .modal h2 { margin: 0 0 4px; font-size: 17px; }
   .modal .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+  .modal-actions #disconnectBtn { margin-right: auto; }
+  @media (max-width: 560px) {
+    /* Four buttons won't fit on one phone row — lay them out 2x2, full width. */
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .modal-actions button { width: 100%; }
+    .modal-actions #disconnectBtn { margin-right: 0; }
+  }
   .test-result { font-size: 12.5px; margin-top: 10px; min-height: 18px; }
   .test-result.ok { color: var(--good); }
   .test-result.bad { color: var(--bad); }
@@ -400,7 +412,7 @@
     </p>
     <div class="test-result" id="testResult"></div>
     <div class="modal-actions">
-      <button class="ghost danger" id="disconnectBtn" style="margin-right:auto">Disconnect</button>
+      <button class="ghost danger" id="disconnectBtn">Disconnect</button>
       <button class="ghost" id="testConn">Test connection</button>
       <button class="ghost" id="cancelSet">Cancel</button>
       <button class="primary" id="saveSet">Save</button>
