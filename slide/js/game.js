@@ -559,7 +559,7 @@
   function getWorker() {
     if (worker !== null) return worker;
     try {
-      worker = new Worker('js/solver-worker.js');
+      worker = new Worker('/slide/js/solver-worker.js');
       worker.onmessage = onHintResult;
       worker.onerror = function () { worker = false; };
     } catch (err) {
@@ -985,9 +985,12 @@
   if (window.ResizeObserver) new ResizeObserver(relayout).observe(document.querySelector('.stage'));
   if (window.visualViewport) window.visualViewport.addEventListener('resize', scheduleRelayout);
 
+  // Absolute paths throughout: the host may serve this page as /slide or
+  // /slide/, and relative URLs resolve against the site root in the first case.
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('sw.js').catch(function () { /* offline support is optional */ });
+      navigator.serviceWorker.register('/slide/sw.js', { scope: '/slide/' })
+        .catch(function () { /* offline support is optional */ });
     });
   }
 })();
