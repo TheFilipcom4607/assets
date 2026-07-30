@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+<title>Super Slide</title>
+<meta name="description" content="A sliding block puzzle — get the big red block out through the gate. 39 hand-verified levels, playable offline.">
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0e1a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#eef1f8" media="(prefers-color-scheme: light)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Super Slide">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btn-levels" aria-label="Choose a level">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/>
+        <rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/>
+      </svg>
+    </button>
+
+    <div class="title">
+      <h1 id="level-name">Super Slide</h1>
+      <p id="level-meta">Loading</p>
+    </div>
+
+    <button class="icon-btn" id="btn-settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.2"/>
+        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.56V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.56V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="hud">
+    <div class="stat" id="stat-moves-wrap"><b id="stat-moves">0</b><span>Moves</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><b id="stat-par">—</b><span>Par</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><b id="stat-time">0:00</b><span>Time</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><b id="stat-best">—</b><span>Best</span></div>
+  </div>
+
+  <main class="stage">
+    <div class="tray" id="tray">
+      <div class="well" aria-hidden="true"></div>
+      <div class="board" id="board" role="application" aria-label="Sliding block puzzle. Drag blocks to free the big red block through the gap in the bottom wall."></div>
+      <div class="gate" aria-hidden="true"></div>
+    </div>
+  </main>
+
+  <footer class="controls">
+    <button class="ctl" id="btn-undo" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 7v6h6"/><path d="M3.5 13a9 9 0 1 0 2.1-5.9L3 10"/>
+      </svg>
+      Undo
+    </button>
+    <button class="ctl" id="btn-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 18h6"/><path d="M10 21h4"/>
+        <path d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.8 1 .9 1.6l.1.6h5.2l.1-.6c.1-.6.4-1.2.9-1.6A6 6 0 0 0 12 3z"/>
+      </svg>
+      Hint
+    </button>
+    <button class="ctl" id="btn-reset">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>
+      </svg>
+      Reset
+    </button>
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<!-- Level picker ------------------------------------------------------- -->
+<section class="sheet" id="sheet-levels" aria-hidden="true" aria-label="Levels">
+  <div class="grabber"></div>
+  <h2>Levels</h2>
+  <p class="sub" id="levels-progress">—</p>
+  <div class="sheet-scroll">
+    <div class="level-grid" id="level-grid"></div>
+  </div>
+</section>
+
+<!-- Win summary -------------------------------------------------------- -->
+<section class="sheet" id="sheet-win" aria-hidden="true" aria-label="Level complete">
+  <div class="grabber"></div>
+  <div class="win-head">
+    <div class="stars" id="win-stars"></div>
+    <div>
+      <h2 id="win-title">Solved</h2>
+      <p class="sub" id="win-sub" style="margin:0">—</p>
+    </div>
+  </div>
+  <div class="result-grid">
+    <div class="result"><b id="win-moves">0</b><span>Moves</span></div>
+    <div class="result"><b id="win-par">0</b><span>Par</span></div>
+    <div class="result" id="win-time-wrap"><b id="win-time">0:00</b><span>Time</span></div>
+  </div>
+  <div class="sheet-actions">
+    <button class="ctl" id="btn-replay">Replay</button>
+    <button class="ctl btn-primary" id="btn-next">Next level</button>
+  </div>
+</section>
+
+<!-- Settings ----------------------------------------------------------- -->
+<section class="sheet" id="sheet-settings" aria-hidden="true" aria-label="Settings">
+  <div class="grabber"></div>
+  <h2>Settings</h2>
+  <p class="sub">Feel, sound and appearance.</p>
+  <div class="sheet-scroll">
+    <div class="row">
+      <div class="text">
+        <div class="label">Sound</div>
+        <div class="hint">Synthesised clicks, thunks and detents.</div>
+      </div>
+      <button class="switch" id="opt-sound" role="switch" aria-checked="true" aria-label="Sound"></button>
+    </div>
+
+    <div class="row">
+      <div class="text">
+        <div class="label">Haptics</div>
+        <div class="hint" id="haptics-hint">—</div>
+      </div>
+      <button class="switch" id="opt-haptics" role="switch" aria-checked="true" aria-label="Haptics"></button>
+    </div>
+
+    <div class="row">
+      <div class="text">
+        <div class="label">Magnetic snap</div>
+        <div class="hint">Blocks cling to each slot and click past it.</div>
+      </div>
+      <button class="switch" id="opt-magnet" role="switch" aria-checked="true" aria-label="Magnetic snap"></button>
+    </div>
+
+    <div class="row">
+      <div class="text"><div class="label">Theme</div></div>
+      <div class="segmented" id="opt-theme">
+        <button data-theme="" aria-pressed="true">Auto</button>
+        <button data-theme="dark" aria-pressed="false">Dark</button>
+        <button data-theme="light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="text">
+        <div class="label">Reset progress</div>
+        <div class="hint">Clears every best score and star.</div>
+      </div>
+      <button class="ctl" id="opt-wipe" style="flex:none;min-height:40px;padding:0 14px">Erase</button>
+    </div>
+
+    <button class="ctl btn-primary" id="btn-install" style="display:none;margin-top:14px">Install app</button>
+
+    <p class="note" id="install-note" style="display:none">
+      <b>Install on iPhone:</b> tap the Share button in Safari, then <b>Add to Home Screen</b>. It then runs full screen and works offline.
+    </p>
+
+    <p class="note">
+      Get the big red block down to the gap in the bottom wall. One move is one
+      block, dragged as far as you like — turns included.
+    </p>
+  </div>
+</section>
+
+<div class="confetti" id="confetti" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/solver.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/feel.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
