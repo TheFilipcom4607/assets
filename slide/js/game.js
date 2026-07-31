@@ -985,12 +985,59 @@
   if (window.ResizeObserver) new ResizeObserver(relayout).observe(document.querySelector('.stage'));
   if (window.visualViewport) window.visualViewport.addEventListener('resize', scheduleRelayout);
 
+  /* ---------------------------------------------------------------- offline */
+
   // Absolute paths throughout: the host may serve this page as /slide or
   // /slide/, and relative URLs resolve against the site root in the first case.
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/slide/sw.js', { scope: '/slide/' })
-        .catch(function () { /* offline support is optional */ });
+    navigator.serviceWorker.register('/slide/sw.js', { scope: '/slide/' })
+      .then(function (reg) { reg.update(); refreshOfflineStatus(); })
+      .catch(function () { refreshOfflineStatus(); });
+    navigator.serviceWorker.addEventListener('controllerchange', refreshOfflineStatus);
+  }
+
+  /**
+   * Report whether the app can launch with no connection. A worker only
+   * controls pages inside its scope, so this also catches the case where the
+   * page was opened at /slide rather than /slide/.
+   */
+  function refreshOfflineStatus() {
+    var row = $('offline-hint');
+    if (!row) return;
+    if (!('serviceWorker' in navigator)) {
+      row.textContent = 'This browser has no service worker support, so the game needs a connection.';
+      return;
+    }
+    if (!window.caches) {
+      row.textContent = 'Storage is unavailable, so the game needs a connection.';
+      return;
+    }
+    // A home-screen icon created before this app had a working manifest
+    // launches /slide, which sits outside the worker's scope and so can never
+    // start without a connection. Re-adding the icon fixes it for good.
+    var hopped = false;
+    try { hopped = sessionStorage.getItem('superslide.hopped') === '1'; } catch (err) { /* ignore */ }
+    var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    if (hopped && standalone) {
+      row.textContent = 'This shortcut opens an address that cannot start offline. ' +
+        'Remove the icon from your home screen and add it again to fix it.';
+      return;
+    }
+
+    caches.keys().then(function (keys) {
+      var cached = keys.some(function (k) { return k.indexOf('super-slide') === 0; });
+      if (cached && navigator.serviceWorker.controller) {
+        row.textContent = 'Ready — the game launches and plays with no connection.';
+      } else if (cached) {
+        row.textContent = 'Files are saved. Relaunch once to finish going offline-ready.';
+      } else {
+        row.textContent = 'Saving files for offline play…';
+        setTimeout(refreshOfflineStatus, 2500);
+      }
+    }).catch(function () {
+      row.textContent = 'Offline status unavailable.';
     });
   }
+
+  refreshOfflineStatus();
 })();

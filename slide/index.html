@@ -3,6 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+<script>
+// The service worker's scope is /slide/, so a page opened at /slide sits
+// outside it and can never be served offline. Hop into scope once. The guard
+// means a host that redirects straight back cannot bounce us in a loop.
+(function () {
+  try {
+    if (location.pathname !== '/slide') return;
+    if (sessionStorage.getItem('superslide.inscope')) return;
+    sessionStorage.setItem('superslide.inscope', '1');
+    // Remember we arrived out of scope: a home-screen icon that launches
+    // /slide can never start offline, and the user needs telling.
+    sessionStorage.setItem('superslide.hopped', '1');
+    location.replace('/slide/' + location.search + location.hash);
+  } catch (err) { /* storage blocked: stay put rather than risk a loop */ }
+})();
+</script>
 <title>Super Slide</title>
 <meta name="description" content="A sliding block puzzle — get the big red block out through the gate. 39 hand-verified levels, playable offline.">
 
@@ -151,6 +167,13 @@
         <button data-theme="" aria-pressed="true">Auto</button>
         <button data-theme="dark" aria-pressed="false">Dark</button>
         <button data-theme="light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="text">
+        <div class="label">Offline</div>
+        <div class="hint" id="offline-hint">Checking…</div>
       </div>
     </div>
 
