@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>planemat — 1:400 airport mat scaler</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#151a22; --panel2:#1b222c; --line:#2a3341;
+    --txt:#e6ebf2; --dim:#8b98a9; --acc:#4da3ff; --acc2:#ffb84d;
+    --ok:#4ade80; --warn:#fbbf24; --bad:#f87171;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--bg); color:var(--txt);
+    font:13px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  header{
+    display:flex; align-items:center; gap:14px; padding:9px 14px;
+    border-bottom:1px solid var(--line); background:var(--panel); flex:none;
+  }
+  header h1{font-size:14px;margin:0;letter-spacing:.2px}
+  header h1 b{color:var(--acc)}
+  .steps{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+  .step{
+    display:flex;align-items:center;gap:6px;padding:3px 9px;border-radius:99px;
+    background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-size:11px;
+  }
+  .step.done{color:var(--ok);border-color:#245c3b}
+  .step.active{color:var(--acc);border-color:#2a5c8f;background:#14243a}
+
+  main{flex:1;display:flex;min-height:0}
+  #stage{flex:1;position:relative;min-width:0;background:#0a0d12;overflow:hidden}
+  #cv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+  #cv.grab{cursor:grab}
+  #drop{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:10px;text-align:center;padding:24px;
+    border:2px dashed var(--line);margin:18px;border-radius:12px;color:var(--dim);
+  }
+  #drop.hot{border-color:var(--acc);background:#0f1a28;color:var(--txt)}
+  #drop strong{color:var(--txt);font-size:15px}
+  .viewbar{
+    position:absolute;left:10px;bottom:10px;display:flex;gap:6px;align-items:center;
+    background:rgba(16,20,27,.88);border:1px solid var(--line);border-radius:8px;padding:5px 7px;
+    backdrop-filter:blur(6px);font-size:11px;color:var(--dim)
+  }
+  .hint{
+    position:absolute;left:50%;top:10px;transform:translateX(-50%);
+    background:rgba(16,20,27,.9);border:1px solid var(--line);border-radius:8px;
+    padding:6px 12px;font-size:12px;color:var(--txt);pointer-events:none;max-width:70%;
+    text-align:center
+  }
+  .hint b{color:var(--acc2)}
+
+  aside{
+    width:330px;flex:none;border-left:1px solid var(--line);background:var(--panel);
+    overflow-y:auto;padding:12px 12px 40px
+  }
+  section{
+    border:1px solid var(--line);border-radius:10px;background:var(--panel2);
+    padding:10px;margin-bottom:10px
+  }
+  section.off{opacity:.42;pointer-events:none}
+  h2{font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--dim);margin:0 0 8px}
+  h2 span{color:var(--acc);margin-right:5px}
+  label.f{display:block;font-size:11px;color:var(--dim);margin:8px 0 3px}
+  .row{display:flex;gap:6px;align-items:center}
+  .row>*{min-width:0}
+  input[type=number],input[type=text],select{
+    background:#0f141b;color:var(--txt);border:1px solid var(--line);border-radius:6px;
+    padding:6px 7px;font:inherit;width:100%
+  }
+  input:focus,select:focus{outline:none;border-color:var(--acc)}
+  button{
+    background:#232c38;color:var(--txt);border:1px solid var(--line);border-radius:6px;
+    padding:6px 10px;font:inherit;cursor:pointer
+  }
+  button:hover{background:#2c3746}
+  button.pri{background:var(--acc);border-color:var(--acc);color:#04121f;font-weight:600}
+  button.pri:hover{background:#68b2ff}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .seg button{border:0;border-radius:0;flex:1;background:#0f141b;color:var(--dim);padding:6px 4px}
+  .seg button.on{background:var(--acc);color:#04121f;font-weight:600}
+  .chk{display:flex;align-items:center;gap:7px;margin:7px 0;font-size:12px;cursor:pointer}
+  .chk input{accent-color:var(--acc);width:14px;height:14px}
+  .kv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:2px 0}
+  .kv span:first-child{color:var(--dim)}
+  .kv span:last-child{font-variant-numeric:tabular-nums;text-align:right}
+  .note{font-size:11px;color:var(--dim);line-height:1.5;margin:7px 0 0}
+  .note code{background:#0f141b;padding:1px 4px;border-radius:3px;color:var(--acc2)}
+  .pill{display:inline-block;padding:1px 6px;border-radius:99px;font-size:10.5px;font-weight:600}
+  .pill.ok{background:#12341f;color:var(--ok)} .pill.warn{background:#3a2d0d;color:var(--warn)}
+  .pill.bad{background:#3a1717;color:var(--bad)}
+  .grids{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px}
+  .grids button{padding:4px 0;font-size:11px}
+  hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+  #busy{
+    position:absolute;inset:0;background:rgba(8,11,15,.86);display:none;
+    align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:5
+  }
+  #busy.on{display:flex}
+  .bar{width:240px;height:5px;background:#232c38;border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--acc);width:0%}
+</style>
+</head>
+<body>
+
+<header>
+  <h1><b>planemat</b> — Google&nbsp;Earth → 1:400 airport mat</h1>
+  <div class="steps">
+    <div class="step" id="s1">1 · Image</div>
+    <div class="step" id="s2">2 · Scale bar</div>
+    <div class="step" id="s3">3 · Frame</div>
+    <div class="step" id="s4">4 · Export</div>
+  </div>
+</header>
+
+<main>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="drop">
+      <strong>Drop a Google Earth screenshot here</strong>
+      <div>or <button id="pick">choose a file</button> — PNG / JPEG</div>
+      <div style="font-size:11px;max-width:420px">
+        Grab it looking straight down (no tilt) with North up, and make sure the little
+        scale bar in the bottom-left corner is included in the shot.
+      </div>
+    </div>
+    <div class="hint" id="hint"></div>
+    <div class="viewbar">
+      <button id="fit">Fit</button>
+      <button id="z1">100%</button>
+      <span id="zlbl">—</span>
+    </div>
+    <div id="busy"><div id="busytxt">Rendering…</div><div class="bar"><i id="busybar"></i></div></div>
+  </div>
+
+  <aside>
+    <!-- 1 ─ image -->
+    <section id="sec1">
+      <h2><span>1</span>Image</h2>
+      <div class="row"><button id="pick2" style="flex:1">Load screenshot…</button></div>
+      <input type="file" id="file" accept="image/*" hidden>
+      <div id="imginfo" class="note">No image loaded.</div>
+    </section>
+
+    <!-- 2 ─ scale -->
+    <section id="sec2" class="off">
+      <h2><span>2</span>Scale bar</h2>
+      <p class="note" style="margin-top:0">
+        Zoom into the scale bar (bottom-left of the screenshot), then drag a line from its
+        left tick to its right tick. Type the number printed next to it.
+      </p>
+      <div class="row"><button id="calbtn" style="flex:1">Draw measuring line</button></div>
+      <label class="chk"><input type="checkbox" id="calh" checked>Keep the line perfectly horizontal</label>
+      <label class="f">The bar says…</label>
+      <div class="row">
+        <input type="number" id="calval" value="100" min="0.0001" step="any" style="flex:2">
+        <select id="calunit" style="flex:1">
+          <option value="1">m</option>
+          <option value="0.3048">ft</option>
+          <option value="1000">km</option>
+          <option value="1609.344">mi</option>
+        </select>
+      </div>
+      <hr>
+      <div class="kv"><span>Line length</span><span id="k_px">—</span></div>
+      <div class="kv"><span>Ground per pixel</span><span id="k_mpp">—</span></div>
+      <div class="kv"><span>Detail at 1:400</span><span id="k_src">—</span></div>
+      <p class="note" id="srcnote"></p>
+      <div class="row" style="margin-top:8px"><button id="calreset">Clear</button></div>
+    </section>
+
+    <!-- 3 ─ frame -->
+    <section id="sec3" class="off">
+      <h2><span>3</span>Frame</h2>
+      <label class="f">Crop mode</label>
+      <div class="seg" id="modeseg">
+        <button data-m="locked" class="on">Locked — 1 page</button>
+        <button data-m="free">Free — tiled</button>
+      </div>
+      <label class="f">Sheet orientation</label>
+      <div class="seg" id="oriseg">
+        <button data-o="landscape" class="on">Landscape</button>
+        <button data-o="portrait">Portrait</button>
+      </div>
+
+      <div id="freeui" style="display:none">
+        <label class="chk"><input type="checkbox" id="snap" checked>Snap to whole sheets (no wasted paper)</label>
+        <label class="f">Ground covered (m)</label>
+        <div class="row">
+          <input type="number" id="covw" step="any" min="5">
+          <span style="color:var(--dim)">×</span>
+          <input type="number" id="covh" step="any" min="5">
+        </div>
+        <div class="grids" id="grids"></div>
+      </div>
+
+      <label class="f">Rotation (° — turn the sheet to line up with a runway)</label>
+      <div class="row">
+        <input type="number" id="rot" value="0" step="0.1">
+        <button id="rot0">0°</button>
+      </div>
+      <label class="f">Size reference overlay (preview only)</label>
+      <select id="ref">
+        <option value="">none</option>
+        <option value="76.25,68.45">Boeing 747-8 · 76.3 × 68.5 m</option>
+        <option value="72.72,79.75">Airbus A380 · 72.7 × 79.8 m</option>
+        <option value="39.47,35.79">Boeing 737-800 · 39.5 × 35.8 m</option>
+        <option value="37.57,35.80">Airbus A320 · 37.6 × 35.8 m</option>
+      </select>
+      <hr>
+      <div class="kv"><span>Ground covered</span><span id="k_cov">—</span></div>
+      <div class="kv"><span>Printed size</span><span id="k_paper">—</span></div>
+      <div class="kv"><span>Sheets</span><span id="k_pages">—</span></div>
+      <p class="note" id="framenote"></p>
+    </section>
+
+    <!-- 4 ─ export -->
+    <section id="sec4" class="off">
+      <h2><span>4</span>Export</h2>
+      <label class="f">Render resolution</label>
+      <select id="dpi">
+        <option value="150">150 DPI — small file</option>
+        <option value="300" selected>300 DPI — recommended</option>
+        <option value="400">400 DPI</option>
+        <option value="600">600 DPI — very large file</option>
+      </select>
+      <label class="f">JPEG quality</label>
+      <select id="qual">
+        <option value="0.85">Standard</option>
+        <option value="0.92" selected>High</option>
+        <option value="0.97">Maximum</option>
+      </select>
+      <label class="chk"><input type="checkbox" id="marks" checked>Trim marks in the corners</label>
+      <label class="chk"><input type="checkbox" id="labels" checked>Sheet labels (R1C2 …) — these print on the mat</label>
+      <hr>
+      <div class="kv"><span>Output</span><span id="k_out">—</span></div>
+      <div class="kv"><span>Effective detail</span><span id="k_eff">—</span></div>
+      <div class="row" style="margin-top:10px"><button id="go" class="pri" style="flex:1">Export PDF</button></div>
+      <p class="note">
+        Print with <code>Actual size</code> / <code>100%</code> — never “Fit to page”, that
+        silently rescales the mat. One A4 sheet at 1:400 covers <b>118.8 × 84 m</b> of ground.
+        Most printers leave a white margin; trim to the corner marks and butt the sheets together.
+      </p>
+    </section>
+  </aside>
+</main>
+
+<script>
+"use strict";
+
+/* ── constants ─────────────────────────────────────────────────────────── */
+const MM_IN   = 25.4;
+const PT_MM   = 72 / MM_IN;          // points per millimetre
+const SCALE   = 400;                 // 1:400
+const A4      = { long: 297, short: 210 };   // mm
+
+const S = {
+  img:null, name:'', iw:0, ih:0,
+  view:{ z:1, x:0, y:0 },
+  tool:'pan',                        // 'cal' | 'crop' | 'pan'
+  cal:{ a:null, b:null },
+  mpp:null,                          // metres per image pixel
+  crop:{ cx:0, cy:0, w:0, h:0, rot:0 },   // centre in image px, w/h in metres, rot in radians
+  mode:'locked', ori:'landscape', snap:true,
+  ref:null,
+  drag:null
+};
+
+/* ── dom ───────────────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d');
+let CW = 0, CH = 0, DPR = 1;
+
+/* ── helpers ───────────────────────────────────────────────────────────── */
+const clamp = (v,a,b) => v < a ? a : v > b ? b : v;
+const r4 = n => (Math.round(n * 1e4) / 1e4);
+const fmt = (n,d=1) => Number(n).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+
+// ground covered by one sheet, in metres
+function sheetM(){
+  const mm = S.ori === 'landscape' ? [A4.long, A4.short] : [A4.short, A4.long];
+  return { w: mm[0] / 1000 * SCALE, h: mm[1] / 1000 * SCALE };   // 118.8 × 84 m
+}
+function sheetMM(){
+  return S.ori === 'landscape' ? { w:A4.long, h:A4.short } : { w:A4.short, h:A4.long };
+}
+function grid(){
+  const s = sheetM();
+  return { cols: Math.max(1, Math.ceil(S.crop.w / s.w - 1e-6)),
+           rows: Math.max(1, Math.ceil(S.crop.h / s.h - 1e-6)) };
+}
+// rotate a vector by the crop angle
+const rot  = (x,y,a) => [x*Math.cos(a) - y*Math.sin(a), x*Math.sin(a) + y*Math.cos(a)];
+const unrot= (x,y,a) => rot(x, y, -a);
+
+const toScreen = (x,y) => [x*S.view.z + S.view.x, y*S.view.z + S.view.y];
+const toImage  = (x,y) => [(x - S.view.x)/S.view.z, (y - S.view.y)/S.view.z];
+
+// the four crop corners, in image pixels
+function cropCorners(){
+  const c = S.crop, m = S.mpp;
+  const hw = c.w/2/m, hh = c.h/2/m;
+  return [[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].map(([u,v]) => {
+    const [dx,dy] = rot(u,v,c.rot);
+    return [c.cx + dx, c.cy + dy];
+  });
+}
+
+/* ── canvas sizing ─────────────────────────────────────────────────────── */
+function resize(){
+  const r = $('stage').getBoundingClientRect();
+  DPR = window.devicePixelRatio || 1;
+  CW = r.width; CH = r.height;
+  cv.width = Math.round(CW*DPR); cv.height = Math.round(CH*DPR);
+  draw();
+}
+new ResizeObserver(resize).observe($('stage'));
+
+function fit(){
+  if(!S.img) return;
+  const z = Math.min(CW/S.iw, CH/S.ih) * 0.9;
+  S.view.z = z;
+  S.view.x = (CW - S.iw*z)/2;
+  S.view.y = (CH - S.ih*z)/2;
+  draw();
+}
+
+/* ── drawing ───────────────────────────────────────────────────────────── */
+function draw(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle = '#0a0d12'; ctx.fillRect(0,0,CW,CH);
+  if(!S.img){ $('zlbl').textContent = '—'; return; }
+
+  ctx.save();
+  ctx.setTransform(DPR*S.view.z,0,0,DPR*S.view.z, DPR*S.view.x, DPR*S.view.y);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(S.img,0,0);
+  ctx.restore();
+
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(S.mpp) drawCrop();
+  drawCal();
+  $('zlbl').textContent = Math.round(S.view.z*100) + '%';
+}
+
+function drawCal(){
+  const {a,b} = S.cal;
+  if(!a) return;
+  const A = toScreen(a[0],a[1]), B = b ? toScreen(b[0],b[1]) : A;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(0,0,0,.65)'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.stroke();
+  ctx.strokeStyle = '#ffb84d'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.stroke();
+  // end caps
+  const n = Math.hypot(B[0]-A[0], B[1]-A[1]) || 1;
+  const px = -(B[1]-A[1])/n*7, py = (B[0]-A[0])/n*7;
+  ctx.beginPath();
+  ctx.moveTo(A[0]-px,A[1]-py); ctx.lineTo(A[0]+px,A[1]+py);
+  ctx.moveTo(B[0]-px,B[1]-py); ctx.lineTo(B[0]+px,B[1]+py);
+  ctx.stroke();
+  for(const P of [A,B]){
+    ctx.fillStyle = '#ffb84d'; ctx.strokeStyle = '#0a0d12'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(P[0],P[1],5,0,7); ctx.fill(); ctx.stroke();
+  }
+}
+
+function drawCrop(){
+  const P = cropCorners().map(p => toScreen(p[0],p[1]));
+
+  // dim everything outside the frame
+  ctx.fillStyle = 'rgba(6,9,13,.58)';
+  ctx.beginPath();
+  ctx.rect(0,0,CW,CH);
+  ctx.moveTo(P[0][0],P[0][1]);
+  for(let i=3;i>=1;i--) ctx.lineTo(P[i][0],P[i][1]);
+  ctx.closePath();
+  ctx.fill('evenodd');
+
+  // sheet grid
+  const g = grid(), s = sheetM(), c = S.crop;
+  const tw = g.cols*s.w, th = g.rows*s.h;
+  ctx.strokeStyle = 'rgba(77,163,255,.5)'; ctx.lineWidth = 1;
+  ctx.setLineDash([5,4]);
+  for(let i=1;i<g.cols;i++) lineLocal(-tw/2 + i*s.w, -th/2, -tw/2 + i*s.w, th/2);
+  for(let j=1;j<g.rows;j++) lineLocal(-tw/2, -th/2 + j*s.h, tw/2, -th/2 + j*s.h);
+  ctx.setLineDash([]);
+
+  // frame
+  ctx.strokeStyle = '#4da3ff'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(P[0][0],P[0][1]);
+  for(let i=1;i<4;i++) ctx.lineTo(P[i][0],P[i][1]);
+  ctx.closePath(); ctx.stroke();
+
+  // corner handles (free mode only)
+  if(S.mode === 'free'){
+    for(const p of P){
+      ctx.fillStyle = '#4da3ff'; ctx.strokeStyle = '#0a0d12'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.rect(p[0]-5,p[1]-5,10,10); ctx.fill(); ctx.stroke();
+    }
+  }
+
+  // rotation handle
+  const R = rotHandle();
+  const mid = [(P[0][0]+P[1][0])/2, (P[0][1]+P[1][1])/2];
+  ctx.strokeStyle = '#4da3ff'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(mid[0],mid[1]); ctx.lineTo(R[0],R[1]); ctx.stroke();
+  ctx.fillStyle = '#ffb84d'; ctx.strokeStyle = '#0a0d12'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(R[0],R[1],6,0,7); ctx.fill(); ctx.stroke();
+
+  // reference aircraft
+  if(S.ref){
+    const [L,W] = S.ref;
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2;
+    lineLocal(0,-L/2,0,L/2); lineLocal(-W/2,-L/6,W/2,-L/6);
+    ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1;
+    lineLocal(0,-L/2,0,L/2); lineLocal(-W/2,-L/6,W/2,-L/6);
+  }
+
+  // helper: draw a line given crop-local metre coords
+  function lineLocal(x1,y1,x2,y2){
+    const p1 = localToScreen(x1,y1), p2 = localToScreen(x2,y2);
+    ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
+  }
+}
+function localToScreen(u,v){                 // crop-local metres → screen px
+  const [dx,dy] = rot(u/S.mpp, v/S.mpp, S.crop.rot);
+  return toScreen(S.crop.cx + dx, S.crop.cy + dy);
+}
+function rotHandle(){
+  const [dx,dy] = rot(0, -S.crop.h/2/S.mpp, S.crop.rot);
+  const p = toScreen(S.crop.cx + dx, S.crop.cy + dy);
+  const [ux,uy] = rot(0,-1,S.crop.rot);
+  return [p[0] + ux*34, p[1] + uy*34];
+}
+
+/* ── loading ───────────────────────────────────────────────────────────── */
+function load(file){
+  if(!file || !file.type.startsWith('image/')) return;
+  const img = new Image();
+  img.onload = () => {
+    S.img = img; S.name = file.name.replace(/\.[^.]+$/,''); S.iw = img.naturalWidth; S.ih = img.naturalHeight;
+    S.cal = {a:null,b:null}; S.mpp = null;
+    $('drop').style.display = 'none';
+    $('imginfo').innerHTML = '<b>' + file.name + '</b><br>' + S.iw + ' × ' + S.ih + ' px';
+    $('sec2').classList.remove('off');
+    setTool('cal');
+    fit(); sync();
+  };
+  img.onerror = () => alert('Could not read that image.');
+  img.src = URL.createObjectURL(file);
+}
+$('file').onchange = e => load(e.target.files[0]);
+$('pick').onclick = $('pick2').onclick = () => $('file').click();
+['dragenter','dragover'].forEach(t => $('stage').addEventListener(t, e => {
+  e.preventDefault(); $('drop').classList.add('hot'); $('drop').style.display='flex';
+}));
+$('stage').addEventListener('dragleave', e => {
+  if(e.relatedTarget && $('stage').contains(e.relatedTarget)) return;
+  $('drop').classList.remove('hot'); if(S.img) $('drop').style.display='none';
+});
+$('stage').addEventListener('drop', e => {
+  e.preventDefault(); $('drop').classList.remove('hot');
+  if(S.img) $('drop').style.display='none';
+  load(e.dataTransfer.files[0]);
+});
+
+/* ── tools & hints ─────────────────────────────────────────────────────── */
+function setTool(t){
+  S.tool = t;
+  const h = $('hint');
+  if(t === 'cal')
+    h.innerHTML = 'Drag along the scale bar — from its <b>left tick</b> to its <b>right tick</b>. Scroll to zoom in first; arrow keys nudge a grabbed end by one pixel.';
+  else if(t === 'crop')
+    h.innerHTML = 'Drag inside the frame to move it, the <b>orange dot</b> to rotate' + (S.mode==='free' ? ', corners to resize' : '') + '. Scroll to zoom, drag outside to pan.';
+  else h.textContent = '';
+  h.style.display = t === 'pan' ? 'none' : 'block';
+  draw();
+}
+$('calbtn').onclick = () => { S.cal = {a:null,b:null}; S.mpp = null; setTool('cal'); sync(); };
+$('calreset').onclick = $('calbtn').onclick;
+
+/* ── pointer interaction ───────────────────────────────────────────────── */
+let panning = null;
+
+cv.addEventListener('contextmenu', e => e.preventDefault());
+
+cv.addEventListener('pointerdown', e => {
+  if(!S.img) return;
+  cv.setPointerCapture(e.pointerId);
+  const m = [e.offsetX, e.offsetY];
+
+  if(e.button === 1 || e.button === 2 || e.shiftKey && S.tool === 'pan'){
+    panning = { m, v:{...S.view} }; return;
+  }
+
+  if(S.tool === 'cal'){
+    const near = p => p && Math.hypot(...toScreen(p[0],p[1]).map((v,i)=>v-m[i])) < 12;
+    if(near(S.cal.a)) { S.drag = {t:'calA'}; return; }
+    if(near(S.cal.b)) { S.drag = {t:'calB'}; return; }
+    const i = toImage(m[0],m[1]);
+    S.cal.a = i; S.cal.b = i.slice();
+    S.drag = {t:'calB'};
+    draw(); return;
+  }
+
+  if(S.tool === 'crop' && S.mpp){
+    const R = rotHandle();
+    if(Math.hypot(R[0]-m[0], R[1]-m[1]) < 13){ S.drag = {t:'rot'}; return; }
+    const P = cropCorners().map(p => toScreen(p[0],p[1]));
+    if(S.mode === 'free'){
+      for(let i=0;i<4;i++){
+        if(Math.hypot(P[i][0]-m[0], P[i][1]-m[1]) < 12){
+          S.drag = { t:'size', sx:[-1,1,1,-1][i], sy:[-1,-1,1,1][i] }; return;
+        }
+      }
+    }
+    const im = toImage(m[0],m[1]);
+    const [u,v] = unrot(im[0]-S.crop.cx, im[1]-S.crop.cy, S.crop.rot);
+    if(Math.abs(u*S.mpp) <= S.crop.w/2 && Math.abs(v*S.mpp) <= S.crop.h/2){
+      S.drag = { t:'move', dx:im[0]-S.crop.cx, dy:im[1]-S.crop.cy }; return;
+    }
+  }
+  panning = { m, v:{...S.view} };
+});
+
+cv.addEventListener('pointermove', e => {
+  const m = [e.offsetX, e.offsetY];
+  if(panning){
+    S.view.x = panning.v.x + (m[0]-panning.m[0]);
+    S.view.y = panning.v.y + (m[1]-panning.m[1]);
+    draw(); return;
+  }
+  if(!S.drag) return;
+  const im = toImage(m[0],m[1]);
+  const d = S.drag;
+
+  if(d.t === 'calA' || d.t === 'calB'){
+    let p = im;
+    if($('calh').checked !== e.shiftKey){
+      const other = d.t === 'calA' ? S.cal.b : S.cal.a;
+      if(other) p = [im[0], other[1]];
+    }
+    if(d.t === 'calA') S.cal.a = p; else S.cal.b = p;
+    sync(); draw(); return;
+  }
+  if(d.t === 'move'){
+    S.crop.cx = im[0]-d.dx; S.crop.cy = im[1]-d.dy; draw(); return;
+  }
+  if(d.t === 'rot'){
+    const dx = im[0]-S.crop.cx, dy = im[1]-S.crop.cy;
+    let a = Math.atan2(dx, -dy);
+    if(e.shiftKey) a = Math.round(a/(Math.PI/12))*(Math.PI/12);
+    S.crop.rot = a;
+    $('rot').value = (a*180/Math.PI).toFixed(1);
+    draw(); return;
+  }
+  if(d.t === 'size'){
+    const c = S.crop, s = sheetM();
+    // opposite corner, held fixed
+    const [fx,fy] = rot(-d.sx*c.w/2/S.mpp, -d.sy*c.h/2/S.mpp, c.rot);
+    const F = [c.cx+fx, c.cy+fy];
+    let [lu,lv] = unrot(im[0]-F[0], im[1]-F[1], c.rot);
+    let w = Math.abs(lu)*S.mpp, h = Math.abs(lv)*S.mpp;
+    if(S.snap){ w = Math.max(1,Math.round(w/s.w))*s.w; h = Math.max(1,Math.round(h/s.h))*s.h; }
+    c.w = Math.max(5,w); c.h = Math.max(5,h);
+    const [nx,ny] = rot(d.sx*c.w/2/S.mpp, d.sy*c.h/2/S.mpp, c.rot);
+    c.cx = F[0]+nx; c.cy = F[1]+ny;
+    sync(); draw(); return;
+  }
+});
+
+const endDrag = () => { S.drag = null; panning = null; sync(); };
+cv.addEventListener('pointerup', endDrag);
+cv.addEventListener('pointercancel', endDrag);
+
+cv.addEventListener('wheel', e => {
+  if(!S.img) return;
+  e.preventDefault();
+  const [ix,iy] = toImage(e.offsetX, e.offsetY);
+  S.view.z = clamp(S.view.z * Math.exp(-e.deltaY * 0.0015), 0.01, 60);
+  S.view.x = e.offsetX - ix*S.view.z;
+  S.view.y = e.offsetY - iy*S.view.z;
+  draw();
+}, {passive:false});
+
+document.addEventListener('keydown', e => {
+  if(/input|select|textarea/i.test(document.activeElement.tagName)) return;
+  if(e.key === 'f'){ fit(); return; }
+  const step = (e.shiftKey ? 10 : 1);
+  const arrows = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+  const a = arrows[e.key];
+  if(!a) return;
+  e.preventDefault();
+  if(S.tool === 'cal' && S.cal.b){
+    S.cal.b = [S.cal.b[0]+a[0]*step, S.cal.b[1]+a[1]*step];
+  } else if(S.tool === 'crop' && S.mpp){
+    S.crop.cx += a[0]*step; S.crop.cy += a[1]*step;
+  }
+  sync(); draw();
+});
+
+$('fit').onclick = fit;
+$('z1').onclick = () => {
+  if(!S.img) return;
+  const [ix,iy] = toImage(CW/2, CH/2);
+  S.view.z = 1; S.view.x = CW/2 - ix; S.view.y = CH/2 - iy; draw();
+};
+
+/* ── controls ──────────────────────────────────────────────────────────── */
+$('calval').oninput = $('calunit').onchange = sync;
+
+$('modeseg').onclick = e => {
+  const b = e.target.closest('button'); if(!b) return;
+  [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x===b));
+  S.mode = b.dataset.m;
+  $('freeui').style.display = S.mode === 'free' ? 'block' : 'none';
+  if(S.mode === 'locked'){ const s = sheetM(); S.crop.w = s.w; S.crop.h = s.h; }
+  setTool('crop'); sync(); draw();
+};
+$('oriseg').onclick = e => {
+  const b = e.target.closest('button'); if(!b) return;
+  [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x===b));
+  const before = sheetM();
+  S.ori = b.dataset.o;
+  const s = sheetM();
+  if(S.mode === 'locked'){ S.crop.w = s.w; S.crop.h = s.h; }
+  else { // keep the same sheet count
+    const c = Math.max(1,Math.round(S.crop.w/before.w)), r = Math.max(1,Math.round(S.crop.h/before.h));
+    S.crop.w = c*s.w; S.crop.h = r*s.h;
+  }
+  sync(); draw();
+};
+$('snap').onchange = e => { S.snap = e.target.checked; };
+$('covw').oninput = () => { const v = parseFloat($('covw').value); if(v>0){ S.crop.w = v; sync(true); draw(); } };
+$('covh').oninput = () => { const v = parseFloat($('covh').value); if(v>0){ S.crop.h = v; sync(true); draw(); } };
+$('rot').oninput = () => { S.crop.rot = (parseFloat($('rot').value)||0) * Math.PI/180; draw(); };
+$('rot0').onclick = () => { S.crop.rot = 0; $('rot').value = 0; draw(); };
+$('ref').onchange = e => { S.ref = e.target.value ? e.target.value.split(',').map(Number) : null; draw(); };
+['dpi','qual','marks','labels'].forEach(id => $(id).onchange = () => sync());
+
+// sheet-grid quick picks
+$('grids').innerHTML = [[1,1],[2,1],[2,2],[3,2],[3,3],[4,3]]
+  .map(([c,r]) => '<button data-c="'+c+'" data-r="'+r+'">'+c+' × '+r+'</button>').join('');
+$('grids').onclick = e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const s = sheetM();
+  S.crop.w = (+b.dataset.c)*s.w; S.crop.h = (+b.dataset.r)*s.h;
+  sync(); draw();
+};
+
+/* ── recompute + readouts ──────────────────────────────────────────────── */
+function sync(skipCov){
+  // calibration
+  const {a,b} = S.cal;
+  const px = a && b ? Math.hypot(b[0]-a[0], b[1]-a[1]) : 0;
+  const metres = (parseFloat($('calval').value)||0) * parseFloat($('calunit').value);
+  const had = S.mpp;
+  S.mpp = (px > 2 && metres > 0) ? metres/px : null;
+
+  $('k_px').textContent  = px ? fmt(px,1)+' px' : '—';
+  $('k_mpp').textContent = S.mpp ? fmt(S.mpp,4)+' m/px' : '—';
+
+  if(S.mpp){
+    // one source pixel becomes mpp*1000/400 mm of paper
+    const mmPerPx = S.mpp * 1000 / SCALE;
+    const dpi = MM_IN / mmPerPx;
+    const cls = dpi >= 150 ? 'ok' : dpi >= 90 ? 'warn' : 'bad';
+    const word = dpi >= 150 ? 'sharp' : dpi >= 90 ? 'acceptable' : 'soft';
+    $('k_src').innerHTML = '<span class="pill '+cls+'">'+Math.round(dpi)+' DPI · '+word+'</span>';
+    $('srcnote').textContent = dpi >= 150
+      ? 'The screenshot has enough detail for a crisp 1:400 print.'
+      : 'That is all the detail the screenshot holds — exporting at a higher DPI will not add any. Re-shoot Google Earth zoomed in closer (or on a bigger window) for a sharper mat.';
+  } else {
+    $('k_src').textContent = '—'; $('srcnote').textContent = '';
+  }
+
+  // first successful calibration → set up the frame
+  if(S.mpp && !had){
+    const s = sheetM();
+    S.crop.w = s.w; S.crop.h = s.h;
+    S.crop.cx = S.iw/2; S.crop.cy = S.ih/2;
+    $('sec3').classList.remove('off'); $('sec4').classList.remove('off');
+    setTool('crop');
+  }
+  if(!S.mpp){ $('sec3').classList.add('off'); $('sec4').classList.add('off'); }
+
+  // frame readouts
+  if(S.mpp){
+    const g = grid(), sh = sheetMM();
+    const paperW = S.crop.w/SCALE*1000, paperH = S.crop.h/SCALE*1000;   // mm
+    $('k_cov').textContent   = fmt(S.crop.w,1)+' × '+fmt(S.crop.h,1)+' m';
+    $('k_paper').textContent = fmt(paperW,0)+' × '+fmt(paperH,0)+' mm';
+    $('k_pages').textContent = g.cols+' × '+g.rows+' = '+(g.cols*g.rows)+' × A4';
+    if(!skipCov){ $('covw').value = r4(S.crop.w); $('covh').value = r4(S.crop.h); }
+
+    const waste = Math.abs(g.cols*sheetM().w - S.crop.w) > 0.05 || Math.abs(g.rows*sheetM().h - S.crop.h) > 0.05;
+    const corners = cropCorners();
+    const out = corners.some(p => p[0] < 0 || p[1] < 0 || p[0] > S.iw || p[1] > S.ih);
+    let n = [];
+    if(S.mode === 'locked') n.push('The frame is locked to exactly one A4 sheet ('+fmt(sheetM().w,1)+' × '+fmt(sheetM().h,1)+' m) — that is what makes the print come out at true 1:400.');
+    if(waste) n.push('The crop does not fill whole sheets, so edge sheets will have blank strips. Turn on snapping for a clean grid.');
+    if(out) n.push('⚠ Part of the frame is outside the image — those areas will print white.');
+    $('framenote').innerHTML = n.join('<br><br>');
+
+    // export readouts
+    const dpi = +$('dpi').value;
+    const pxw = Math.round(sh.w/MM_IN*dpi), pxh = Math.round(sh.h/MM_IN*dpi);
+    $('k_out').textContent = (g.cols*g.rows)+' page'+(g.cols*g.rows>1?'s':'')+' · '+pxw+' × '+pxh+' px each';
+    const srcAcross = S.crop.w/S.mpp;                    // source pixels across the whole crop
+    const effDpi = srcAcross / (paperW/MM_IN);
+    const cls = effDpi >= 150 ? 'ok' : effDpi >= 90 ? 'warn' : 'bad';
+    $('k_eff').innerHTML = '<span class="pill '+cls+'">'+Math.round(Math.min(effDpi,dpi))+' DPI</span>';
+  }
+
+  // step chips
+  $('s1').className = 'step' + (S.img ? ' done' : ' active');
+  $('s2').className = 'step' + (S.mpp ? ' done' : S.img ? ' active' : '');
+  $('s3').className = 'step' + (S.mpp ? ' active' : '');
+  $('s4').className = 'step' + (S.mpp ? ' active' : '');
+  $('go').disabled = !S.mpp;
+}
+
+/* ── PDF writer ────────────────────────────────────────────────────────── */
+// PDF strings are single-byte, so fold anything above Latin-1 down first —
+// otherwise a character like an em dash would be written as a stray control byte.
+const esc = s => String(s)
+  .replace(/[‐-―−]/g,'-')
+  .replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
+  .replace(/×/g,'x').replace(/[    ]/g,' ')
+  .replace(/[^\x20-\x7E\xA1-\xFF]/g,'')
+  .replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
+
+function pageContent(page, W, H, o){
+  let s = 'q\n' + r4(W) + ' 0 0 ' + r4(H) + ' 0 0 cm\n/Im0 Do\nQ\n';
+
+  if(o.marks){
+    const L = 8*PT_MM, T = 5*PT_MM;
+    const segs = [
+      [[0,L],[0,0],[L,0]],
+      [[W-L,0],[W,0],[W,L]],
+      [[W,H-L],[W,H],[W-L,H]],
+      [[L,H],[0,H],[0,H-L]],
+      [[W/2,0],[W/2,T]], [[W/2,H],[W/2,H-T]],
+      [[0,H/2],[T,H/2]], [[W,H/2],[W-T,H/2]]
+    ];
+    const path = segs.map(pts => pts.map((p,i) => r4(p[0])+' '+r4(p[1])+' '+(i?'l':'m')).join('\n')).join('\n');
+    s += '1 1 1 RG 2.4 w 1 J 1 j\n' + path + '\nS\n';
+    s += '0 0 0 RG 0.7 w\n' + path + '\nS\n';
+  }
+
+  if(o.labels && page.label){
+    const fs = 8, m = 5*PT_MM;
+    const tw = page.label.length*fs*0.55 + 9, th = fs + 6;
+    s += '1 1 1 rg\n' + r4(m)+' '+r4(m)+' '+r4(tw)+' '+r4(th)+' re f\n';
+    s += '0 0 0 rg\nBT /F1 '+fs+' Tf '+r4(m+4.5)+' '+r4(m+5)+' Td ('+esc(page.label)+') Tj ET\n';
+  }
+  return s;
+}
+
+function buildPDF(pages, mm, o){
+  const W = mm.w*PT_MM, H = mm.h*PT_MM;
+  const chunks = []; let len = 0;
+  const out = s => { chunks.push(s); len += s.length; };
+  const off = [];
+  const obj = (n, body) => { off[n] = len; out(n+' 0 obj\n'+body+'\nendobj\n'); };
+
+  out('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');   // binary marker, written as escapes so the file's own encoding cannot corrupt it
+
+  const N = pages.length;
+  const pgN = i => 4 + i*3, ctN = i => 5 + i*3, imN = i => 6 + i*3;
+  const infoN = 4 + N*3;
+
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, '<< /Type /Pages /Count '+N+' /Kids ['+pages.map((_,i)=>pgN(i)+' 0 R').join(' ')+'] >>');
+  obj(3, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+
+  pages.forEach((p,i) => {
+    obj(pgN(i),
+      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+r4(W)+' '+r4(H)+']'
+      + ' /Resources << /XObject << /Im0 '+imN(i)+' 0 R >> /Font << /F1 3 0 R >> >>'
+      + ' /Contents '+ctN(i)+' 0 R >>');
+
+    const cs = pageContent(p, W, H, o);
+    off[ctN(i)] = len;
+    out(ctN(i)+' 0 obj\n<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream\nendobj\n');
+
+    off[imN(i)] = len;
+    out(imN(i)+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+p.w+' /Height '+p.h
+      + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+p.jpeg.length
+      + ' >>\nstream\n'+p.jpeg+'\nendstream\nendobj\n');
+  });
+
+  obj(infoN, '<< /Title ('+esc(o.title)+') /Creator (planemat) /Producer (planemat) >>');
+
+  const size = infoN + 1, xref = len;
+  let x = 'xref\n0 '+size+'\n0000000000 65535 f \n';
+  for(let n=1;n<size;n++) x += String(off[n]).padStart(10,'0') + ' 00000 n \n';
+  out(x);
+  out('trailer\n<< /Size '+size+' /Root 1 0 R /Info '+infoN+' 0 R >>\nstartxref\n'+xref+'\n%%EOF\n');
+
+  const bytes = new Uint8Array(len);
+  let k = 0;
+  for(const s of chunks) for(let i=0;i<s.length;i++) bytes[k++] = s.charCodeAt(i) & 0xFF;
+  return bytes;
+}
+
+/* ── export ────────────────────────────────────────────────────────────── */
+const tick = () => new Promise(r => setTimeout(r, 0));
+
+$('go').onclick = async () => {
+  if(!S.mpp || !S.img) return;
+  const g = grid(), sM = sheetM(), sMM = sheetMM();
+  const dpi = +$('dpi').value, q = +$('qual').value;
+  const pxW = Math.round(sMM.w/MM_IN*dpi), pxH = Math.round(sMM.h/MM_IN*dpi);
+  const total = g.cols*g.rows;
+
+  $('busy').classList.add('on');
+  await tick();
+
+  const cvo = document.createElement('canvas');
+  cvo.width = pxW; cvo.height = pxH;
+  const c = cvo.getContext('2d');
+  c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+
+  // the tiled area is centred on the crop
+  const totW = g.cols*sM.w, totH = g.rows*sM.h;
+  const s = pxW / (sM.w / S.mpp);          // output px per source px
+  const pages = [];
+
+  try{
+    for(let r=0;r<g.rows;r++) for(let col=0;col<g.cols;col++){
+      const n = r*g.cols + col + 1;
+      $('busytxt').textContent = 'Rendering sheet ' + n + ' of ' + total + '…';
+      $('busybar').style.width = ((n-1)/total*100) + '%';
+      await tick();
+
+      // tile centre, in crop-local metres → image pixels
+      const lu = -totW/2 + (col + 0.5)*sM.w;
+      const lv = -totH/2 + (r   + 0.5)*sM.h;
+      const [dx,dy] = rot(lu/S.mpp, lv/S.mpp, S.crop.rot);
+      const Cx = S.crop.cx + dx, Cy = S.crop.cy + dy;
+
+      c.setTransform(1,0,0,1,0,0);
+      c.fillStyle = '#ffffff'; c.fillRect(0,0,pxW,pxH);
+      c.translate(pxW/2, pxH/2);
+      c.scale(s, s);
+      c.rotate(-S.crop.rot);
+      c.translate(-Cx, -Cy);
+      c.drawImage(S.img, 0, 0);
+
+      const b64 = cvo.toDataURL('image/jpeg', q).split(',')[1];
+      pages.push({ jpeg: atob(b64), w: pxW, h: pxH,
+                   label: 'R'+(r+1)+'C'+(col+1)+'  1:400' });
+      await tick();
+    }
+
+    $('busytxt').textContent = 'Writing PDF…';
+    $('busybar').style.width = '100%';
+    await tick();
+
+    const title = (S.name || 'airport') + ' — 1:400 mat, ' + fmt(S.crop.w,1) + ' × ' + fmt(S.crop.h,1) + ' m';
+    const bytes = buildPDF(pages, sMM, {
+      marks: $('marks').checked, labels: $('labels').checked && total > 1, title
+    });
+
+    const url = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'}));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (S.name || 'airport') + '_1-400_' + g.cols + 'x' + g.rows + '.pdf';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 20000);
+  } catch(err){
+    alert('Export failed: ' + err.message);
+  } finally {
+    $('busy').classList.remove('on');
+    $('busybar').style.width = '0%';
+  }
+};
+
+/* ── boot ──────────────────────────────────────────────────────────────── */
+resize(); sync();
+</script>
+</body>
+</html>
