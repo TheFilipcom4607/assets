@@ -1,18 +1,18 @@
 /* Cache-first for the handful of files this app is made of, so it still works
    in a kitchen with bad wifi. Bump CACHE when any of them change. */
 
-const CACHE = 'popcorn-ear-v1';
+const CACHE = 'popcorn-ear-v2';
 const ASSETS = [
-  './',
-  'index.html',
-  'styles.css',
-  'detector.js',
-  'app.js',
-  'manifest.json',
-  'icons/icon-180.png',
-  'icons/icon-192.png',
-  'icons/icon-512.png',
-  'icons/icon-maskable-512.png',
+  '/popcorn/',
+  '/popcorn/index.html',
+  '/popcorn/styles.css',
+  '/popcorn/detector.js',
+  '/popcorn/app.js',
+  '/popcorn/manifest.json',
+  '/popcorn/icons/icon-180.png',
+  '/popcorn/icons/icon-192.png',
+  '/popcorn/icons/icon-512.png',
+  '/popcorn/icons/icon-maskable-512.png',
 ];
 
 self.addEventListener('install', (e) => {

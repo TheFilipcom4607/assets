@@ -556,6 +556,7 @@ function drawGraph(now) {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('/popcorn/sw.js', { scope: '/popcorn/' })
+      .catch(() => {});
   });
 }

@@ -33,11 +33,22 @@ const MIME = {
   '.css': 'text/css', '.json': 'application/json', '.png': 'image/png',
 };
 
+/* Mounts the app at /popcorn/, exactly as it is deployed, and — like Vercel —
+   serves /popcorn (no trailing slash) without redirecting to /popcorn/. That
+   combination is what breaks relative asset URLs, so the test has to reproduce
+   it: anything outside /popcorn/ 404s here just as it does in production. */
 function serve(dir) {
   return new Promise((resolve) => {
     const server = createServer(async (req, res) => {
       let p = decodeURIComponent(req.url.split('?')[0]);
-      if (p.endsWith('/')) p += 'index.html';
+      if (p === '/popcorn' || p === '/popcorn/') {
+        p = '/index.html';
+      } else if (p.startsWith('/popcorn/')) {
+        p = p.slice('/popcorn'.length);
+      } else {
+        res.writeHead(404).end('not found');
+        return;
+      }
       const file = join(dir, normalize(p).replace(/^(\.\.[/\\])+/, ''));
       try {
         const body = await readFile(file);
@@ -71,7 +82,8 @@ const lastPop = popTimes[popTimes.length - 1];
 console.log(`  ${popTimes.length} pops, last one at ${lastPop.toFixed(1)}s`);
 
 const server = await serve(ROOT);
-const url = `http://127.0.0.1:${server.address().port}/`;
+// Deliberately without the trailing slash — the way it actually gets opened.
+const url = `http://127.0.0.1:${server.address().port}/popcorn`;
 
 const browser = await chromium.launch({
   args: [
@@ -91,8 +103,24 @@ const consoleErrors = [];
 page.on('pageerror', (e) => consoleErrors.push(String(e)));
 page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
 
+const badResponses = [];
+page.on('response', (r) => {
+  if (r.status() >= 400) badResponses.push(`${r.status()} ${r.url()}`);
+});
+
 console.log(`running the page for up to ${DURATION}s…`);
 await page.goto(url);
+
+// Everything the page asks for must resolve, and the stylesheet must actually
+// have taken effect — an unstyled page still "works" enough to fool a smoke
+// test, because without CSS every screen is visible at once.
+const cssApplied = await page.evaluate(() =>
+  getComputedStyle(document.getElementById('screen-listen')).display === 'none');
+
+console.log('\n── loading');
+check('every asset loaded', badResponses.length === 0, badResponses.slice(0, 5).join(' | '));
+check('stylesheet applied', cssApplied);
+check('manifest resolves', (await page.request.get(url + '/manifest.json')).ok());
 
 await page.click('#btn-start');
 await page.waitForSelector('#screen-listen.is-active', { timeout: 10000 });
@@ -137,6 +165,7 @@ if (alertAt !== null) {
 }
 
 check('no console or page errors', consoleErrors.length === 0, consoleErrors.slice(0, 3).join(' | '));
+check('nothing 404d over the whole run', badResponses.length === 0, badResponses.slice(0, 5).join(' | '));
 
 await browser.close();
 server.close();

@@ -2,16 +2,34 @@
   "name": "Popcorn Ear",
   "short_name": "Popcorn",
   "description": "Listens to your microwave and tells you out loud when the popcorn is done.",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/popcorn/",
+  "scope": "/popcorn/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#16110b",
   "theme_color": "#16110b",
-  "categories": ["utilities", "food"],
+  "categories": [
+    "utilities",
+    "food"
+  ],
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/popcorn/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/popcorn/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/popcorn/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

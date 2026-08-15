@@ -7,6 +7,13 @@ when to stop the microwave.
 Lives at `/popcorn/` on the site. No build step, no dependencies, no backend —
 the audio never leaves the page.
 
+**Asset URLs are absolute (`/popcorn/styles.css`, not `styles.css`) and have to
+stay that way.** The host serves `/popcorn` without redirecting to `/popcorn/`,
+so relative URLs resolve against the site root and every asset 404s — the page
+renders as unstyled HTML with all four screens stacked on top of each other. If
+this app ever moves to a different path, `index.html`, `manifest.json`, `sw.js`,
+and the `serviceWorker.register` call in `app.js` all need updating together.
+
 ## How it decides
 
 **Hearing a pop.** A running microwave is loud, but it's loud in a steady,
@@ -74,6 +81,13 @@ when the recording ends.
 `test-browser.mjs` runs the actual page in Chromium with that audio piped in as
 a fake microphone, covering the parts the offline test can't: the getUserMedia
 constraints, the analyser, the rAF loop, the screens, and the feedback loop.
+
+Its server mirrors production rather than serving the folder as the site root:
+the app is mounted at `/popcorn/`, requests outside that prefix 404, and
+`/popcorn` is served *without* redirecting to `/popcorn/`. The test then asserts
+that nothing 404s and that the stylesheet actually took effect — an unstyled
+page still passes a naive smoke test, since without CSS every screen is visible
+at once rather than hidden.
 
 `tools/make-icons.mjs` regenerates the PWA icons (hand-rasterised and written
 with `zlib`, since no image library is available here).
