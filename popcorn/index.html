@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Popcorn Ear</title>
+<meta name="description" content="Listens to your microwave and tells you out loud when the popcorn is done.">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16110b">
+<meta name="color-scheme" content="dark">
+
+<!-- Home Screen install: the old Apple name plus the standardised one. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Popcorn Ear">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── Setup ─────────────────────────────────────────────────────────────── -->
+<section id="screen-setup" class="screen is-active">
+  <header class="brand">
+    <div class="brand-mark" aria-hidden="true">🍿</div>
+    <h1>Popcorn Ear</h1>
+    <p class="tagline">I listen to the pops and tell you out loud when to stop the microwave.</p>
+  </header>
+
+  <ol class="steps">
+    <li>Put the phone <strong>1–2 feet from the microwave</strong>, screen up.</li>
+    <li>Flip the <strong>ringer switch on</strong> and turn the volume up — iPhones mute web audio when the switch is off.</li>
+    <li>Tap start, then start the microwave. Leave this screen open.</li>
+  </ol>
+
+  <button id="btn-start" class="btn btn-primary btn-huge">Start listening</button>
+  <p id="setup-error" class="error" hidden></p>
+
+  <details class="disclosure">
+    <summary>Settings</summary>
+    <div class="setting">
+      <label for="patience">When to call it</label>
+      <input type="range" id="patience" min="0" max="1" step="0.05" value="0.5">
+      <div class="setting-scale"><span>Sooner<br><small>less burnt</small></span><span>Later<br><small>fewer unpopped</small></span></div>
+      <p class="hint" id="patience-hint"></p>
+    </div>
+    <div class="setting">
+      <label for="sensitivity">Microphone sensitivity</label>
+      <input type="range" id="sensitivity" min="0" max="1" step="0.05" value="0.5">
+      <div class="setting-scale"><span>Only loud pops</span><span>Faint pops</span></div>
+      <p class="hint">Leave this alone unless the pop counter stays at zero (raise it) or races up before the microwave is even hot (lower it).</p>
+    </div>
+    <div class="setting setting-row">
+      <label for="chime">Chime before speaking</label>
+      <input type="checkbox" id="chime" checked>
+    </div>
+    <p class="hint">Your settings are remembered on this phone.</p>
+  </details>
+
+  <p class="footnote">Everything runs on your phone. No audio is recorded, stored, or sent anywhere.</p>
+</section>
+
+<!-- ── Listening ─────────────────────────────────────────────────────────── -->
+<section id="screen-listen" class="screen">
+  <div class="status-wrap">
+    <p id="phase" class="phase">Warming up…</p>
+    <p id="phase-sub" class="phase-sub">Start the microwave now.</p>
+  </div>
+
+  <div class="dial">
+    <div id="rate-big" class="rate-big">0.0</div>
+    <div class="rate-unit">pops / second</div>
+  </div>
+
+  <canvas id="graph" class="graph" height="130" aria-label="Pop rate over time"></canvas>
+
+  <div class="readouts">
+    <div class="readout"><span id="total-pops">0</span><small>pops</small></div>
+    <div class="readout"><span id="elapsed">0:00</span><small>elapsed</small></div>
+    <div class="readout"><span id="gap">—</span><small>since last pop</small></div>
+  </div>
+
+  <div class="meter" aria-hidden="true">
+    <div class="meter-label">mic</div>
+    <div class="meter-track"><div id="meter-fill" class="meter-fill"></div><div class="meter-mark"></div></div>
+  </div>
+
+  <p id="listen-warning" class="warn" hidden></p>
+
+  <div class="listen-actions">
+    <button id="btn-test-voice" class="btn btn-ghost">Test the voice</button>
+    <button id="btn-cancel" class="btn btn-ghost">Stop listening</button>
+  </div>
+  <p class="footnote">Keep this screen open — iOS shuts the microphone off if you lock the phone or switch apps.</p>
+</section>
+
+<!-- ── Alert ─────────────────────────────────────────────────────────────── -->
+<section id="screen-alert" class="screen screen-alert">
+  <div class="alert-inner">
+    <div class="alert-emoji" aria-hidden="true">🍿</div>
+    <h2 id="alert-title">Stop the microwave</h2>
+    <p id="alert-sub">Pops have died down.</p>
+    <button id="btn-got-it" class="btn btn-alert btn-huge">Got it</button>
+  </div>
+</section>
+
+<!-- ── Done ──────────────────────────────────────────────────────────────── -->
+<section id="screen-done" class="screen">
+  <h2>How did it turn out?</h2>
+  <p class="tagline">This tunes the timing for next time.</p>
+  <div class="feedback">
+    <button class="btn btn-feedback" data-verdict="early"><strong>Too many unpopped</strong><span>call it later next time</span></button>
+    <button class="btn btn-feedback" data-verdict="good"><strong>Just right</strong><span>keep this timing</span></button>
+    <button class="btn btn-feedback" data-verdict="late"><strong>Scorched</strong><span>call it sooner next time</span></button>
+  </div>
+  <button id="btn-again" class="btn btn-ghost">Skip</button>
+  <p id="done-summary" class="footnote"></p>
+</section>
+
+<script src="detector.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
