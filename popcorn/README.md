@@ -14,6 +14,37 @@ renders as unstyled HTML with all four screens stacked on top of each other. If
 this app ever moves to a different path, `index.html`, `manifest.json`, `sw.js`,
 and the `serviceWorker.register` call in `app.js` all need updating together.
 
+## The iOS rule that shapes the whole app
+
+**iOS will not let a page capture and play at the same time.** The moment any
+sound comes out of the speaker — a chime, a spoken phrase, anything — the
+`MediaStreamAudioSourceNode` feeding the analyser goes silent, permanently.
+
+Nothing in the API reports this. The track still reads `live`, the
+`AudioContext` still reads `running`, and the analyser just returns digital
+silence forever. Since "no pops" is indistinguishable from "the bag finished",
+the app would then flash the alert with no sound behind it.
+
+Three consequences run through the code:
+
+- **Silent while listening.** Nothing that used to be announced mid-run is
+  spoken; it's shown on screen instead. Output has its own `AudioContext`,
+  separate from the capture one, and `tone()`/`speak()` refuse to run while
+  capture is live — bumping `popcornDebug.audioWhileCapturing`, which the
+  browser test asserts stays at zero.
+- **The microphone is released before it speaks.** `triggerAlert` tears down
+  capture first, so the voice comes out of a clean playback session.
+- **A watchdog.** iOS still kills capture on its own — a notification, Siri, a
+  route change. If the band goes exactly zero for 2 seconds (a real room never
+  does), the graph is rebuilt from scratch. Because the dropout leaves a hole in
+  the pop record that reads as "gone quiet", `suspendDecisions()` then blocks
+  any stop call until the 8-second window has refilled. After three failed
+  recoveries it raises the alert rather than sitting there deaf.
+
+Speech synthesis is also unreliable in an iOS Home Screen web app: it accepts an
+utterance and never speaks it, without firing `onerror`. So `speak()` starts a
+900 ms timer and falls back to a loud alarm tone if `onstart` never arrives.
+
 ## How it decides
 
 **Hearing a pop.** A running microwave is loud, but it's loud in a steady,
@@ -74,9 +105,9 @@ were still to come when the alarm fired.
 `AnalyserNode` (same Blackman window, FFT size, and hop the browser uses) and
 into the real `detector.js`. It covers a typical bag, quiet pops, a loud
 microwave, a weak bag that never gets vigorous, a bag with a lull in the middle,
-both ends of the patience slider, and negative cases that must *never* fire — a
-microwave running with no popcorn, a silent room, and a bag still popping hard
-when the recording ends.
+both ends of the patience slider, a 4-second microphone dropout mid-run, and
+negative cases that must *never* fire — a microwave running with no popcorn, a
+silent room, and a bag still popping hard when the recording ends.
 
 `test-browser.mjs` runs the actual page in Chromium with that audio piped in as
 a fake microphone, covering the parts the offline test can't: the getUserMedia
@@ -95,8 +126,9 @@ with `zlib`, since no image library is available here).
 ## iPhone notes
 
 - **Ringer switch on, volume up.** Safari silences web audio when the phone is
-  on silent. The "Test the voice" button on the listening screen exists so you
-  can check this with the mic already running.
+  on silent. "Test the voice first" on the setup screen checks this before you
+  commit a bag to it — it lives there, not on the listening screen, because
+  playing anything mid-run is exactly what breaks capture.
 - **Leave the screen open.** iOS cuts the microphone when you lock the phone or
   switch apps. The app takes a screen wake lock, and warns you on-screen if it
   detects it was throttled and may have missed pops.

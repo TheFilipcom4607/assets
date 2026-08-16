@@ -81,7 +81,8 @@ function frameToDb(audio, end, out) {
 /* ── Harness ──────────────────────────────────────────────────────────────── */
 
 function run({ label, popAmp = 0.45, bgAmp = 0.12, seed = 1, patience = 0.5,
-               sensitivity = 0.5, curve = DEFAULT_RATE_CURVE, durationSec = 70 }) {
+               sensitivity = 0.5, curve = DEFAULT_RATE_CURVE, durationSec = 70,
+               deafFrom = 0, deafSec = 0 }) {
   const { audio, popTimes } = synth({ durationSec, curve, seed, bgAmp, popAmp });
 
   const detector = new PopDetector(SAMPLE_RATE, FFT_SIZE);
@@ -93,8 +94,29 @@ function run({ label, popAmp = 0.45, bgAmp = 0.12, seed = 1, patience = 0.5,
   const events = [];
   let detected = 0;
 
+  let deafHandled = false;
+
   for (let end = HOP; end < audio.length; end += HOP) {
     const nowMs = (end / SAMPLE_RATE) * 1000;
+    const t = nowMs / 1000;
+
+    // Simulates iOS killing the capture graph: the analyser keeps being polled
+    // and keeps returning nothing, exactly as it does on a real phone.
+    const deaf = deafSec > 0 && t >= deafFrom && t < deafFrom + deafSec;
+    if (deaf) {
+      deafHandled = true;
+      const ev = session.update(nowMs);
+      if (ev) events.push({ t, ...ev });
+      continue;
+    }
+    if (deafHandled) {
+      // What the app does on recovery: rebuild, and refuse to judge the bag
+      // until the decision window has refilled with real data.
+      deafHandled = false;
+      detector.resetContinuity();
+      session.suspendDecisions(nowMs, PopSession.SLOW_WINDOW_MS);
+    }
+
     frameToDb(audio, end, db);
     if (detector.process(db, nowMs)) { session.addPop(nowMs); detected++; }
     const ev = session.update(nowMs);
@@ -145,6 +167,13 @@ results.push(report(run({
   label: 'weak bag (peaks at ~4 pops/s)',
   curve: [[0, 0], [8, 0.3], [20, 3], [34, 4], [48, 2], [58, 0.4], [64, 0.05], [75, 0]],
   durationSec: 75,
+})));
+
+// A microphone dropout at the height of the popping. Deafness looks exactly
+// like silence, so without the decision hold this calls the bag done early.
+results.push(report(run({
+  label: 'mic dropout for 4s mid-run',
+  deafFrom: 28, deafSec: 4,
 })));
 
 // A bag with a real lull in the middle — the classic false-stop trap.

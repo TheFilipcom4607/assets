@@ -1,7 +1,21 @@
 'use strict';
 
 /* Popcorn Ear — listens to the microwave and says out loud when to stop it.
-   Everything is local: the mic stream never leaves the AudioContext. */
+   Everything is local: the mic stream never leaves the AudioContext.
+
+   ── The one rule that shapes this whole file ──────────────────────────────
+   iOS will not let a page capture and play at the same time. The moment any
+   sound comes out of the speaker — a chime, a spoken phrase, anything — the
+   MediaStreamAudioSourceNode feeding the analyser goes silent, permanently,
+   and no pop is ever heard again. Nothing in the API reports this: the track
+   still says "live", the AudioContext still says "running", the analyser just
+   returns silence forever.
+
+   So: the app makes no sound at all while it is listening, and it releases the
+   microphone *before* it speaks. Everything that used to be announced during
+   the run is now shown on screen instead. There is also a watchdog, because
+   iOS can kill capture on its own (a notification, Siri, a route change), and
+   a silent detector looks exactly like a bag that stopped popping.  */
 
 const $ = (id) => document.getElementById(id);
 
@@ -18,6 +32,8 @@ const el = {
   patienceHint: $('patience-hint'),
   sensitivity: $('sensitivity'),
   chime: $('chime'),
+  speakWarning: $('speak-warning'),
+  testVoice: $('btn-test-voice'),
 
   phase: $('phase'),
   phaseSub: $('phase-sub'),
@@ -28,7 +44,6 @@ const el = {
   gap: $('gap'),
   meterFill: $('meter-fill'),
   listenWarning: $('listen-warning'),
-  testVoice: $('btn-test-voice'),
   cancel: $('btn-cancel'),
 
   alertTitle: $('alert-title'),
@@ -40,24 +55,39 @@ const el = {
 };
 
 const settings = loadSettings();
-let ctx = null;
+let session = new PopSession(settings.patience);
+
+// Capture side.
+let capCtx = null;
 let stream = null;
 let analyser = null;
 let freqData = null;
 let detector = null;
-let session = new PopSession(settings.patience);
+let capturing = false;
+let recovering = false;
+let recoveries = 0;
+const MAX_RECOVERIES = 3;
+
 let rafId = 0;
-let running = false;
 let lastFrameAt = 0;
+let silentSince = 0;
 let stallReported = false;
+
 let alertTimer = 0;
 let alertRepeats = 0;
 let outcome = null;
 
+/* Visible in the console, so a problem on a real phone can be reported without
+   guessing. `audioWhileCapturing` must stay at 0 — anything else means we broke
+   the rule above. */
+const debug = { audioWhileCapturing: 0, micStalls: 0, recoveries: 0, spoke: 0, ttsFallbacks: 0 };
+Object.defineProperty(debug, 'capturing', { get: () => capturing });
+window.popcornDebug = debug;
+
 /* ── Settings ─────────────────────────────────────────────────────────────── */
 
 function loadSettings() {
-  const defaults = { patience: 0.5, sensitivity: 0.5, chime: true };
+  const defaults = { patience: 0.5, sensitivity: 0.5, chime: true, speakWarning: false };
   try {
     return Object.assign(defaults, JSON.parse(localStorage.getItem('popcorn-ear') || '{}'));
   } catch {
@@ -79,6 +109,7 @@ function describePatience() {
 el.patience.value = settings.patience;
 el.sensitivity.value = settings.sensitivity;
 el.chime.checked = settings.chime;
+el.speakWarning.checked = settings.speakWarning;
 describePatience();
 
 el.patience.addEventListener('input', () => {
@@ -96,6 +127,10 @@ el.chime.addEventListener('change', () => {
   settings.chime = el.chime.checked;
   saveSettings();
 });
+el.speakWarning.addEventListener('change', () => {
+  settings.speakWarning = el.speakWarning.checked;
+  saveSettings();
+});
 
 /* ── Screens ──────────────────────────────────────────────────────────────── */
 
@@ -106,60 +141,27 @@ function show(name) {
   window.scrollTo(0, 0);
 }
 
-/* ── Voice ────────────────────────────────────────────────────────────────── */
+/* ── Sound out ────────────────────────────────────────────────────────────── */
 
-/* The phone's own speaker is right next to the mic, so anything we say lands
-   back in the detector as a fake pop. We hold detection off while talking. */
-let speaking = false;
-let speakingClearTimer = 0;
+/* Output gets its own AudioContext, entirely separate from the capture one, and
+   is only ever used while capture is stopped. */
+let outCtx = null;
 
-function speak(text) {
-  const synth = window.speechSynthesis;
-  if (!synth) { fallbackTone(); return; }
-
-  // Rough guess at how long the phrase takes, so detection resumes even if the
-  // utterance callbacks never fire (they occasionally don't on iOS).
-  const estimateMs = Math.max(1800, text.length * 90);
-  holdDetection(estimateMs);
-
+function outputContext() {
   try {
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.0;
-    u.pitch = 1.0;
-    u.volume = 1.0;
-    u.lang = 'en-US';
-    u.onstart = () => holdDetection(estimateMs);
-    u.onend = () => holdDetection(400);
-    u.onerror = () => { holdDetection(300); fallbackTone(); };
-    synth.resume();
-    synth.speak(u);
+    if (!outCtx || outCtx.state === 'closed') {
+      outCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (outCtx.state === 'suspended') outCtx.resume().catch(() => {});
+    return outCtx;
   } catch {
-    fallbackTone();
+    return null;
   }
 }
 
-function holdDetection(ms) {
-  speaking = true;
-  clearTimeout(speakingClearTimer);
-  speakingClearTimer = setTimeout(() => {
-    speaking = false;
-    if (detector) detector.resetContinuity();
-  }, ms);
-}
-
-/* Short attention chime, so the first syllable of the voice isn't lost under a
-   running microwave. Also the fallback if speech synthesis is missing. */
-function chime() {
-  if (!settings.chime) return;
-  tone([880, 1320], 0.16, 0.35);
-}
-
-function fallbackTone() {
-  tone([880, 1200, 880, 1200], 0.18, 0.5);
-}
-
 function tone(freqs, step, gainValue) {
+  if (capturing) { debug.audioWhileCapturing++; return; }
+  const ctx = outputContext();
   if (!ctx) return;
   try {
     const t0 = ctx.currentTime + 0.02;
@@ -176,15 +178,57 @@ function tone(freqs, step, gainValue) {
       osc.start(start);
       osc.stop(start + step);
     });
-    holdDetection(freqs.length * step * 1000 + 500);
   } catch {}
+}
+
+function chime() {
+  if (!settings.chime) return;
+  tone([880, 1320], 0.16, 0.4);
+}
+
+/* Backup for when speech synthesis silently refuses — which is exactly what
+   happens in an iOS Home Screen web app. */
+function alarmTone() {
+  debug.ttsFallbacks++;
+  tone([784, 1046, 784, 1046, 784, 1046], 0.22, 0.6);
+}
+
+function speak(text) {
+  if (capturing) { debug.audioWhileCapturing++; return; }
+  const synth = window.speechSynthesis;
+  if (!synth) { alarmTone(); return; }
+
+  let started = false;
+  try {
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    u.lang = 'en-US';
+    u.onstart = () => { started = true; debug.spoke++; };
+    u.onerror = () => { if (!started) alarmTone(); };
+    synth.resume();
+    synth.speak(u);
+  } catch {
+    alarmTone();
+    return;
+  }
+
+  // iOS home-screen web apps will accept an utterance and then never speak it,
+  // without firing onerror. If nothing has started by now, make a noise instead.
+  setTimeout(() => { if (!started) alarmTone(); }, 900);
 }
 
 function announce(text) {
   chime();
-  // Let the chime clear before the voice starts.
   setTimeout(() => speak(text), settings.chime ? 380 : 0);
 }
+
+el.testVoice.addEventListener('click', () => {
+  outputContext();
+  announce('This is how loud I will be.');
+});
 
 /* ── Wake lock ────────────────────────────────────────────────────────────── */
 
@@ -206,75 +250,13 @@ function releaseWakeLock() {
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
-  if (!running) return;
+  if (!capturing) return;
   acquireWakeLock();
-  if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+  if (capCtx && capCtx.state === 'suspended') capCtx.resume().catch(() => {});
   if (detector) detector.resetContinuity();
 });
 
-/* ── Start / stop ─────────────────────────────────────────────────────────── */
-
-el.start.addEventListener('click', async () => {
-  el.setupError.hidden = true;
-  el.start.disabled = true;
-  el.start.textContent = 'Starting…';
-
-  // Both of these must be kicked off inside the tap handler: iOS only unlocks
-  // audio output and speech synthesis from a real user gesture.
-  try {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    await ctx.resume();
-  } catch (err) {
-    fail('Could not start audio on this browser.');
-    return;
-  }
-  speak('Listening for pops.');
-
-  try {
-    stream = await getMic();
-  } catch (err) {
-    fail(micErrorMessage(err));
-    return;
-  }
-
-  const source = ctx.createMediaStreamSource(stream);
-  analyser = ctx.createAnalyser();
-  analyser.fftSize = 1024;
-  analyser.smoothingTimeConstant = 0; // smoothing would erase the transients
-  source.connect(analyser);           // deliberately not connected to output
-
-  freqData = new Float32Array(analyser.frequencyBinCount);
-  detector = new PopDetector(ctx.sampleRate, analyser.fftSize);
-  detector.setSensitivity(settings.sensitivity);
-
-  session.setPatience(settings.patience);
-  session.start(performance.now());
-
-  const track = stream.getAudioTracks()[0];
-  if (track) track.addEventListener('ended', () => {
-    if (running) warn('The microphone was disconnected. Tap “Stop listening” and start again.');
-  });
-
-  running = true;
-  stallReported = false;
-  lastFrameAt = performance.now();
-  el.listenWarning.hidden = true;
-  el.start.disabled = false;
-  el.start.textContent = 'Start listening';
-  setPhase('Warming up…', 'Start the microwave now.');
-  show('listen');
-  acquireWakeLock();
-  sizeGraph();
-  rafId = requestAnimationFrame(loop);
-
-  function fail(msg) {
-    el.setupError.textContent = msg;
-    el.setupError.hidden = false;
-    el.start.disabled = false;
-    el.start.textContent = 'Start listening';
-    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch {}
-  }
-});
+/* ── Microphone ───────────────────────────────────────────────────────────── */
 
 async function getMic() {
   // Safari applies its own noise suppression and gain control by default, both
@@ -307,49 +289,181 @@ function micErrorMessage(err) {
   return 'Could not open the microphone' + (name ? ' (' + name + ').' : '.');
 }
 
-function stopListening() {
-  running = false;
-  cancelAnimationFrame(rafId);
-  clearInterval(alertTimer);
-  releaseWakeLock();
-  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch {}
+async function openCapture() {
+  stream = await getMic();
+  capCtx = new (window.AudioContext || window.webkitAudioContext)();
+  await capCtx.resume();
+
+  const source = capCtx.createMediaStreamSource(stream);
+  analyser = capCtx.createAnalyser();
+  analyser.fftSize = 1024;
+  analyser.smoothingTimeConstant = 0; // smoothing would erase the transients
+  source.connect(analyser);           // never connected to destination
+
+  freqData = new Float32Array(analyser.frequencyBinCount);
+  detector = new PopDetector(capCtx.sampleRate, analyser.fftSize);
+  detector.setSensitivity(settings.sensitivity);
+
+  capturing = true;
+  silentSince = 0;
+
+  const track = stream.getAudioTracks()[0];
+  if (track) {
+    track.addEventListener('ended', () => { if (capturing) recoverMic(); });
+  }
+}
+
+function closeCapture() {
+  capturing = false;
   if (stream) stream.getTracks().forEach((t) => t.stop());
   stream = null;
-  if (ctx) { ctx.close().catch(() => {}); ctx = null; }
+  if (capCtx) { capCtx.close().catch(() => {}); capCtx = null; }
   analyser = null;
   detector = null;
+  freqData = null;
+}
+
+/* iOS kills capture for reasons of its own. A dead analyser returns digital
+   silence — indistinguishable from a bag that finished — so rebuild rather than
+   quietly mis-decide. */
+async function recoverMic() {
+  if (!capturing || recovering) return;
+  recovering = true;
+  debug.micStalls++;
+
+  // If we genuinely cannot hear any more, say so rather than sitting there
+  // silently — a deaf detector and a finished bag look identical from here.
+  if (recoveries >= MAX_RECOVERIES) {
+    recovering = false;
+    outcome = 'mic-lost';
+    triggerAlert('Lost the microphone', 'I can no longer hear the microwave — go and check it.');
+    return;
+  }
+  recoveries++;
+
+  closeCapture();
+  try {
+    await openCapture();
+    debug.recoveries++;
+    // The window now has a hole in it; do not judge the bag until it refills.
+    session.suspendDecisions(performance.now(), PopSession.SLOW_WINDOW_MS);
+    silentSince = 0;
+    lastFrameAt = performance.now();
+    warn('The microphone dropped out for a moment — restarted it, still listening.');
+  } catch (err) {
+    warn(micErrorMessage(err));
+  }
+  recovering = false;
+}
+
+/* ── Start / stop ─────────────────────────────────────────────────────────── */
+
+el.start.addEventListener('click', async () => {
+  el.setupError.hidden = true;
+  el.start.disabled = true;
+  el.start.textContent = 'Starting…';
+
+  // Unlock audio output inside the tap, which is the only time iOS allows it —
+  // and get the priming utterance over with *before* the mic opens, so the two
+  // never overlap.
+  outputContext();
+  await primeSpeech();
+
+  try {
+    await openCapture();
+  } catch (err) {
+    el.setupError.textContent = micErrorMessage(err);
+    el.setupError.hidden = false;
+    el.start.disabled = false;
+    el.start.textContent = 'Start listening';
+    closeCapture();
+    return;
+  }
+
+  session.setPatience(settings.patience);
+  session.start(performance.now());
+
+  recoveries = 0;
+  stallReported = false;
+  lastFrameAt = performance.now();
+  el.listenWarning.hidden = true;
+  el.start.disabled = false;
+  el.start.textContent = 'Start listening';
+  setPhase('Warming up…', 'Start the microwave now.');
+  show('listen');
+  acquireWakeLock();
+  sizeGraph();
+  rafId = requestAnimationFrame(loop);
+});
+
+/* Speech synthesis has to be woken by a real user gesture or it stays mute for
+   the rest of the page's life. Wait for it to finish before opening the mic. */
+function primeSpeech() {
+  return new Promise((resolve) => {
+    const synth = window.speechSynthesis;
+    if (!synth) { resolve(); return; }
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    try {
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance('Listening.');
+      u.lang = 'en-US';
+      u.volume = 1.0;
+      u.onstart = () => { debug.spoke++; };
+      u.onend = finish;
+      u.onerror = finish;
+      synth.resume();
+      synth.speak(u);
+    } catch {
+      finish();
+    }
+    setTimeout(finish, 1600);
+  });
+}
+
+function endSession() {
+  cancelAnimationFrame(rafId);
+  rafId = 0;
+  clearInterval(alertTimer);
+  alertTimer = 0;
+  releaseWakeLock();
+  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch {}
+  closeCapture();
 }
 
 el.cancel.addEventListener('click', () => {
-  stopListening();
+  endSession();
   show('setup');
-});
-
-el.testVoice.addEventListener('click', () => {
-  announce('This is how loud I will be.');
 });
 
 /* ── Main loop ────────────────────────────────────────────────────────────── */
 
 function loop() {
-  if (!running) return;
+  if (!capturing && !recovering) { rafId = 0; return; }
   rafId = requestAnimationFrame(loop);
+  if (!analyser || !detector) return; // mid-rebuild
 
   const now = performance.now();
   const dt = now - lastFrameAt;
   lastFrameAt = now;
 
-  // A long stall means iOS throttled us — the detector missed pops in the gap.
   if (dt > 600 && !stallReported && session.phase !== 'warmup') {
     stallReported = true;
     warn('The screen went to sleep for a moment, so I may have missed some pops. Keep this screen open and awake.');
     detector.resetContinuity();
+    session.suspendDecisions(now, PopSession.SLOW_WINDOW_MS);
   }
 
   analyser.getFloatFrequencyData(freqData);
+  if (detector.process(freqData, now)) session.addPop(now);
 
-  if (!speaking && detector.process(freqData, now)) {
-    session.addPop(now);
+  // Digital silence means the capture graph died; a real room is never exactly
+  // zero across the whole band.
+  if (detector.bandMag > 0) {
+    silentSince = 0;
+  } else {
+    if (!silentSince) silentSince = now;
+    if (now - silentSince > 2000) { silentSince = 0; recoverMic(); }
   }
 
   const event = session.update(now);
@@ -361,19 +475,17 @@ function loop() {
 function handleEvent(event) {
   switch (event.type) {
     case 'started':
-      setPhase('Popping', 'I will tell you when to stop.');
-      announce('Popping has started.');
+      // Silent on purpose: speaking here would kill the microphone.
+      setPhase('Popping', 'Listening. I will call out when to stop.');
       break;
 
     case 'warning':
-      setPhase('Slowing down', 'Head to the microwave.');
-      announce('Almost done. Head to the microwave.');
+      setPhase('Slowing down', 'Nearly there — head to the microwave.');
+      if (settings.speakWarning) speakWhileListening('Almost done. Head to the microwave.');
       break;
 
     case 'resumed':
-      // It was only a lull. Say nothing — the screen is enough, and a second
-      // announcement here would just be noise.
-      setPhase('Popping', 'Picked back up. I will tell you when to stop.');
+      setPhase('Popping', 'Picked back up. I will call out when to stop.');
       break;
 
     case 'stop':
@@ -393,7 +505,32 @@ function handleEvent(event) {
   }
 }
 
+/* Opt-in only. Speaking mid-run costs us the microphone, so we hand it back
+   deliberately, say the line, and rebuild — which is why the stop decision is
+   then held until the window has refilled. */
+async function speakWhileListening(text) {
+  closeCapture();
+  announce(text);
+  setTimeout(async () => {
+    if (session.phase === 'done') return;
+    try {
+      await openCapture();
+      session.suspendDecisions(performance.now(), PopSession.SLOW_WINDOW_MS);
+      lastFrameAt = performance.now();
+      if (!rafId) rafId = requestAnimationFrame(loop);
+    } catch {
+      warn('Could not restart the microphone after speaking.');
+    }
+  }, 3000);
+}
+
 function triggerAlert(title, sub) {
+  // Hand the microphone back before making any sound, or iOS routes the voice
+  // into the earpiece and half-swallows it.
+  cancelAnimationFrame(rafId);
+  rafId = 0;
+  closeCapture();
+
   el.alertTitle.textContent = title;
   el.alertSub.textContent = sub;
   show('alert');
@@ -412,13 +549,11 @@ function triggerAlert(title, sub) {
 }
 
 el.gotIt.addEventListener('click', () => {
-  clearInterval(alertTimer);
-  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch {}
   const secs = Math.round((session.lastPopAt - session.startedAt) / 1000);
   el.doneSummary.textContent =
     `${session.totalPops} pops counted · peak ${session.peakRate.toFixed(1)}/s · ` +
     `last pop at ${fmtTime(Math.max(0, secs))}.`;
-  stopListening();
+  endSession();
   show(outcome === 'stop' ? 'done' : 'setup');
 });
 
@@ -466,7 +601,7 @@ function render(now) {
     : '—';
 
   // Centre of the meter is the detection threshold.
-  const meter = Math.min(1, detector.ratio / 2);
+  const meter = detector ? Math.min(1, detector.ratio / 2) : 0;
   el.meterFill.style.width = (meter * 100).toFixed(1) + '%';
 
   drawGraph(now);
@@ -482,11 +617,10 @@ function sizeGraph() {
   graphH = Math.max(1, Math.round(rect.height));
   el.graph.width = graphW * dpr;
   el.graph.height = graphH * dpr;
-  const g = el.graph.getContext('2d');
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  el.graph.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-window.addEventListener('resize', () => { if (running) sizeGraph(); });
+window.addEventListener('resize', () => { if (capturing) sizeGraph(); });
 
 function drawGraph(now) {
   const g = el.graph.getContext('2d');
@@ -500,7 +634,6 @@ function drawGraph(now) {
   const x = (t) => (t / spanMs) * w;
   const y = (r) => h - 6 - (r / yMax) * (h - 16);
 
-  // The level popping has to fall to before we call it.
   if (session.peakRate > 0) {
     const yStop = y(session.peakRate * session.stopRatio);
     g.strokeStyle = 'rgba(70, 209, 127, 0.55)';
@@ -537,7 +670,7 @@ function drawGraph(now) {
   g.stroke();
 }
 
-/* ── Install hint (iOS only shows the mic prompt reliably in Safari) ──────── */
+/* ── Install hint ─────────────────────────────────────────────────────────── */
 
 (function installHint() {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||

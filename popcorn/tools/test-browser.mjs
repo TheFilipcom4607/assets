@@ -142,6 +142,7 @@ try {
 
 const totalPops = parseInt(await page.textContent('#total-pops'), 10) || 0;
 const alertTitle = alertAt ? (await page.textContent('#alert-title')).trim() : '';
+const dbg = await page.evaluate(() => ({ ...window.popcornDebug, capturing: window.popcornDebug.capturing }));
 
 console.log('\n── checks');
 check('alert fired', alertAt !== null);
@@ -152,6 +153,14 @@ if (alertAt !== null) {
   check('alert is not late', alertAt < lastPop + 8, `${(alertAt - lastPop).toFixed(1)}s vs last pop`);
 }
 check('counted a realistic number of pops', totalPops > 60, `${totalPops} counted of ${popTimes.length} real`);
+
+// The rule that keeps the microphone alive on iOS: nothing may be played while
+// capture is running, and capture must be handed back before the alert speaks.
+check('never played a sound while capturing', dbg.audioWhileCapturing === 0,
+  `${dbg.audioWhileCapturing} attempts`);
+check('microphone released before speaking', dbg.capturing === false);
+check('microphone never stalled during the run', dbg.micStalls === 0,
+  `${dbg.micStalls} stalls, ${dbg.recoveries} recoveries`);
 
 // The dismiss → feedback path, since that is what tunes the next run.
 if (alertAt !== null) {

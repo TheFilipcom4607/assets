@@ -34,9 +34,11 @@
     <li>Put the phone <strong>30–60 cm from the microwave</strong>, screen up.</li>
     <li>Flip the <strong>ringer switch on</strong> and turn the volume up — iPhones mute web audio when the switch is off.</li>
     <li>Tap start, then start the microwave. Leave this screen open.</li>
+    <li>It stays <strong>silent while listening</strong> — iOS cuts the microphone off if the page makes any sound — then speaks up when it's time.</li>
   </ol>
 
   <button id="btn-start" class="btn btn-primary btn-huge">Start listening</button>
+  <button id="btn-test-voice" class="btn btn-ghost">Test the voice first</button>
   <p id="setup-error" class="error" hidden></p>
 
   <details class="disclosure">
@@ -56,6 +58,13 @@
     <div class="setting setting-row">
       <label for="chime">Chime before speaking</label>
       <input type="checkbox" id="chime" checked>
+    </div>
+    <div class="setting">
+      <div class="setting-row">
+        <label for="speak-warning">Also speak the early heads-up</label>
+        <input type="checkbox" id="speak-warning">
+      </div>
+      <p class="hint">Says “almost done” a few seconds before the end so you can walk over. Costs a few seconds of deafness, because the microphone has to be handed back and restarted around it — so the final call comes slightly later.</p>
     </div>
     <p class="hint">Your settings are remembered on this phone.</p>
   </details>
@@ -91,7 +100,6 @@
   <p id="listen-warning" class="warn" hidden></p>
 
   <div class="listen-actions">
-    <button id="btn-test-voice" class="btn btn-ghost">Test the voice</button>
     <button id="btn-cancel" class="btn btn-ghost">Stop listening</button>
   </div>
   <p class="footnote">Keep this screen open — iOS shuts the microphone off if you lock the phone or switch apps.</p>

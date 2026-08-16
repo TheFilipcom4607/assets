@@ -202,6 +202,15 @@ class PopSession {
     this.phase = 'warmup';  // warmup | waiting | popping | fading | done
     this.rateTrack = [];    // {t, rate} for the graph
     this._lastTrackAt = 0;
+    this.decisionsBlockedUntil = 0;
+  }
+
+  /* After a microphone dropout there is a hole in the pop record. Judging the
+     stop on a window that contains that hole would read as "gone quiet" and
+     call the bag done early, so decisions are held off until the window has
+     refilled with real data. */
+  suspendDecisions(now, ms) {
+    this.decisionsBlockedUntil = Math.max(this.decisionsBlockedUntil, now + ms);
   }
 
   start(now) {
@@ -241,6 +250,7 @@ class PopSession {
     }
 
     if (this.phase === 'done') return null;
+    if (now < this.decisionsBlockedUntil) return null;
 
     const elapsed = now - this.startedAt;
     const gap = this.lastPopAt ? (now - this.lastPopAt) / 1000 : 0;
@@ -301,6 +311,8 @@ class PopSession {
     return null;
   }
 }
+
+PopSession.SLOW_WINDOW_MS = SLOW_WINDOW_MS;
 
 window.PopDetector = PopDetector;
 window.PopSession = PopSession;

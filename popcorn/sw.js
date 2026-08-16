@@ -1,7 +1,7 @@
 /* Cache-first for the handful of files this app is made of, so it still works
    in a kitchen with bad wifi. Bump CACHE when any of them change. */
 
-const CACHE = 'popcorn-ear-v2';
+const CACHE = 'popcorn-ear-v3';
 const ASSETS = [
   '/popcorn/',
   '/popcorn/index.html',
