@@ -203,6 +203,7 @@ main {
   .source { grid-column: auto; }
   .bar { padding: 12px 14px; }
   .config { margin-left: 0; width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+  .config .field:first-child { grid-column: 1 / -1; }
   .brand-sub { display: none; }
   .status { padding: 10px 14px; }
 }

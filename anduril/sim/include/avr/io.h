@@ -11,6 +11,12 @@
 #define _BV(bit)  (1 << (bit))
 #endif
 
+#ifdef SIM_LEGACY
+// Anduril 1 talks to the chip's registers directly, so it gets a register file
+#include "sim/legacy.h"
+#define EEPROM_SIZE  256      // attiny1634
+#else
+
 // bit positions / masks, in the style the AVR headers use
 #define PIN0_bp 0
 #define PIN1_bp 1
@@ -40,3 +46,5 @@
 
 // avr-libc spells this out for locking down protected registers
 #define _PROTECTED_WRITE(reg, value)  ((reg) = (value))
+
+#endif  // SIM_LEGACY

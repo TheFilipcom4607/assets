@@ -32,7 +32,8 @@
 <p>
   Every build here is produced by compiling
   <a href="https://github.com/ToyKeeper/anduril" target="_blank" rel="noopener">ToyKeeper's Anduril</a>
-  at a released tag, unmodified. Anduril builds as one big translation unit, so
+  at a released tag, unmodified &mdash; including Anduril&nbsp;1, the generation
+  that still ships on Convoy lights. Anduril builds as one big translation unit, so
   the whole firmware — the FSM microkernel, the event decoder, the ramp tables,
   the config menus, thermal regulation, low-voltage protection, the aux LED
   logic, the blinkies — is compiled exactly as it is upstream. When you press
@@ -59,8 +60,15 @@
       step with the wall clock, so a second in here is a second out there.</li>
   <li><strong>The pins.</strong> Older Anduril versions drive the aux LEDs by
       poking port registers directly, so the simulator emulates the pins:
-      set/clear registers, direction, and the internal pull-up that Anduril uses
-      to get a dim "low" out of an LED with no PWM on it.</li>
+      direction, output, set/clear registers, and the internal pull-up that
+      Anduril uses to get a dim "low" out of an LED with no PWM on it.</li>
+  <li><strong>The whole register file, for Anduril&nbsp;1.</strong> That release
+      predates Anduril's hardware abstraction layer: it configures the ADC,
+      watchdog and pin-change interrupt by writing chip registers itself. So the
+      simulator gives it registers to write and reads them back &mdash; starting
+      and stopping the ADC when <code>ADCSRA</code> says to, taking the tick rate
+      from the watchdog prescaler bits, and filling in <code>ADC</code> with
+      what a finished conversion would hold.</li>
   <li><strong>The temperature sensor.</strong> The die heats up as a first-order
       lag toward whatever temperature the current output would settle at, and
       the sensor reports that temperature plus whatever error you dial in. The
@@ -96,6 +104,9 @@
   <li>This matrix covers aux LEDs, button LEDs and the temperature sensor. Tint
       ramping, multi-channel lights and dual-switch (clicky + e-switch) lights
       are not built here.</li>
+  <li>Anduril&nbsp;1 is built for an attiny1634, the part it ran on in lights
+      that had aux LEDs. It counts battery voltage in tenths of a volt where
+      later releases use fiftieths, which the panel accounts for.</li>
 </ul>
 
 <h2>How the builds are made</h2>
@@ -114,6 +125,16 @@
   that implements the same interface as Anduril's <code>arch/attiny1616.c</code>,
   a hardware definition under <code>sim/hw/sim/</code> describing this
   imaginary light, and small stand-ins for the avr-libc headers.
+</p>
+
+<h2>Versions worth comparing</h2>
+<p>
+  Switching the firmware picker changes the behaviour, not just the version
+  string. Anduril&nbsp;1 has muggle mode and goodnight mode and goes straight to
+  turbo on two clicks; Anduril&nbsp;2 replaced muggle mode with the simple UI and
+  added channel modes, smooth steps and the config menus. The state readout names
+  whichever state function is actually running, so the differences are visible as
+  you click.
 </p>
 
 <h2>Credits</h2>

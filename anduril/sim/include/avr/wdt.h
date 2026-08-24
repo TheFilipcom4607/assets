@@ -1,6 +1,8 @@
 // avr/wdt.h: watchdog shim for the web simulator.
 #pragma once
 
+#include <avr/io.h>
+
 #define WDTO_15MS 0
 #define WDTO_30MS 1
 #define WDTO_60MS 2

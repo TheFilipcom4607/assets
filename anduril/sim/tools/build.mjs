@@ -55,7 +55,7 @@ function ledApi(src) {
 //     uint8_t off_state(Event event, uint16_t arg) {
 function stateSources(src) {
   const out = {};
-  for (const dir of ['ui/anduril', 'fsm']) {
+  for (const dir of ['ui/anduril', 'fsm', 'spaghetti-monster/anduril', 'spaghetti-monster']) {
     const abs = path.join(src, dir);
     if (!fs.existsSync(abs)) continue;
     for (const name of fs.readdirSync(abs)) {
@@ -73,23 +73,32 @@ function stateSources(src) {
 // Anduril counted voltage in 1/40 V before r2024 and 1/50 V after.
 function voltScale(src) {
   const f = path.join(src, 'fsm/adc.h');
-  const txt = fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : '';
+  if (!fs.existsSync(f)) return 10;          // Anduril 1 counted tenths of a volt
+  const txt = fs.readFileSync(f, 'utf8');
   const m = txt.match(/#define\s+dV\s+(\d+)/);
   return m ? Number(m[1]) * 10 : 40;
 }
 
-function compile(src, outFile, defines) {
-  const cc = [
+function compile(src, outFile, defines, legacy) {
+  const common = [
     '--target=wasm32', '-Os', '-std=gnu99', '-fgnu89-inline', '-fshort-enums',
     '-fno-strict-aliasing', '-fwrapv',
     '-Wno-int-to-pointer-cast', '-Wno-parentheses-equality', '-Wno-static-in-inline',
     '-nostdlib', '-Wl,--no-entry', '-Wl,--allow-undefined', '-Wl,--export-dynamic',
-    '-DMCUNAME=sim', '-DMCU=0x1616', '-DCFG_H=sim/anduril.h', '-DMODEL_NUMBER="0000"',
-    ...defines,
-    '-I', 'sim/include', '-I', 'sim/hw',
-    '-I', path.join(src, 'ui'), '-I', path.join(src, 'hw'), '-I', src,
-    '-o', outFile, 'sim/sim_main.c',
+    ...defines, '-I', 'sim/include',
   ];
+  // Anduril 1 has no arch/ layer and a different source tree, so it gets its
+  // own translation unit and its own register-level hardware.
+  const cc = legacy
+    ? [...common,
+       '-DSIM_LEGACY=1', '-DCONFIGFILE=sim/cfg-sim.h',
+       '-I', 'sim/legacy', '-I', src, '-I', path.join(src, 'spaghetti-monster'),
+       '-o', outFile, 'sim/sim_main_legacy.c']
+    : [...common,
+       '-DMCUNAME=sim', '-DMCU=0x1616', '-DCFG_H=sim/anduril.h', '-DMODEL_NUMBER="0000"',
+       '-I', 'sim/hw',
+       '-I', path.join(src, 'ui'), '-I', path.join(src, 'hw'), '-I', src,
+       '-o', outFile, 'sim/sim_main.c'];
   sh('clang', cc);
   sh(WASM_OPT, [
     '--asyncify', '--pass-arg=asyncify-imports@env.sim_host_yield',
@@ -121,8 +130,9 @@ function verify(file, layout) {
   s('env_millivolts', 3900);
   s('env_decikelvin', (23 + 275) * 10);
   let started = false;
+  const fCpu = g('f_cpu') || 10000000;
   const run = (ms) => {
-    s('budget_cycles', Math.round(10000000 * ms / 1000));
+    s('budget_cycles', Math.round(fCpu * ms / 1000));
     let n = 0;
     while (g('budget_cycles') > 0 && n++ < 20000) {
       if (!started) { started = true; inst.exports.sim_main(); }
@@ -158,6 +168,7 @@ for (const v of versions) {
   const src = checkout(v.tag);
   const commit = sh('git', ['-C', UPSTREAM, 'rev-parse', `${v.tag}^{commit}`]).toString().trim();
   const date = sh('git', ['-C', UPSTREAM, 'log', '-1', '--format=%cs', `${v.tag}^{commit}`]).toString().trim();
+  const legacy = v.layout === 'legacy';
   const api = ledApi(src);
   const volts = voltScale(src);
   const sources = stateSources(src);
@@ -174,7 +185,7 @@ for (const v of versions) {
           `-DSIM_AUX1=${hw.aux1}`, `-DSIM_AUXRGB=${hw.auxrgb}`,
           `-DSIM_AUX1_BUTTON=${hw.aux1btn}`, `-DSIM_AUXRGB_BUTTON=${hw.rgbbtn}`,
           `-DSIM_THERM=${th.on}`,
-        ]);
+        ], legacy);
         const info = verify(file, layout);
         const { table } = tableNames(fs.readFileSync(file));
         const states = {};

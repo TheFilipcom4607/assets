@@ -1,6 +1,8 @@
 // avr/sleep.h: sleep shim for the web simulator.
 #pragma once
 
+#include <avr/io.h>
+
 #define SLEEP_MODE_IDLE        0
 #define SLEEP_MODE_ADC         1
 #define SLEEP_MODE_STANDBY     2

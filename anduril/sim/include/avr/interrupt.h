@@ -1,6 +1,8 @@
 // avr/interrupt.h: interrupt shim for the web simulator.
 #pragma once
 
+#include <avr/io.h>
+
 #include "sim/simcore.h"
 
 // An "ISR" here is just a function the simulated peripheral clock calls.

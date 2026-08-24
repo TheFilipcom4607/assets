@@ -298,7 +298,9 @@ function render(physics) {
   const rel = Math.min(1, lm / Math.max(1, state.env.maxLumens));
   const v = Math.pow(rel, 0.42);                     // eyes are not linear
 
-  const mix = (a, b) => Math.round(a + (b - a) * v);
+  // even a couple of lumens is a visibly lit emitter, so lift the bottom end
+  const lit = lm > 0 ? 0.16 + 0.84 * v : 0;
+  const mix = (a, b) => Math.round(a + (b - a) * lit);
   els.emitter.style.background = lm > 0
     ? `rgb(${mix(0x28, 0xff)}, ${mix(0x2b, 0xf6)}, ${mix(0x33, 0xe4)})` : '#232730';
   els.emitter.style.boxShadow = lm > 0

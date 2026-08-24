@@ -166,7 +166,9 @@ uint8_t sim_switch_port(void) {
     // reading a pin costs a couple of cycles, which keeps firmware spin-loops
     // (like "wait until the button is released") moving through virtual time
     sim_burn_cycles(2);
-    return sim_io.button_down ? 0 : 1;  // active low, with a pull-up
+    // The e-switch is active low with a pull-up.  Every bit carries the same
+    // value so this works whichever pin number a hardware definition picks.
+    return sim_io.button_down ? 0x00 : 0xFF;
 }
 
 ////////// EEPROM //////////

@@ -3,6 +3,8 @@
 // battery change on a real light.
 #pragma once
 
+#include <avr/io.h>
+
 #include <stdint.h>
 
 uint8_t sim_eeprom_read(uint16_t addr);
