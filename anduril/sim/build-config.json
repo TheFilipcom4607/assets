@@ -1,0 +1,23 @@
+{
+  "repo": "https://github.com/ToyKeeper/anduril",
+  "rawBase": "https://raw.githubusercontent.com/ToyKeeper/anduril",
+  "versions": [
+    { "tag": "r2026-08-12", "label": "r2026-08-12", "note": "latest release", "layout": "modern" },
+    { "tag": "r2025-07-07", "label": "r2025-07-07", "note": "2025 release", "layout": "modern" },
+    { "tag": "r2024-04-20", "label": "r2024-04-20", "note": "2024 release", "layout": "modern" },
+    { "tag": "r2023-12-03", "label": "r2023-12-03", "note": "first release after the source tree was reorganised", "layout": "modern" }
+  ],
+  "hardware": [
+    { "id": "plain",        "label": "No aux LEDs",                      "aux1": 0, "auxrgb": 0, "aux1btn": 0, "rgbbtn": 0 },
+    { "id": "btn",          "label": "Button LED",                       "aux1": 1, "auxrgb": 0, "aux1btn": 1, "rgbbtn": 0 },
+    { "id": "aux",          "label": "Aux LEDs",                         "aux1": 1, "auxrgb": 0, "aux1btn": 0, "rgbbtn": 0 },
+    { "id": "auxrgb",       "label": "RGB aux LEDs",                     "aux1": 0, "auxrgb": 1, "aux1btn": 0, "rgbbtn": 0 },
+    { "id": "btn-auxrgb",   "label": "Button LED + RGB aux LEDs",        "aux1": 1, "auxrgb": 1, "aux1btn": 1, "rgbbtn": 0 },
+    { "id": "rgbbtn",       "label": "RGB button",                       "aux1": 0, "auxrgb": 1, "aux1btn": 0, "rgbbtn": 1 },
+    { "id": "rgbbtn-aux",   "label": "RGB button + aux LEDs",            "aux1": 1, "auxrgb": 1, "aux1btn": 0, "rgbbtn": 1 }
+  ],
+  "thermal": [
+    { "id": "therm", "label": "Temperature sensor", "on": 1 },
+    { "id": "notherm", "label": "No temperature sensor", "on": 0 }
+  ]
+}

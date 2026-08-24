@@ -1,0 +1,573 @@
+{
+ "generated": "2026-08-24",
+ "repo": "https://github.com/ToyKeeper/anduril",
+ "rawBase": "https://raw.githubusercontent.com/ToyKeeper/anduril",
+ "hardware": [
+  {
+   "id": "plain",
+   "label": "No aux LEDs",
+   "aux1": 0,
+   "auxrgb": 0,
+   "aux1btn": 0,
+   "rgbbtn": 0
+  },
+  {
+   "id": "btn",
+   "label": "Button LED",
+   "aux1": 1,
+   "auxrgb": 0,
+   "aux1btn": 1,
+   "rgbbtn": 0
+  },
+  {
+   "id": "aux",
+   "label": "Aux LEDs",
+   "aux1": 1,
+   "auxrgb": 0,
+   "aux1btn": 0,
+   "rgbbtn": 0
+  },
+  {
+   "id": "auxrgb",
+   "label": "RGB aux LEDs",
+   "aux1": 0,
+   "auxrgb": 1,
+   "aux1btn": 0,
+   "rgbbtn": 0
+  },
+  {
+   "id": "btn-auxrgb",
+   "label": "Button LED + RGB aux LEDs",
+   "aux1": 1,
+   "auxrgb": 1,
+   "aux1btn": 1,
+   "rgbbtn": 0
+  },
+  {
+   "id": "rgbbtn",
+   "label": "RGB button",
+   "aux1": 0,
+   "auxrgb": 1,
+   "aux1btn": 0,
+   "rgbbtn": 1
+  },
+  {
+   "id": "rgbbtn-aux",
+   "label": "RGB button + aux LEDs",
+   "aux1": 1,
+   "auxrgb": 1,
+   "aux1btn": 0,
+   "rgbbtn": 1
+  }
+ ],
+ "thermal": [
+  {
+   "id": "therm",
+   "label": "Temperature sensor",
+   "on": 1
+  },
+  {
+   "id": "notherm",
+   "label": "No temperature sensor",
+   "on": 0
+  }
+ ],
+ "versions": [
+  {
+   "tag": "r2026-08-12",
+   "label": "r2026-08-12",
+   "note": "latest release",
+   "layout": "modern",
+   "commit": "3057a0db8d87d9303fd50d662d0dbf49ef68f18e",
+   "date": "2026-08-12",
+   "ledApi": 1,
+   "voltScale": 50,
+   "builds": {
+    "plain-therm": {
+     "wasm": "r2026-08-12/plain-therm.wasm",
+     "states": "r2026-08-12/plain-therm.states.json",
+     "bytes": 36941,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "plain-notherm": {
+     "wasm": "r2026-08-12/plain-notherm.wasm",
+     "states": "r2026-08-12/plain-notherm.states.json",
+     "bytes": 35006,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-therm": {
+     "wasm": "r2026-08-12/btn-therm.wasm",
+     "states": "r2026-08-12/btn-therm.states.json",
+     "bytes": 36031,
+     "capabilities": 2096871,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-notherm": {
+     "wasm": "r2026-08-12/btn-notherm.wasm",
+     "states": "r2026-08-12/btn-notherm.states.json",
+     "bytes": 34128,
+     "capabilities": 2096870,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-therm": {
+     "wasm": "r2026-08-12/aux-therm.wasm",
+     "states": "r2026-08-12/aux-therm.states.json",
+     "bytes": 36932,
+     "capabilities": 2096871,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-notherm": {
+     "wasm": "r2026-08-12/aux-notherm.wasm",
+     "states": "r2026-08-12/aux-notherm.states.json",
+     "bytes": 35079,
+     "capabilities": 2096870,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-therm": {
+     "wasm": "r2026-08-12/auxrgb-therm.wasm",
+     "states": "r2026-08-12/auxrgb-therm.states.json",
+     "bytes": 38469,
+     "capabilities": 2096875,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-notherm": {
+     "wasm": "r2026-08-12/auxrgb-notherm.wasm",
+     "states": "r2026-08-12/auxrgb-notherm.states.json",
+     "bytes": 36616,
+     "capabilities": 2096874,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-therm": {
+     "wasm": "r2026-08-12/btn-auxrgb-therm.wasm",
+     "states": "r2026-08-12/btn-auxrgb-therm.states.json",
+     "bytes": 38526,
+     "capabilities": 2096879,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-notherm": {
+     "wasm": "r2026-08-12/btn-auxrgb-notherm.wasm",
+     "states": "r2026-08-12/btn-auxrgb-notherm.states.json",
+     "bytes": 36673,
+     "capabilities": 2096878,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-therm": {
+     "wasm": "r2026-08-12/rgbbtn-therm.wasm",
+     "states": "r2026-08-12/rgbbtn-therm.states.json",
+     "bytes": 36776,
+     "capabilities": 2096875,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-notherm": {
+     "wasm": "r2026-08-12/rgbbtn-notherm.wasm",
+     "states": "r2026-08-12/rgbbtn-notherm.states.json",
+     "bytes": 34877,
+     "capabilities": 2096874,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-therm": {
+     "wasm": "r2026-08-12/rgbbtn-aux-therm.wasm",
+     "states": "r2026-08-12/rgbbtn-aux-therm.states.json",
+     "bytes": 38159,
+     "capabilities": 2096879,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-notherm": {
+     "wasm": "r2026-08-12/rgbbtn-aux-notherm.wasm",
+     "states": "r2026-08-12/rgbbtn-aux-notherm.states.json",
+     "bytes": 36306,
+     "capabilities": 2096878,
+     "bootLevel": 50,
+     "rampSize": 150
+    }
+   }
+  },
+  {
+   "tag": "r2025-07-07",
+   "label": "r2025-07-07",
+   "note": "2025 release",
+   "layout": "modern",
+   "commit": "08bad8136f613c797c9a1b9de78aa11399cdf310",
+   "date": "2025-07-07",
+   "ledApi": 0,
+   "voltScale": 50,
+   "builds": {
+    "plain-therm": {
+     "wasm": "r2025-07-07/plain-therm.wasm",
+     "states": "r2025-07-07/plain-therm.states.json",
+     "bytes": 36672,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "plain-notherm": {
+     "wasm": "r2025-07-07/plain-notherm.wasm",
+     "states": "r2025-07-07/plain-notherm.states.json",
+     "bytes": 34832,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-therm": {
+     "wasm": "r2025-07-07/btn-therm.wasm",
+     "states": "r2025-07-07/btn-therm.states.json",
+     "bytes": 36747,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-notherm": {
+     "wasm": "r2025-07-07/btn-notherm.wasm",
+     "states": "r2025-07-07/btn-notherm.states.json",
+     "bytes": 34907,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-therm": {
+     "wasm": "r2025-07-07/aux-therm.wasm",
+     "states": "r2025-07-07/aux-therm.states.json",
+     "bytes": 37514,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-notherm": {
+     "wasm": "r2025-07-07/aux-notherm.wasm",
+     "states": "r2025-07-07/aux-notherm.states.json",
+     "bytes": 35718,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-therm": {
+     "wasm": "r2025-07-07/auxrgb-therm.wasm",
+     "states": "r2025-07-07/auxrgb-therm.states.json",
+     "bytes": 37358,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-notherm": {
+     "wasm": "r2025-07-07/auxrgb-notherm.wasm",
+     "states": "r2025-07-07/auxrgb-notherm.states.json",
+     "bytes": 35558,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-therm": {
+     "wasm": "r2025-07-07/btn-auxrgb-therm.wasm",
+     "states": "r2025-07-07/btn-auxrgb-therm.states.json",
+     "bytes": 37559,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-notherm": {
+     "wasm": "r2025-07-07/btn-auxrgb-notherm.wasm",
+     "states": "r2025-07-07/btn-auxrgb-notherm.states.json",
+     "bytes": 35744,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-therm": {
+     "wasm": "r2025-07-07/rgbbtn-therm.wasm",
+     "states": "r2025-07-07/rgbbtn-therm.states.json",
+     "bytes": 35425,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-notherm": {
+     "wasm": "r2025-07-07/rgbbtn-notherm.wasm",
+     "states": "r2025-07-07/rgbbtn-notherm.states.json",
+     "bytes": 33579,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-therm": {
+     "wasm": "r2025-07-07/rgbbtn-aux-therm.wasm",
+     "states": "r2025-07-07/rgbbtn-aux-therm.states.json",
+     "bytes": 36201,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-notherm": {
+     "wasm": "r2025-07-07/rgbbtn-aux-notherm.wasm",
+     "states": "r2025-07-07/rgbbtn-aux-notherm.states.json",
+     "bytes": 34401,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    }
+   }
+  },
+  {
+   "tag": "r2024-04-20",
+   "label": "r2024-04-20",
+   "note": "2024 release",
+   "layout": "modern",
+   "commit": "72128b62aae51c5747c8cc21e5113e145c66b9c7",
+   "date": "2024-04-20",
+   "ledApi": 0,
+   "voltScale": 50,
+   "builds": {
+    "plain-therm": {
+     "wasm": "r2024-04-20/plain-therm.wasm",
+     "states": "r2024-04-20/plain-therm.states.json",
+     "bytes": 36593,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "plain-notherm": {
+     "wasm": "r2024-04-20/plain-notherm.wasm",
+     "states": "r2024-04-20/plain-notherm.states.json",
+     "bytes": 34753,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-therm": {
+     "wasm": "r2024-04-20/btn-therm.wasm",
+     "states": "r2024-04-20/btn-therm.states.json",
+     "bytes": 36668,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-notherm": {
+     "wasm": "r2024-04-20/btn-notherm.wasm",
+     "states": "r2024-04-20/btn-notherm.states.json",
+     "bytes": 34828,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-therm": {
+     "wasm": "r2024-04-20/aux-therm.wasm",
+     "states": "r2024-04-20/aux-therm.states.json",
+     "bytes": 37455,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-notherm": {
+     "wasm": "r2024-04-20/aux-notherm.wasm",
+     "states": "r2024-04-20/aux-notherm.states.json",
+     "bytes": 35659,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-therm": {
+     "wasm": "r2024-04-20/auxrgb-therm.wasm",
+     "states": "r2024-04-20/auxrgb-therm.states.json",
+     "bytes": 37312,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-notherm": {
+     "wasm": "r2024-04-20/auxrgb-notherm.wasm",
+     "states": "r2024-04-20/auxrgb-notherm.states.json",
+     "bytes": 35512,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-therm": {
+     "wasm": "r2024-04-20/btn-auxrgb-therm.wasm",
+     "states": "r2024-04-20/btn-auxrgb-therm.states.json",
+     "bytes": 37506,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-notherm": {
+     "wasm": "r2024-04-20/btn-auxrgb-notherm.wasm",
+     "states": "r2024-04-20/btn-auxrgb-notherm.states.json",
+     "bytes": 35706,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-therm": {
+     "wasm": "r2024-04-20/rgbbtn-therm.wasm",
+     "states": "r2024-04-20/rgbbtn-therm.states.json",
+     "bytes": 35400,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-notherm": {
+     "wasm": "r2024-04-20/rgbbtn-notherm.wasm",
+     "states": "r2024-04-20/rgbbtn-notherm.states.json",
+     "bytes": 33554,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-therm": {
+     "wasm": "r2024-04-20/rgbbtn-aux-therm.wasm",
+     "states": "r2024-04-20/rgbbtn-aux-therm.states.json",
+     "bytes": 36217,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-notherm": {
+     "wasm": "r2024-04-20/rgbbtn-aux-notherm.wasm",
+     "states": "r2024-04-20/rgbbtn-aux-notherm.states.json",
+     "bytes": 34417,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    }
+   }
+  },
+  {
+   "tag": "r2023-12-03",
+   "label": "r2023-12-03",
+   "note": "first release after the source tree was reorganised",
+   "layout": "modern",
+   "commit": "bc0b4625a1618d9322ea6a5f0bb402f8ddc0aad6",
+   "date": "2023-12-03",
+   "ledApi": 0,
+   "voltScale": 40,
+   "builds": {
+    "plain-therm": {
+     "wasm": "r2023-12-03/plain-therm.wasm",
+     "states": "r2023-12-03/plain-therm.states.json",
+     "bytes": 36575,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "plain-notherm": {
+     "wasm": "r2023-12-03/plain-notherm.wasm",
+     "states": "r2023-12-03/plain-notherm.states.json",
+     "bytes": 34731,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-therm": {
+     "wasm": "r2023-12-03/btn-therm.wasm",
+     "states": "r2023-12-03/btn-therm.states.json",
+     "bytes": 36650,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-notherm": {
+     "wasm": "r2023-12-03/btn-notherm.wasm",
+     "states": "r2023-12-03/btn-notherm.states.json",
+     "bytes": 34806,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-therm": {
+     "wasm": "r2023-12-03/aux-therm.wasm",
+     "states": "r2023-12-03/aux-therm.states.json",
+     "bytes": 37136,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-notherm": {
+     "wasm": "r2023-12-03/aux-notherm.wasm",
+     "states": "r2023-12-03/aux-notherm.states.json",
+     "bytes": 35340,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-therm": {
+     "wasm": "r2023-12-03/auxrgb-therm.wasm",
+     "states": "r2023-12-03/auxrgb-therm.states.json",
+     "bytes": 36956,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-notherm": {
+     "wasm": "r2023-12-03/auxrgb-notherm.wasm",
+     "states": "r2023-12-03/auxrgb-notherm.states.json",
+     "bytes": 35156,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-therm": {
+     "wasm": "r2023-12-03/btn-auxrgb-therm.wasm",
+     "states": "r2023-12-03/btn-auxrgb-therm.states.json",
+     "bytes": 37150,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-notherm": {
+     "wasm": "r2023-12-03/btn-auxrgb-notherm.wasm",
+     "states": "r2023-12-03/btn-auxrgb-notherm.states.json",
+     "bytes": 35350,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-therm": {
+     "wasm": "r2023-12-03/rgbbtn-therm.wasm",
+     "states": "r2023-12-03/rgbbtn-therm.states.json",
+     "bytes": 35048,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-notherm": {
+     "wasm": "r2023-12-03/rgbbtn-notherm.wasm",
+     "states": "r2023-12-03/rgbbtn-notherm.states.json",
+     "bytes": 33202,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-therm": {
+     "wasm": "r2023-12-03/rgbbtn-aux-therm.wasm",
+     "states": "r2023-12-03/rgbbtn-aux-therm.states.json",
+     "bytes": 35848,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-notherm": {
+     "wasm": "r2023-12-03/rgbbtn-aux-notherm.wasm",
+     "states": "r2023-12-03/rgbbtn-aux-notherm.states.json",
+     "bytes": 34048,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    }
+   }
+  }
+ ]
+}

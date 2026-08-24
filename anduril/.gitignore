@@ -1,0 +1,4 @@
+# build inputs and tooling, not part of the deployed site
+.upstream/
+.build/
+.tools/

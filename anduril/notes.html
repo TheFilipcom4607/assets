@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anduril Simulator — how it works</title>
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Anduril&nbsp;Simulator</h1>
+  <div class="pickers"><a class="ghost" href="./">Back to the simulator</a></div>
+</header>
+
+<article class="prose">
+
+<h1>How it works</h1>
+<p class="lede">
+  This page runs Anduril itself. Not a re-implementation, not a description of
+  the UI: the same C source that gets flashed onto a flashlight, compiled to
+  WebAssembly and given simulated hardware to talk to.
+</p>
+
+<h2>What is real</h2>
+<p>
+  Every build here is produced by compiling
+  <a href="https://github.com/ToyKeeper/anduril" target="_blank" rel="noopener">ToyKeeper's Anduril</a>
+  at a released tag, unmodified. Anduril builds as one big translation unit, so
+  the whole firmware — the FSM microkernel, the event decoder, the ramp tables,
+  the config menus, thermal regulation, low-voltage protection, the aux LED
+  logic, the blinkies — is compiled exactly as it is upstream. When you press
+  the button, the click is decoded by <code>fsm/wdt.c</code> and dispatched by
+  <code>fsm/events.c</code> to whichever state function is on top of Anduril's
+  own state stack. The instrument panel is reading the firmware's own
+  variables.
+</p>
+<p>
+  The <em>Source</em> panel fetches the file for the running state straight from
+  GitHub at the commit the build was compiled from, so you can read the code
+  that is executing.
+</p>
+
+<h2>What is simulated</h2>
+<ul>
+  <li><strong>The MCU.</strong> An attiny1616-class part at 10&nbsp;MHz. It has a
+      periodic interrupt every 16&nbsp;ms (the 62.5&nbsp;Hz clock tick Anduril
+      counts everything in), a slower 128&nbsp;ms tick in standby, sleep modes,
+      and an ADC that finishes a conversion about every 83&nbsp;µs.</li>
+  <li><strong>The clock.</strong> Simulated time only advances when the firmware
+      waits: delay loops, sleeps, EEPROM writes and pin reads all cost the same
+      number of cycles they would on the real part. The host doles out cycles in
+      step with the wall clock, so a second in here is a second out there.</li>
+  <li><strong>The pins.</strong> Older Anduril versions drive the aux LEDs by
+      poking port registers directly, so the simulator emulates the pins:
+      set/clear registers, direction, and the internal pull-up that Anduril uses
+      to get a dim "low" out of an LED with no PWM on it.</li>
+  <li><strong>The temperature sensor.</strong> The die heats up as a first-order
+      lag toward whatever temperature the current output would settle at, and
+      the sensor reports that temperature plus whatever error you dial in. The
+      firmware only ever sees the sensor, so a sensor that reads 2&nbsp;°C high
+      makes the light throttle 2&nbsp;°C early — and you can correct it from
+      Anduril's own thermal calibration menu, exactly as on a real light.</li>
+  <li><strong>The cell.</strong> Open-circuit voltage, internal resistance, sag
+      under load and the drop before the MCU. Optionally it runs down as you use
+      it, which is enough to trigger the firmware's low-voltage warnings.</li>
+  <li><strong>The EEPROM.</strong> Backed by your browser's local storage, per
+      version and per hardware layout, so your settings survive a reload the way
+      they survive a battery change.</li>
+</ul>
+
+<h2>What differs from a real light</h2>
+<ul>
+  <li><strong><code>int</code> is 32 bits here, 16 bits on AVR.</strong> This is
+      the one difference that could in principle change behaviour: arithmetic
+      that would overflow a 16-bit int on the real chip will not overflow here.
+      Anduril avoids relying on that, but it is not something the simulator can
+      rule out.</li>
+  <li><strong>Computation is free.</strong> Only waiting costs simulated time, so
+      the firmware's own instruction cycles are not counted. Anything timed by
+      the clock tick or by a delay is exact; anything that depended on how long
+      a calculation took would not be.</li>
+  <li><strong>The light is generic.</strong> It is an FET+1 driver on an
+      attiny1616 with the ramp tables Anduril ships for the Wurkkos TS10. The
+      emitter output, currents and thermal behaviour are a model with sliders,
+      not a specific product.</li>
+  <li><strong>No PWM flicker.</strong> The panel reports duty cycle; the display
+      shows steady brightness.</li>
+  <li><strong>Aux LED brightness is approximated</strong> as off / dim / full.</li>
+  <li>This matrix covers aux LEDs, button LEDs and the temperature sensor. Tint
+      ramping, multi-channel lights and dual-switch (clicky + e-switch) lights
+      are not built here.</li>
+</ul>
+
+<h2>How the builds are made</h2>
+<p>
+  Vercel serves static files, so nothing can be compiled on demand. Instead the
+  sources are checked out at each release tag and compiled ahead of time with
+  <code>clang --target=wasm32</code>, once per hardware combination, then run
+  through Binaryen's <code>--asyncify</code> pass. Asyncify is what lets the
+  firmware's blocking <code>while(1)</code> main loop and its busy-wait delays
+  hand control back to the browser between animation frames instead of freezing
+  the tab. Every artifact is booted and clicked once during the build; one that
+  does not run never reaches the site.
+</p>
+<p>
+  The simulated hardware lives in <code>sim/</code>: an <code>arch/sim.c</code>
+  that implements the same interface as Anduril's <code>arch/attiny1616.c</code>,
+  a hardware definition under <code>sim/hw/sim/</code> describing this
+  imaginary light, and small stand-ins for the avr-libc headers.
+</p>
+
+<h2>Credits</h2>
+<p>
+  Anduril is by Selene ToyKeeper and contributors, licensed GPL-3.0-or-later.
+  The simulated hardware around it is under the same licence.
+</p>
+
+</article>
+</body>
+</html>

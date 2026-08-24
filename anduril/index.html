@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Anduril Simulator</title>
+<meta name="description" content="A flashlight simulator that runs the real Anduril firmware, compiled from source, on a simulated MCU.">
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔦</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Anduril&nbsp;Simulator</h1>
+  <div class="pickers">
+    <label>Firmware
+      <select id="version" aria-label="Anduril version"></select>
+    </label>
+    <label>Aux&nbsp;LEDs
+      <select id="aux" aria-label="Aux LED hardware">
+        <option value="none">none</option>
+        <option value="single">single colour</option>
+        <option value="rgb">RGB</option>
+      </select>
+    </label>
+    <label>Button&nbsp;LED
+      <select id="btn" aria-label="Button LED hardware">
+        <option value="none">none</option>
+        <option value="single">single colour</option>
+        <option value="rgb">RGB</option>
+      </select>
+    </label>
+    <label>Temp&nbsp;sensor
+      <select id="therm" aria-label="Temperature sensor">
+        <option value="1">fitted</option>
+        <option value="0">not fitted</option>
+      </select>
+    </label>
+  </div>
+</header>
+
+<p id="status" class="status" role="status"></p>
+
+<main>
+
+  <section class="stage panel">
+    <div class="beam" id="beam">
+      <div class="head">
+        <div class="auxring" id="auxring" hidden></div>
+        <div class="emitter" id="emitter"></div>
+      </div>
+    </div>
+
+    <div class="output-line">
+      <span id="lumens">0 lm</span>
+      <span id="levelReadout" class="muted">off</span>
+    </div>
+
+    <button id="eswitch" class="eswitch" aria-label="E-switch">
+      <span class="eswitch-led" id="eswitchLed"></span>
+      <span class="eswitch-label">PRESS &amp; HOLD</span>
+    </button>
+
+    <div class="stage-actions">
+      <button id="reconnect" class="ghost" title="Unscrew and refit the tailcap">Reconnect battery</button>
+      <button id="wipe" class="ghost" title="Erase saved settings, like a brand new light">Wipe memory</button>
+      <label class="speed" title="Runs at normal speed whenever the button is held">Fast-forward
+        <select id="speed">
+          <option value="1">1&times;</option>
+          <option value="4">4&times;</option>
+          <option value="16">16&times;</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="panel readouts">
+    <h2>Firmware</h2>
+    <dl id="firmwareReadout">
+      <dt>state</dt><dd id="rState">-</dd>
+      <dt>stack</dt><dd id="rStack" class="muted">-</dd>
+      <dt>event</dt><dd id="rEvent">-</dd>
+      <dt>level</dt><dd id="rLevel">-</dd>
+      <dt>channel</dt><dd id="rChannel">-</dd>
+      <dt>PWM</dt><dd id="rPwm">-</dd>
+      <dt>aux LEDs</dt><dd id="rAux">-</dd>
+      <dt>battery</dt><dd id="rBattery">-</dd>
+      <dt>heat</dt><dd id="rHeat">-</dd>
+      <dt>MCU</dt><dd id="rMcu">-</dd>
+      <dt>uptime</dt><dd id="rUptime">-</dd>
+    </dl>
+  </section>
+
+  <section class="panel env">
+    <h2>Environment</h2>
+    <div class="controls" id="envControls"></div>
+    <p class="hint" id="envHint"></p>
+  </section>
+
+  <section class="panel log">
+    <h2>Event log <button id="clearLog" class="ghost small">clear</button></h2>
+    <ol id="logList"></ol>
+  </section>
+
+  <section class="panel source">
+    <h2>Source <span id="sourceWhere" class="path muted"></span></h2>
+    <p class="hint">The code below is fetched from GitHub at the exact commit this build was compiled from.</p>
+    <div class="source-actions">
+      <button id="loadSource" class="ghost">Show the code for this state</button>
+      <a id="sourceLink" class="ghost" target="_blank" rel="noopener" hidden>Open on GitHub</a>
+    </div>
+    <pre id="sourceView" hidden></pre>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    Runs <a href="https://github.com/ToyKeeper/anduril" target="_blank" rel="noopener">Anduril</a>
+    by Selene ToyKeeper, GPL-3.0, compiled unmodified to WebAssembly.
+    The MCU, e-switch, LEDs, battery and temperature sensor around it are simulated.
+    <a href="notes.html">How it works &amp; what differs from real hardware</a>.
+  </p>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
