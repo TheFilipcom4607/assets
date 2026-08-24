@@ -2,11 +2,12 @@
 import { AndurilSim, World, defaultEnvironment, describeEvent } from './sim.js';
 
 const $ = (id) => document.getElementById(id);
+const asset = (path) => new URL(path, import.meta.url).href;
 const els = {
   status: $('status'), version: $('version'), aux: $('aux'), btn: $('btn'),
   therm: $('therm'), speed: $('speed'), eswitch: $('eswitch'),
   eswitchLed: $('eswitchLed'), emitter: $('emitter'), auxring: $('auxring'),
-  lumens: $('lumens'), levelReadout: $('levelReadout'),
+  lampGlow: $('lampGlow'), lumens: $('lumens'), levelReadout: $('levelReadout'),
   reconnect: $('reconnect'), wipe: $('wipe'), clearLog: $('clearLog'),
   logList: $('logList'), envControls: $('envControls'), envHint: $('envHint'),
   loadSource: $('loadSource'), sourceView: $('sourceView'),
@@ -164,8 +165,8 @@ async function loadBuild() {
   const sim = new AndurilSim();
   try {
     await sim.load({
-      wasmUrl: `builds/${build.wasm}`,
-      statesUrl: `builds/${build.states}`,
+      wasmUrl: asset(`builds/${build.wasm}`),
+      statesUrl: asset(`builds/${build.states}`),
       layout: state.layout,
     });
   } catch (err) {
@@ -318,7 +319,8 @@ function render(physics) {
     els.eswitchLed.style.boxShadow = on ? `0 0 12px 1px ${css(bc, 200)}` : 'none';
   }
 
-  els.lumens.textContent = lm >= 1 ? `${Math.round(lm)} lm` : (lm > 0 ? '<1 lm' : '0 lm');
+  els.lampGlow.style.opacity = (lm > 0 ? 0.10 + 0.5 * v : 0).toFixed(3);
+  els.lumens.textContent = lm >= 1 ? Math.round(lm).toLocaleString() : (lm > 0 ? '<1' : '0');
   const level = sim.get('fw_actual_level');
   els.levelReadout.textContent = level
     ? `level ${level} / ${sim.get('fw_ramp_size')}` : 'off';
@@ -551,9 +553,10 @@ async function main() {
   wireInput();
 
   try {
+    // resolved against this module's own URL, so the page works from any path
     const [manifest, layout] = await Promise.all([
-      fetch('builds/manifest.json').then((r) => r.json()),
-      fetch('builds/layout.json').then((r) => r.json()),
+      fetch(asset('builds/manifest.json')).then((r) => r.json()),
+      fetch(asset('builds/layout.json')).then((r) => r.json()),
     ]);
     state.manifest = manifest;
     state.layout = layout;

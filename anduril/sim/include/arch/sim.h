@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
-#include "sim/simcore.h"
+#include "sim/core.h"
 
 // Anduril's internal voltage unit: 50 per volt on current releases, 40 on
 // releases before r2024.  The build script detects which one applies.
@@ -20,9 +20,6 @@
 #define F_CPU  10000000UL
 #define BOGOMIPS  (F_CPU/4350)
 #define DELAY_ZERO_TIME  1020
-
-// the PIT ticks every 16 ms while awake
-#define SIM_TICK_MS  16
 
 ////////// I/O ports //////////
 // Older Anduril versions drive the aux LEDs by poking port registers directly,
@@ -53,27 +50,6 @@ void sim_ports_update(void);
 #define SIM_LED_G_PIN     4
 #define SIM_LED_B_PORT    sim_porta
 #define SIM_LED_B_PIN     3
-
-////////// virtual clock //////////
-
-void sim_burn_cycles(uint32_t cycles);   // spend cycles, running due interrupts
-void sim_advance_to(uint64_t target);
-void sim_publish_time(void);
-void sim_fire_pending(void);
-void sim_poll_button(void);
-void sim_yield_to_host(void);
-void sim_sei(void);
-void sim_cli(void);
-void sim_set_sleep_mode(int mode);
-void sim_sleep_cpu(void);
-uint8_t sim_switch_port(void);
-uint8_t sim_eeprom_read(uint16_t addr);
-void sim_eeprom_write(uint16_t addr, uint8_t value);
-
-// interrupt handlers, defined later by the firmware via ISR()
-void sim_wdt_isr(void);
-void sim_adc_isr(void);
-void sim_pcint_isr(void);
 
 ////////// clock speed //////////
 

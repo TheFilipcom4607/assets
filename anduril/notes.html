@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- so the page works whether it is opened as /anduril or /anduril/ -->
+<base href="/anduril/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Anduril Simulator — how it works</title>
 <meta name="color-scheme" content="dark">
@@ -9,9 +11,12 @@
 </head>
 <body>
 
-<header class="topbar">
-  <h1>Anduril&nbsp;Simulator</h1>
-  <div class="pickers"><a class="ghost" href="./">Back to the simulator</a></div>
+<header class="bar">
+  <div class="brand">
+    <span class="brand-dot" aria-hidden="true"></span>
+    <h1>Anduril Simulator</h1>
+  </div>
+  <div class="config"><a class="btn" href="./">Back to the simulator</a></div>
 </header>
 
 <article class="prose">

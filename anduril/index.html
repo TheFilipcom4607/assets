@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- so the page works whether it is opened as /anduril or /anduril/ -->
+<base href="/anduril/">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Anduril Simulator</title>
 <meta name="description" content="A flashlight simulator that runs the real Anduril firmware, compiled from source, on a simulated MCU.">
@@ -11,32 +13,41 @@
 </head>
 <body>
 
-<header class="topbar">
-  <h1>Anduril&nbsp;Simulator</h1>
-  <div class="pickers">
-    <label>Firmware
-      <select id="version" aria-label="Anduril version"></select>
-    </label>
-    <label>Aux&nbsp;LEDs
-      <select id="aux" aria-label="Aux LED hardware">
-        <option value="none">none</option>
-        <option value="single">single colour</option>
+<header class="bar">
+  <div class="brand">
+    <span class="brand-dot" aria-hidden="true"></span>
+    <h1>Anduril Simulator</h1>
+    <span class="brand-sub">the real firmware, in your browser</span>
+  </div>
+
+  <div class="config">
+    <div class="field">
+      <label for="version">Firmware</label>
+      <select id="version"></select>
+    </div>
+    <div class="field">
+      <label for="aux">Aux LEDs</label>
+      <select id="aux">
+        <option value="none">None</option>
+        <option value="single">Single colour</option>
         <option value="rgb">RGB</option>
       </select>
-    </label>
-    <label>Button&nbsp;LED
-      <select id="btn" aria-label="Button LED hardware">
-        <option value="none">none</option>
-        <option value="single">single colour</option>
+    </div>
+    <div class="field">
+      <label for="btn">Button LED</label>
+      <select id="btn">
+        <option value="none">None</option>
+        <option value="single">Single colour</option>
         <option value="rgb">RGB</option>
       </select>
-    </label>
-    <label>Temp&nbsp;sensor
-      <select id="therm" aria-label="Temperature sensor">
-        <option value="1">fitted</option>
-        <option value="0">not fitted</option>
+    </div>
+    <div class="field">
+      <label for="therm">Temp sensor</label>
+      <select id="therm">
+        <option value="1">Fitted</option>
+        <option value="0">Not fitted</option>
       </select>
-    </label>
+    </div>
   </div>
 </header>
 
@@ -44,42 +55,46 @@
 
 <main>
 
-  <section class="stage panel">
-    <div class="beam" id="beam">
+  <section class="card stage">
+    <div class="lamp">
+      <div class="lamp-glow" id="lampGlow" aria-hidden="true"></div>
       <div class="head">
         <div class="auxring" id="auxring" hidden></div>
         <div class="emitter" id="emitter"></div>
       </div>
     </div>
 
-    <div class="output-line">
-      <span id="lumens">0 lm</span>
-      <span id="levelReadout" class="muted">off</span>
+    <p class="output">
+      <span class="output-num" id="lumens">0</span><span class="output-unit">lm</span>
+      <span class="output-sub" id="levelReadout">off</span>
+    </p>
+
+    <div class="eswitch-slot">
+      <button id="eswitch" class="eswitch" aria-label="E-switch">
+        <span class="eswitch-led" id="eswitchLed" aria-hidden="true"></span>
+        <span>PRESS &amp; HOLD</span>
+      </button>
     </div>
 
-    <button id="eswitch" class="eswitch" aria-label="E-switch">
-      <span class="eswitch-led" id="eswitchLed"></span>
-      <span class="eswitch-label">PRESS &amp; HOLD</span>
-    </button>
-
-    <div class="stage-actions">
-      <button id="reconnect" class="ghost" title="Unscrew and refit the tailcap">Reconnect battery</button>
-      <button id="wipe" class="ghost" title="Erase saved settings, like a brand new light">Wipe memory</button>
-      <label class="speed" title="Runs at normal speed whenever the button is held">Fast-forward
+    <div class="tools">
+      <button id="reconnect" class="btn" title="Unscrew and refit the tailcap">Reconnect battery</button>
+      <button id="wipe" class="btn" title="Erase saved settings, like a brand new light">Wipe memory</button>
+      <div class="field field-inline" title="Runs at normal speed whenever the button is held">
+        <label for="speed">Fast-forward</label>
         <select id="speed">
           <option value="1">1&times;</option>
           <option value="4">4&times;</option>
           <option value="16">16&times;</option>
         </select>
-      </label>
+      </div>
     </div>
   </section>
 
-  <section class="panel readouts">
+  <section class="card readouts">
     <h2>Firmware</h2>
     <dl id="firmwareReadout">
       <dt>state</dt><dd id="rState">-</dd>
-      <dt>stack</dt><dd id="rStack" class="muted">-</dd>
+      <dt>stack</dt><dd id="rStack">-</dd>
       <dt>event</dt><dd id="rEvent">-</dd>
       <dt>level</dt><dd id="rLevel">-</dd>
       <dt>channel</dt><dd id="rChannel">-</dd>
@@ -92,23 +107,23 @@
     </dl>
   </section>
 
-  <section class="panel env">
+  <section class="card env">
     <h2>Environment</h2>
     <div class="controls" id="envControls"></div>
     <p class="hint" id="envHint"></p>
   </section>
 
-  <section class="panel log">
-    <h2>Event log <button id="clearLog" class="ghost small">clear</button></h2>
+  <section class="card log">
+    <h2>Event log <button id="clearLog" class="btn btn-mini">Clear</button></h2>
     <ol id="logList"></ol>
   </section>
 
-  <section class="panel source">
+  <section class="card source">
     <h2>Source <span id="sourceWhere" class="path muted"></span></h2>
     <p class="hint">The code below is fetched from GitHub at the exact commit this build was compiled from.</p>
     <div class="source-actions">
-      <button id="loadSource" class="ghost">Show the code for this state</button>
-      <a id="sourceLink" class="ghost" target="_blank" rel="noopener" hidden>Open on GitHub</a>
+      <button id="loadSource" class="btn">Show the code for this state</button>
+      <a id="sourceLink" class="btn" target="_blank" rel="noopener" hidden>Open on GitHub</a>
     </div>
     <pre id="sourceView" hidden></pre>
   </section>
