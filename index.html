@@ -1,2 +1,877 @@
-hi
-i use this domain to host random stuff i dont want to bother making a custom subdomain for, and images for my stuff
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Pad Arcade — Launchpad</title>
+<style>
+  :root { --bg:#101114; --panel:#191a20; --line:#303139; --muted:#9698a8; --text:#f1f1f5; --lime:#d5fa73; --purple:#b5a1ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  button,select,input { font:inherit; }
+  button,select { color:inherit; background:#25262e; border:1px solid var(--line); border-radius:9px; }
+  button { cursor:pointer; padding:11px 16px; font-weight:600; touch-action:manipulation; }
+  button:hover { filter:brightness(1.16); }
+  button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible { outline:2px solid var(--lime); outline-offset:4px; }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  button.primary { background:var(--lime); border-color:var(--lime); color:#202619; }
+  header { max-width:1180px; margin:auto; padding:28px 30px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); gap:16px; }
+  .brand { font-size:20px; font-weight:800; letter-spacing:-.7px; display:flex; align-items:center; gap:12px; }
+  .brandmark { display:grid; grid-template-columns:repeat(3,5px); gap:3px; transform:rotate(-8deg); }
+  .brandmark i { height:5px; background:var(--lime); border-radius:1px; }
+  .eyebrow { color:var(--muted); font:11px/1.5 ui-monospace,SFMono-Regular,monospace; letter-spacing:1.7px; text-transform:uppercase; }
+  .badge { font-size:12px; color:var(--muted); border:1px solid var(--line); padding:7px 12px; border-radius:30px; white-space:nowrap; }
+  .badge::before { content:""; display:inline-block; width:6px; height:6px; background:var(--muted); border-radius:50%; margin-right:8px; }
+  .badge.connected::before { background:var(--lime); box-shadow:0 0 9px #d5fa7355; }
+  main { max-width:1180px; margin:auto; padding:36px 30px 50px; }
+  .intro { display:flex; justify-content:space-between; align-items:end; gap:20px; margin-bottom:28px; }
+  h1 { font-size:clamp(30px,4vw,44px); letter-spacing:-1.7px; line-height:1.1; margin:9px 0 13px; }
+  p { margin:0; color:var(--muted); }
+  .offline { display:flex; flex-direction:column; align-items:flex-end; gap:11px; font-size:12px; text-align:right; color:var(--muted); }
+  .layout { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr); gap:24px; align-items:start; }
+  .home-view { max-width:1120px; margin:6vh auto 0; }
+  .home-copy { max-width:720px; margin-bottom:30px; }
+  .home-copy h1 { margin-bottom:14px; }
+  .model-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+  .model-card { position:relative; display:flex; cursor:pointer; }
+  .model-card input { position:absolute; width:1px; height:1px; margin:0; opacity:0; pointer-events:none; }
+  .model-card-body { position:relative; flex:1; display:flex; flex-direction:column; min-height:162px; padding:18px; background:var(--panel); border:1px solid var(--line); border-radius:14px; transition:border-color .15s,background .15s,transform .15s,box-shadow .15s; }
+  .model-card:hover .model-card-body { border-color:#5b6070; transform:translateY(-2px); }
+  .model-card input:focus-visible + .model-card-body { outline:2px solid var(--lime); outline-offset:4px; }
+  .model-card input:checked + .model-card-body { border-color:var(--lime); background:#242a1d; box-shadow:0 0 0 1px #d5fa7344; }
+  .model-icon { display:block; width:54px; height:54px; margin-bottom:16px; color:#41444f; --aux:#5b6070; transition:color .15s; }
+  .model-icon svg { display:block; width:100%; height:100%; }
+  .model-icon .keys { fill:var(--aux); }
+  .model-icon .faint { opacity:.42; }
+  .model-card:hover .model-icon { color:#505464; --aux:#6e7385; }
+  .model-card input:checked + .model-card-body .model-icon { color:var(--lime); --aux:#8ab441; }
+  .model-name { display:block; font-weight:700; letter-spacing:-.2px; }
+  .model-detail { display:block; margin:5px 0 14px; color:var(--muted); font-size:12px; }
+  .model-tag { align-self:start; margin-top:auto; padding:4px 9px; border:1px solid var(--line); border-radius:30px; font:10px ui-monospace,SFMono-Regular,monospace; letter-spacing:.9px; text-transform:uppercase; color:#8b8ea0; }
+  .model-card input:checked + .model-card-body .model-tag { border-color:#4e5c31; color:var(--lime); }
+  .model-check { position:absolute; top:14px; right:14px; display:grid; place-items:center; width:19px; height:19px; border-radius:50%; background:var(--lime); color:#202619; font-size:11px; font-weight:800; opacity:0; transform:scale(.6); transition:opacity .15s,transform .15s; }
+  .model-card input:checked + .model-card-body .model-check { opacity:1; transform:scale(1); }
+  .model-actions { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-top:24px; }
+  .model-actions p { font-size:12px; }
+  #continue { min-width:210px; }
+  .play-view[hidden],.home-view[hidden] { display:none; }
+  .play-view:focus,.home-view:focus { outline:none; }
+  .model-change { padding:7px 13px; font-size:12px; border-radius:8px; white-space:nowrap; }
+  @media (max-width:980px) { .model-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media (max-width:600px) { .model-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .model-actions { display:block; } #continue { width:100%; margin-top:16px; } }
+  @media (max-width:420px) {
+    .model-grid { grid-template-columns:1fr; }
+    .model-card-body { display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:15px; min-height:0; }
+    .model-icon { grid-row:1/4; align-self:center; width:44px; height:44px; margin:0; }
+    .model-detail { margin-bottom:0; }
+    .model-tag { justify-self:start; margin-top:9px; }
+  }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms !important; } .model-card:hover .model-card-body { transform:none; } }
+   .panel { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:22px; }
+  .play-panel { padding:24px; }
+  .game-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; background:#111216; padding:5px; border-radius:11px; }
+  .game-tabs button { min-width:0; padding:10px 6px; font-size:13px; border-color:transparent; background:transparent; color:var(--muted); }
+  .game-tabs button[aria-pressed="true"] { color:var(--lime); background:#292e21; border-color:#414b2f; }
+  .game-tabs button[data-game="tetris"][aria-pressed="true"] { color:var(--purple); background:#2c263e; border-color:#4c4168; }
+  .game-tabs button[data-game="simon"][aria-pressed="true"] { color:#5adaf6; background:#16303a; border-color:#2c5f73; }
+  .game-tabs button[data-game="breakout"][aria-pressed="true"] { color:#ffa357; background:#3a2718; border-color:#71462a; }
+  .scoreboard { display:grid; grid-template-columns:1fr 1fr 1fr; margin:22px 0; gap:10px; }
+  .metric { border-right:1px solid var(--line); }
+  .metric:last-child { border:0; }
+  .metric strong { display:block; font:600 27px/1.3 ui-monospace,SFMono-Regular,monospace; margin-top:4px; }
+  .device { background:#0b0c10; border:1px solid #36373f; padding:16px; border-radius:17px; box-shadow:0 8px 0 #07080b,0 18px 36px #0004; }
+  .surface { display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:7px; }
+  .surface--surround { grid-template-columns:repeat(10,minmax(0,1fr)); }
+  .pad,.control { aspect-ratio:1; min-width:0; padding:0; border-radius:5px; border:1px solid #ffffff0a; display:flex; align-items:center; justify-content:center; }
+  .pad { background:#202127; position:relative; }
+  .pad.lit { box-shadow:inset 0 0 9px #ffffff17,0 0 12px var(--glow); }
+  .control { background:#1b1c22; color:#aaaebd; font-size:clamp(9px,1.3vw,13px); }
+  .control[data-action="pause"] { color:var(--lime); }
+  .control[data-action="snake"],.control[data-action="tetris"],.control[data-action="simon"],.control[data-action="breakout"] { color:var(--purple); }
+  .control[data-action="easy"],.control[data-action="normal"],.control[data-action="hard"] { color:#6fcadd; }
+  .corner { display:grid; place-items:center; color:#565963; font-size:14px; }
+  .device-label { display:flex; justify-content:space-between; margin-top:14px; color:#6b6e7d; font:10px ui-monospace,SFMono-Regular,monospace; letter-spacing:1.2px; }
+  .game-status { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:24px 0 16px; min-height:47px; }
+  #gameState { font-weight:700; font-size:16px; }
+  #gameHint { font-size:12px; margin-top:3px; }
+  .state-label { padding:5px 9px; font:10px ui-monospace,SFMono-Regular,monospace; letter-spacing:1px; color:var(--lime); border:1px solid #414b2f; border-radius:5px; }
+  .actions { display:flex; gap:9px; }
+  .actions button:first-child { flex:1; }
+  .sidebar { display:grid; gap:18px; }
+  .section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  h2 { font-size:16px; margin:0; letter-spacing:-.2px; }
+  .section-number { font:11px ui-monospace,SFMono-Regular,monospace; color:#717483; }
+  .steps { list-style:none; padding:0; margin:0 0 18px; counter-reset:step; }
+  .steps li { counter-increment:step; display:flex; gap:12px; margin:12px 0; color:#bcbeca; font-size:13px; }
+  .steps li::before { content:counter(step); flex-shrink:0; display:grid; place-items:center; width:23px; height:23px; border:1px solid #41434f; border-radius:50%; font:11px ui-monospace,SFMono-Regular,monospace; color:var(--purple); }
+  #connect { width:100%; }
+  #connectionMessage { font-size:12px; margin-top:12px; overflow-wrap:anywhere; }
+  .error { color:#ff999f !important; }
+  .port-fields { display:grid; gap:10px; margin-top:16px; }
+  .port-fields[hidden] { display:none; }
+  label { display:block; font-size:12px; color:var(--muted); }
+  select { width:100%; padding:9px; margin-top:5px; min-width:0; }
+  .setting { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:16px; }
+  .setting[hidden] { display:none; }
+  .setting select { width:125px; margin:0; }
+  input[type="range"] { width:125px; accent-color:var(--lime); }
+  .key-row { display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:12px; padding:9px 0; border-bottom:1px solid #ffffff08; color:#bcbeca; }
+  kbd { display:inline-block; background:#25262e; border:1px solid #454652; border-bottom-width:2px; border-radius:4px; padding:2px 6px; font:11px ui-monospace,SFMono-Regular,monospace; color:#efeff4; }
+  .note { font-size:12px; margin-top:14px; }
+  .next { display:flex; align-items:center; gap:9px; }
+  #nextPiece { width:48px; height:36px; display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(3,1fr); gap:2px; }
+  #nextPiece span { border-radius:2px; }
+  details { margin-top:24px; border-top:1px solid var(--line); padding-top:20px; }
+  summary { color:#c4c6d1; cursor:pointer; font-size:13px; }
+  details p { font-size:13px; margin:12px 0; max-width:880px; }
+  a { color:var(--purple); }
+  code { font-size:12px; color:#d2d5e0; overflow-wrap:anywhere; }
+  footer { display:flex; justify-content:space-between; gap:15px; margin-top:25px; font:10px ui-monospace,SFMono-Regular,monospace; color:#6f7280; letter-spacing:.7px; }
+  @media (max-width:800px) { .layout { grid-template-columns:1fr; } .intro { display:block; } .offline { align-items:flex-start; text-align:left; margin-top:14px; } .control { font-size:12px; } .play-panel { max-width:570px; width:100%; margin:auto; } }
+  @media (max-width:420px) { main { padding:24px 14px; } header { padding:20px 14px; } .badge { font-size:10px; } .panel { padding:17px; } .device { padding:10px; } .surface { gap:5px; } .control { font-size:10px; } .game-tabs { grid-template-columns:repeat(2,minmax(0,1fr)); } footer { flex-direction:column; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="brandmark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>pad arcade<span style="color:var(--muted);font-weight:400">/</span></div>
+  <span id="connectionBadge" class="badge">Keyboard mode</span>
+</header>
+<main>
+  <section id="homeView" class="home-view" tabindex="-1" aria-labelledby="homeTitle">
+    <div class="home-copy">
+      <div class="eyebrow">Pad arcade / setup</div>
+      <h1 id="homeTitle">Choose your Launchpad.</h1>
+      <p>Pick your controller first — arcade lighting and MIDI mapping follow your hardware. No Launchpad to hand? Choose the closest model anyway; every game also plays on the keyboard.</p>
+    </div>
+    <form id="modelForm">
+      <div class="model-grid" role="radiogroup" aria-label="Launchpad model">
+        <label class="model-card"><input type="radio" name="model" value="mini-mk3"><span class="model-card-body"><span class="model-icon" aria-hidden="true"></span><span class="model-name">Launchpad Mini MK3</span><span class="model-detail">8 × 8 + top / right buttons</span><span class="model-tag">RGB SysEx</span><span class="model-check" aria-hidden="true">✓</span></span></label>
+        <label class="model-card"><input type="radio" name="model" value="launchpad-x"><span class="model-card-body"><span class="model-icon" aria-hidden="true"></span><span class="model-name">Launchpad X</span><span class="model-detail">8 × 8 + top / right buttons</span><span class="model-tag">RGB SysEx</span><span class="model-check" aria-hidden="true">✓</span></span></label>
+        <label class="model-card"><input type="radio" name="model" value="pro-mk3"><span class="model-card-body"><span class="model-icon" aria-hidden="true"></span><span class="model-name">Launchpad Pro MK3</span><span class="model-detail">8 × 8 + buttons all round</span><span class="model-tag">RGB SysEx</span><span class="model-check" aria-hidden="true">✓</span></span></label>
+        <label class="model-card"><input type="radio" name="model" value="legacy"><span class="model-card-body"><span class="model-icon" aria-hidden="true"></span><span class="model-name">Launchpad MK2 / older</span><span class="model-detail">8 × 8 + top / right buttons</span><span class="model-tag">MIDI palette</span><span class="model-check" aria-hidden="true">✓</span></span></label>
+        <label class="model-card"><input type="radio" name="model" value="standard"><span class="model-card-body"><span class="model-icon" aria-hidden="true"></span><span class="model-name">Other Launchpad</span><span class="model-detail">8 × 8 grid, custom controls</span><span class="model-tag">Standard MIDI</span><span class="model-check" aria-hidden="true">✓</span></span></label>
+      </div>
+      <div class="model-actions"><p id="modelHint" aria-live="polite">Choose model to continue.</p><button id="continue" class="primary" type="submit" disabled>Continue to playing <span aria-hidden="true">→</span></button></div>
+    </form>
+  </section>
+  <section id="playView" class="play-view" tabindex="-1" hidden>
+  <div class="intro">
+    <div><div class="eyebrow">64 pads. Four games. Any Launchpad.</div><h1>Your Launchpad. Now an arcade.</h1><p>Plug in, light up, and give those pads a different kind of workout.</p></div>
+    <div class="offline"><p>Made for Launchpad controllers<br>One file · No downloads · Works offline</p><button id="changeModel" class="model-change" type="button">Change model</button></div>
+  </div>
+  <div class="layout">
+    <section class="panel play-panel" aria-label="Game arcade">
+      <div class="game-tabs" role="group" aria-label="Select game">
+        <button data-game="snake" aria-pressed="true">01 / Snake</button>
+        <button data-game="tetris" aria-pressed="false">02 / Tetris</button>
+        <button data-game="simon" aria-pressed="false">03 / Simon</button>
+        <button data-game="breakout" aria-pressed="false">04 / Breakout</button>
+      </div>
+      <div class="scoreboard">
+        <div class="metric"><span class="eyebrow">Score</span><strong id="score">000</strong></div>
+        <div class="metric"><span class="eyebrow">Personal best</span><strong id="best">000</strong></div>
+        <div class="metric"><span id="thirdLabel" class="eyebrow">Length</span><strong id="thirdValue">3 / 64</strong></div>
+      </div>
+      <div class="device">
+        <div id="surface" class="surface" role="group" aria-label="Launchpad game display and controls"></div>
+        <div class="device-label"><span>LAUNCHPAD / <span id="deviceLabel">MIDI</span></span><span>8 × 8</span></div>
+      </div>
+      <div class="game-status" aria-live="polite"><div><div id="gameState">Ready when you are.</div><p id="gameHint">Eat the pink pixel. Don't hit the walls or yourself.</p></div><span id="stateLabel" class="state-label">READY</span></div>
+      <div class="actions"><button id="start" class="primary">Start game <span aria-hidden="true">↵</span></button><button id="restart" aria-label="Restart game">Restart</button></div>
+    </section>
+    <aside class="sidebar">
+      <section class="panel">
+        <div class="section-title"><h2>Connect your Launchpad</h2><span class="section-number">01 — USB MIDI</span></div>
+        <ol class="steps">
+          <li><span>Connect any Launchpad with a <b>USB data cable</b>.</span></li>
+          <li><span>Open this file in <b>Chrome or Edge</b>. Close Ableton, Components, and other apps using the controller.</span></li>
+          <li><span>Click below and allow MIDI access. RGB Launchpads switch to Programmer Mode automatically; older models use standard MIDI lighting.</span></li>
+        </ol>
+        <button id="connect" class="primary">Connect Launchpad</button>
+        <p id="connectionMessage" role="status">No hardware? Start a game with your keyboard or the on-screen controls.</p>
+        <div id="portFields" class="port-fields" hidden>
+          <label>MIDI input<select id="midiInput" aria-label="MIDI input"></select></label>
+          <label>MIDI output<select id="midiOutput" aria-label="MIDI output"></select></label>
+        </div>
+        <div class="setting"><label for="brightness">Pad brightness <span id="brightnessValue">55%</span></label><input id="brightness" type="range" min="5" max="100" value="55"></div>
+      </section>
+      <section class="panel">
+        <div class="section-title"><h2 id="controlsTitle">How to play Snake</h2><span class="section-number">02 — PLAY</span></div>
+        <div class="key-row"><span id="directionLabel">Steer</span><span><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></span></div>
+        <div class="key-row"><span id="spaceLabel">Pause / resume</span><kbd>Space</kbd></div>
+        <div class="key-row"><span>Start / pause / resume</span><span><kbd>Enter</kbd> / <kbd>P</kbd></span></div>
+        <div class="key-row"><span>Restart</span><kbd>R</kbd></div>
+        <p class="note" id="padHelp">On hardware: use the four top-left arrow buttons, or tap the grid's top, bottom, left, or right region to steer.</p>
+        <p class="note">The screen mirrors common 8×8 Launchpad layouts. On models with edge buttons, right edge runs up / rotate, left, right, down, drop, play / pause, restart, switch game; top runs arrows, Snake, Tetris, play / pause, restart. Pro MK3 adds two rails: its left column picks the game (Snake, Tetris, Simon, Breakout) and sets difficulty, and its bottom row repeats the arrows, hard drop, play / pause, restart and switch.</p>
+        <div class="setting"><label for="speed">Difficulty</label><select id="speed"><option value="easy">Chill</option><option value="normal" selected>Classic</option><option value="hard">Fast</option></select></div>
+        <div class="setting" id="nextSection" hidden><span class="eyebrow">Next piece</span><div class="next"><span id="nextName" class="eyebrow"></span><div id="nextPiece" aria-label="Next tetromino preview"></div></div></div>
+        <p class="note" id="rules">Every snack earns 10 points and makes you faster. Fill all 64 pads to win. WASD also works.</p>
+      </section>
+    </aside>
+  </div>
+  <details>
+    <summary>Connection help &amp; hardware notes</summary>
+    <p><b>Safari won't connect.</b> Use current Chrome or Edge. This is a local, self-contained page: no accounts, libraries, or network requests. Your personal bests are stored only in this browser.</p>
+    <p>If MIDI is blocked for a local file, serve this folder from Terminal with <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open <a href="http://localhost:8000/launchpad-arcade.html">http://localhost:8000/launchpad-arcade.html</a> in Chrome. Web MIDI requires a trusted context such as localhost or HTTPS. Allow MIDI / SysEx in the browser's site settings if you previously denied it.</p>
+    <p><b>No device listed?</b> Check the cable supports data, not only charging. Unplug and reconnect; close other MIDI apps. The selectors list connected Launchpad MIDI ports, not DAW ports. If you have multiple Launchpads, select matching input and output, then connect. Reconnect explicitly after unplugging.</p>
+    <p><b>Done playing?</b> Click <b>Disconnect &amp; restore</b> to clear LEDs and return modern Launchpads to Live Mode. Older models receive an all-off frame. Closing a tab attempts same, but browsers cannot guarantee MIDI delivery during shutdown.</p>
+    <p>Games pause when this tab becomes hidden or controller disconnects. Keep this tab visible while playing on hardware. Tetris uses compact <b>8×8 board</b>, seven tetrominoes, clockwise rotation with simple wall kicks, and dim landing preview. It is not full-size tournament-rules implementation.</p>
+    <p>Modern Launchpads use Novation's <a href="https://userguides.novationmusic.com/hc/en-gb/articles/24001475492498-Controlling-the-Launchpad-X-surface" target="_blank" rel="noreferrer">Programmer Mode MIDI/SysEx surface</a>. Older models use standard <a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator/requestMIDIAccess" target="_blank" rel="noreferrer">Web MIDI</a> messages.</p>
+  </details>
+  <footer><span>PAD ARCADE / LOCAL PLAY, REAL LIGHTS</span><span id="midiActivity">MIDI NOT CONNECTED</span></footer>
+  </section>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const SIZE = 8;
+const COLORS = { off:[0,0,0], snake:[123,206,70], head:[213,250,115], food:[255,97,144], over:[255,48,48], I:[90,218,246], O:[249,210,94], T:[183,145,255], S:[118,221,126], Z:[248,100,121], J:[103,151,255], L:[255,163,87] };
+const SHAPES = { I:[[1,1,1,1]], O:[[1,1],[1,1]], T:[[0,1,0],[1,1,1]], S:[[0,1,1],[1,1,0]], Z:[[1,1,0],[0,1,1]], J:[[1,0,0],[1,1,1]], L:[[0,0,1],[1,1,1]] };
+const GAMEOVER_FLASH_MS = 1250, GAMEOVER_BLINK_MS = 250;
+const SPEEDS = ['easy','normal','hard'];
+const topControls = [['up','↑','Up / rotate'],['down','↓','Down'],['left','←','Left'],['right','→','Right'],['snake','S','Select Snake'],['tetris','T','Select Tetris'],['pause','Ⅱ','Start / pause / resume'],['restart','↻','Restart']];
+const sideControls = [['up','↑','Up / rotate'],['left','←','Left'],['right','→','Right'],['down','↓','Down'],['drop','⇓','Hard drop (Tetris)'],['pause','Ⅱ','Start / pause / resume'],['restart','↻','Restart'],['switch','⇄','Switch game']];
+// Pro MK3 only: its left column becomes the game / difficulty rail and its bottom
+// row a second transport rail, mirroring where those keys sit on the hardware.
+const leftControls = [['snake','S','Select Snake'],['tetris','T','Select Tetris'],['simon','M','Select Simon'],['breakout','B','Select Breakout'],['easy','1','Difficulty: Chill'],['normal','2','Difficulty: Classic'],['hard','3','Difficulty: Fast'],['switch','⇄','Switch game']];
+const bottomControls = [['left','←','Left'],['down','↓','Down'],['up','↑','Up / rotate'],['right','→','Right'],['drop','⇓','Hard drop (Tetris)'],['pause','Ⅱ','Start / pause / resume'],['restart','↻','Restart'],['switch','⇄','Switch game']];
+// `layout` drives both the setup-screen icon and the on-screen surface, so the
+// preview can never disagree with the model the player picked.
+const DEVICE_PROFILES = [
+  {id:'mini-mk3', label:'Mini MK3', match:/lpminimk3|launchpadminimk3/, product:0x0D, topBase:91, sideBase:89, rgb:true, programmer:true, layout:'top-right'},
+  {id:'launchpad-x', label:'Launchpad X', match:/launchpadx|lpx/, product:0x0C, topBase:91, sideBase:89, rgb:true, programmer:true, layout:'top-right'},
+  {id:'pro-mk3', label:'Pro MK3', match:/launchpadpromk3|lppromk3/, product:0x0E, topBase:91, sideBase:89, leftBase:80, bottomBase:1, rgb:true, programmer:true, layout:'surround'},
+  {id:'legacy', label:'Legacy Launchpad', match:/launchpad(?:mk1|mk2|original)|lpmk[12]/, topBase:104, sideBase:89, rgb:false, programmer:false, layout:'top-right'},
+  {id:'standard', label:'Launchpad', match:/launchpad|^lp(?:$|[^a-z])/, topBase:104, sideBase:89, rgb:false, programmer:false, layout:'top-right', vague:true}
+];
+function profileForPort(port) {
+  const name = (port?.name || '').replace(/[^a-z0-9]/gi,'').toLowerCase();
+  return DEVICE_PROFILES.find(profile => profile.match.test(name)) || DEVICE_PROFILES.at(-1);
+}
+function profileForId(id) { return DEVICE_PROFILES.find(profile => profile.id === id) || DEVICE_PROFILES.at(-1); }
+let selectedProfileId = '';
+let deviceProfile = DEVICE_PROFILES[0];
+const pads = [], ledCache = new Map();
+let game = 'snake', state = 'ready', score = 0, lines = 0, elapsed = 0, lastTime = 0, overAt = 0, overPhase = -1;
+let snake, direction, turns, food, board, piece, bag = [], nextType;
+let simon, ball, paddle, bricks;
+let midiAccess = null, midiInput = null, midiOutput = null, midiBusy = false;
+let brightness = .55, lastMidiPaint = 0, pauseReason = '';
+let bests = { snake:0, tetris:0, simon:0, breakout:0 };
+try { for (const key of Object.keys(bests)) { const value = Number(localStorage.getItem('pad-arcade-best-' + key)); if (Number.isFinite(value) && value > 0) bests[key] = value; } } catch { /* Storage may be blocked for local files. */ }
+
+function controlButton(spec, area, position) {
+  const button = document.createElement('button');
+  button.className = 'control'; button.textContent = spec[1]; button.title = spec[2];
+  button.setAttribute('aria-label', spec[2]); button.dataset.action = spec[0]; button.dataset.area = area; button.dataset.position = position;
+  button.addEventListener('click', () => action(spec[0]));
+  return button;
+}
+function surfaceCell(className) {
+  const cell = document.createElement('span');
+  cell.className = className; cell.setAttribute('aria-hidden','true');
+  if (className === 'corner') cell.textContent = '·';
+  return cell;
+}
+// Pro MK3 wraps its grid in edge keys on all four sides; every other model has
+// them along the top and right only.
+function buildSurface() {
+  const surface = $('surface'), surround = deviceProfile.layout === 'surround';
+  surface.replaceChildren();
+  surface.classList.toggle('surface--surround',surround);
+  pads.length = 0;
+  if (surround) surface.append(surfaceCell('corner'));
+  for (let x = 0; x < SIZE; x++) surface.append(controlButton(topControls[x], 'top', x));
+  surface.append(surfaceCell('corner'));
+  for (let y = 0; y < SIZE; y++) {
+    if (surround) surface.append(controlButton(leftControls[y], 'left', y));
+    for (let x = 0; x < SIZE; x++) {
+      const pad = document.createElement('button'); pad.className = 'pad';
+      pad.setAttribute('aria-label', 'Row ' + (y + 1) + ', column ' + (x + 1));
+      pad.addEventListener('click', () => gridAction(x, y));
+      pads.push(pad); surface.append(pad);
+    }
+    surface.append(controlButton(sideControls[y], 'side', y));
+  }
+  if (surround) {
+    surface.append(surfaceCell('corner'));
+    for (let x = 0; x < SIZE; x++) surface.append(controlButton(bottomControls[x], 'bottom', x));
+    surface.append(surfaceCell('corner'));
+  }
+}
+buildSurface();
+for (let i = 0; i < 12; i++) $('nextPiece').append(document.createElement('span'));
+
+function recordBest() {
+  if (score <= bests[game]) return;
+  bests[game] = score;
+  try { localStorage.setItem('pad-arcade-best-' + game, String(score)); } catch { /* Gameplay does not require storage. */ }
+}
+function newFood() {
+  const free = [];
+  for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) if (!snake.some(p => p.x === x && p.y === y)) free.push({x,y});
+  return free.length ? free[Math.floor(Math.random() * free.length)] : null;
+}
+function drawType() {
+  if (!bag.length) {
+    bag = Object.keys(SHAPES);
+    for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i],bag[j]] = [bag[j],bag[i]]; }
+  }
+  return bag.pop();
+}
+function spawnPiece() {
+  const type = nextType; nextType = drawType();
+  const shape = SHAPES[type].map(row => row.slice());
+  piece = { type, shape, x:Math.floor((SIZE - shape[0].length) / 2), y:0 };
+  if (!fits(piece.shape, piece.x, piece.y)) endGame(false);
+}
+// --- Simon: repeat the flashing quadrants -------------------------------------
+const SIMON_QUADS = [COLORS.I, COLORS.O, COLORS.S, COLORS.food];
+const SIMON_ARROWS = { up:0, right:1, down:3, left:2 };
+function quadFill(cells, quad, rgb) {
+  const ox = (quad % 2) * 4, oy = Math.floor(quad / 2) * 4;
+  for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) cells[(oy + y) * SIZE + ox + x] = rgb;
+}
+function stepSimon() {
+  simon.flash = -1;
+  if (simon.phase === 'input') return;
+  if (simon.phase === 'grow') { simon.sequence.push(Math.floor(Math.random() * 4)); simon.phase = 'show'; simon.at = 0; simon.lit = true; return; }
+  // Every flash is followed by a dark beat so repeats of one quadrant stay countable.
+  if (simon.lit) { simon.lit = false; return; }
+  simon.at++;
+  if (simon.at >= simon.sequence.length) { simon.phase = 'input'; simon.typed = 0; }
+  else simon.lit = true;
+}
+function simonPress(quad) {
+  if (simon.phase !== 'input') return;
+  simon.flash = quad;
+  if (quad !== simon.sequence[simon.typed]) { endGame(false); return; }
+  simon.typed++;
+  if (simon.typed < simon.sequence.length) return;
+  score += 10 * simon.sequence.length; recordBest();
+  simon.phase = 'grow'; simon.lit = false; elapsed = 0;
+}
+
+// --- Breakout: three brick rows, one ball, no second chances -------------------
+const BRICK_ROWS = 3, PADDLE_W = 3, PADDLE_Y = SIZE - 1, BRICK_TOTAL = BRICK_ROWS * SIZE;
+const BRICK_COLORS = [COLORS.Z, COLORS.L, COLORS.O];
+function bricksLeft() { return bricks.reduce((total,row) => total + row.filter(Boolean).length, 0); }
+function movePaddle(to) { paddle = Math.min(SIZE - PADDLE_W, Math.max(0, to)); }
+function stepBreakout() {
+  let nx = ball.x + ball.dx, ny = ball.y + ball.dy;
+  if (nx < 0 || nx >= SIZE) { ball.dx = -ball.dx; nx = ball.x + ball.dx; }
+  if (ny < 0) { ball.dy = 1; ny = ball.y + ball.dy; }
+  if (ny < BRICK_ROWS && bricks[ny][nx]) {
+    bricks[ny][nx] = false; score += 10; recordBest();
+    ball.dy = -ball.dy; ny = ball.y + ball.dy;
+    if (!bricksLeft()) { ball.x = nx; ball.y = Math.max(0,ny); endGame(true); return; }
+  }
+  if (ny >= PADDLE_Y) {
+    const hit = nx - paddle;
+    if (hit < 0 || hit >= PADDLE_W) { endGame(false); return; }
+    // Edge of the paddle steers the ball; the middle keeps its angle.
+    ball.dy = -1; ny = PADDLE_Y - 1;
+    if (hit === 0) ball.dx = -1; else if (hit === PADDLE_W - 1) ball.dx = 1;
+  }
+  ball.x = nx; ball.y = ny;
+}
+
+// One entry per game, so adding a game never means editing the engine again.
+const GAMES = {
+  snake: {
+    label:'Snake', tint:COLORS.head, metric:'Length', space:'pause', repeat:[],
+    speeds:{easy:400,normal:280,hard:170},
+    interval(base) { return Math.max(85, base - Math.floor(score / 10) * 6); },
+    reset() { snake = [{x:3,y:4},{x:2,y:4},{x:1,y:4}]; direction = {x:1,y:0}; turns = []; food = newFood(); },
+    step() { stepSnake(); },
+    input(name) { const move = {up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[name]; if (move) snakeTurn(...move); },
+    grid(x,y) { const dx = x - 3.5, dy = y - 3.5; this.input(Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down')); },
+    draw(cells) { snake.forEach((p,i) => { cells[p.y * SIZE + p.x] = i === 0 ? COLORS.head : COLORS.snake; }); if (food) cells[food.y * SIZE + food.x] = COLORS.food; },
+    value() { return snake.length + ' / 64'; },
+    running:'Find your next bite.', won:'All 64 pads. You win!',
+    hint:"Eat the pink pixel. Don't hit the walls or yourself.",
+    steer:'Steer', spaceLabel:'Pause / resume',
+    padHelp:"On hardware: use the four top-left arrow buttons, or tap the grid's top, bottom, left, or right region to steer.",
+    rules:'Every snack earns 10 points and makes you faster. Fill all 64 pads to win. WASD also works.'
+  },
+  tetris: {
+    label:'Tetris', tint:COLORS.T, metric:'Lines / level', space:'drop', repeat:['left','right','down'],
+    speeds:{easy:950,normal:650,hard:380},
+    interval(base) { return Math.max(120, base * Math.pow(.82, Math.floor(lines / 5))); },
+    reset() { board = Array.from({length:SIZE}, () => Array(SIZE).fill(null)); bag = []; nextType = drawType(); spawnPiece(); },
+    step() { stepTetris(); },
+    input(name) {
+      if (name === 'left' || name === 'right') { const dx = name === 'left' ? -1 : 1; if (fits(piece.shape,piece.x + dx,piece.y)) piece.x += dx; }
+      if (name === 'up') rotatePiece();
+      if (name === 'down') stepTetris(true);
+      if (name === 'drop') { while (fits(piece.shape,piece.x,piece.y + 1)) { piece.y++; score += 2; } lockPiece(); }
+    },
+    grid(x,y) { this.input(x < 3 ? 'left' : x > 4 ? 'right' : y < 4 ? 'up' : 'drop'); },
+    draw(cells) {
+      board.forEach((row,y) => row.forEach((type,x) => { if (type) cells[y * SIZE + x] = COLORS[type]; }));
+      let ghostY = piece.y;
+      while (fits(piece.shape,piece.x,ghostY + 1)) ghostY++;
+      const ghostColor = COLORS[piece.type].map(v => Math.round(v * .15));
+      for (let y = 0; y < piece.shape.length; y++) for (let x = 0; x < piece.shape[y].length; x++) if (piece.shape[y][x]) {
+        if (ghostY + y >= 0) cells[(ghostY + y) * SIZE + piece.x + x] = ghostColor;
+      }
+      for (let y = 0; y < piece.shape.length; y++) for (let x = 0; x < piece.shape[y].length; x++) if (piece.shape[y][x] && piece.y + y >= 0) cells[(piece.y + y) * SIZE + piece.x + x] = COLORS[piece.type];
+    },
+    value() { return lines + ' / ' + (1 + Math.floor(lines / 5)); },
+    running:'Make room for one more.', won:'Board cleared. You win!',
+    hint:'Stack, rotate, clear. Dim pixels show where you will land.',
+    steer:'Move / rotate ↑ / soft drop ↓', spaceLabel:'Hard drop',
+    padHelp:'Grid controls: left 3 columns move left; right 3 move right. Middle 2 columns: top half rotates, bottom half hard-drops. Arrow buttons also work.',
+    rules:'Clear 1 / 2 / 3 / 4 rows for 100 / 300 / 500 / 800 × level. Level up every 5 rows. Soft drop: 1 per cell; hard drop: 2. WASD also works.'
+  },
+  simon: {
+    label:'Simon', tint:COLORS.I, metric:'Sequence', space:'pause', repeat:[],
+    speeds:{easy:460,normal:330,hard:220},
+    interval(base) { return base; },
+    reset() { simon = {sequence:[], phase:'grow', at:0, lit:false, typed:0, flash:-1}; },
+    step() { stepSimon(); },
+    input(name) { const quad = SIMON_ARROWS[name]; if (quad !== undefined) simonPress(quad); },
+    grid(x,y) { simonPress((y < 4 ? 0 : 2) + (x < 4 ? 0 : 1)); },
+    draw(cells) {
+      if (simon.phase === 'show' && simon.lit) { const quad = simon.sequence[simon.at]; quadFill(cells,quad,SIMON_QUADS[quad]); return; }
+      if (simon.phase !== 'input') return;
+      // Your turn: all four blocks glow faintly, and the one you hit lights up.
+      for (let quad = 0; quad < 4; quad++) quadFill(cells,quad,SIMON_QUADS[quad].map(v => Math.round(v * .12)));
+      if (simon.flash >= 0) quadFill(cells,simon.flash,SIMON_QUADS[simon.flash]);
+    },
+    value() { return String(simon.sequence.length); },
+    running:'Watch, then repeat.', won:'Perfect recall!',
+    hint:'Watch the blocks flash, then play the same order back.',
+    steer:'Pick a block', spaceLabel:'Pause / resume',
+    padHelp:'On hardware: tap any pad inside a quarter of the grid to choose it. The four blocks glow dimly when it is your turn.',
+    rules:'Each round adds one flash. A finished round scores 10 × its length. One wrong block ends the run. Arrows go clockwise from the top-left block.'
+  },
+  breakout: {
+    label:'Breakout', tint:COLORS.L, metric:'Bricks', space:'pause', repeat:['left','right'],
+    speeds:{easy:340,normal:230,hard:150},
+    interval(base) { return Math.max(110, base - (BRICK_TOTAL - bricksLeft()) * 4); },
+    reset() { bricks = Array.from({length:BRICK_ROWS}, () => Array(SIZE).fill(true)); movePaddle(Math.floor((SIZE - PADDLE_W) / 2)); ball = {x:3, y:5, dx:1, dy:-1}; },
+    step() { stepBreakout(); },
+    input(name) { if (name === 'left') movePaddle(paddle - 1); if (name === 'right') movePaddle(paddle + 1); },
+    grid(x,y) { movePaddle(x - 1); },
+    draw(cells) {
+      bricks.forEach((row,y) => row.forEach((alive,x) => { if (alive) cells[y * SIZE + x] = BRICK_COLORS[y]; }));
+      for (let i = 0; i < PADDLE_W; i++) cells[PADDLE_Y * SIZE + paddle + i] = COLORS.snake;
+      cells[ball.y * SIZE + ball.x] = COLORS.head;
+    },
+    value() { return bricksLeft() + ' / ' + BRICK_TOTAL; },
+    running:'Keep it off the floor.', won:'Every brick down. You win!',
+    hint:'Slide the paddle. Miss the ball and the run is over.',
+    steer:'Move paddle', spaceLabel:'Pause / resume',
+    padHelp:'On hardware: tap any pad in a column to send the paddle there, or use the left / right buttons.',
+    rules:'Ten points a brick, and the ball speeds up as the wall thins. Paddle edges angle the ball; the middle keeps it straight. WASD also works.'
+  }
+};
+const GAME_KEYS = Object.keys(GAMES);
+
+function resetGame() {
+  score = 0; lines = 0; elapsed = 0; pauseReason = ''; state = 'ready';
+  GAMES[game].reset();
+  render();
+}
+function selectGame(value) { if (game === value || !GAMES[value]) return; game = value; resetGame(); }
+function playPause() {
+  if (state === 'running') { state = 'paused'; pauseReason = ''; }
+  else { if (state === 'over' || state === 'won') resetGame(); state = 'running'; elapsed = 0; }
+  render();
+}
+function pause(message) { if (state === 'running') { state = 'paused'; pauseReason = message; render(); } }
+function endGame(won) { state = won ? 'won' : 'over'; overAt = performance.now(); overPhase = -1; recordBest(); }
+function snakeTurn(x, y) {
+  const previous = turns.length ? turns[turns.length - 1] : direction;
+  if (turns.length < 2 && (x !== previous.x || y !== previous.y) && !(x === -previous.x && y === -previous.y)) turns.push({x,y});
+}
+function stepSnake() {
+  if (turns.length) direction = turns.shift();
+  const head = { x:snake[0].x + direction.x, y:snake[0].y + direction.y };
+  const eating = food && head.x === food.x && head.y === food.y;
+  // The tail vacates its cell this tick unless the snake is growing.
+  const bodyLength = snake.length - (eating ? 0 : 1);
+  if (head.x < 0 || head.x >= SIZE || head.y < 0 || head.y >= SIZE || snake.slice(0, bodyLength).some(p => p.x === head.x && p.y === head.y)) { endGame(false); return; }
+  snake.unshift(head);
+  if (eating) { score += 10; recordBest(); food = newFood(); if (!food) endGame(true); }
+  else snake.pop();
+}
+function fits(shape, px, py) {
+  for (let y = 0; y < shape.length; y++) for (let x = 0; x < shape[y].length; x++) {
+    if (!shape[y][x]) continue;
+    const bx = px + x, by = py + y;
+    if (bx < 0 || bx >= SIZE || by >= SIZE || (by >= 0 && board[by][bx])) return false;
+  }
+  return true;
+}
+function rotatePiece() {
+  const rotated = piece.shape[0].map((_, x) => piece.shape.map(row => row[x]).reverse());
+  for (const dx of [0,-1,1,-2,2]) if (fits(rotated, piece.x + dx, piece.y)) { piece.shape = rotated; piece.x += dx; return; }
+}
+function lockPiece() {
+  for (let y = 0; y < piece.shape.length; y++) for (let x = 0; x < piece.shape[y].length; x++) {
+    if (!piece.shape[y][x]) continue;
+    if (piece.y + y < 0) { endGame(false); return; }
+    board[piece.y + y][piece.x + x] = piece.type;
+  }
+  const remaining = board.filter(row => row.some(cell => cell === null));
+  const cleared = SIZE - remaining.length;
+  if (cleared) {
+    const level = 1 + Math.floor(lines / 5);
+    score += [0,100,300,500,800][cleared] * level; lines += cleared;
+    while (remaining.length < SIZE) remaining.unshift(Array(SIZE).fill(null));
+    board = remaining;
+  }
+  recordBest(); elapsed = 0; spawnPiece();
+}
+function stepTetris(soft = false) {
+  if (fits(piece.shape, piece.x, piece.y + 1)) { piece.y++; if (soft) { score++; recordBest(); } }
+  else lockPiece();
+}
+function action(name) {
+  if (GAMES[name]) { selectGame(name); return; }
+  if (name === 'switch') { selectGame(GAME_KEYS[(GAME_KEYS.indexOf(game) + 1) % GAME_KEYS.length]); return; }
+  if (SPEEDS.includes(name)) { $('speed').value = name; elapsed = 0; render(); return; }
+  if (name === 'restart') { resetGame(); state = 'running'; render(); return; }
+  if (name === 'pause') { playPause(); return; }
+  if (state !== 'running') return;
+  GAMES[game].input(name);
+  render();
+}
+function gridAction(x, y) {
+  if (state !== 'running') return;
+  GAMES[game].grid(x,y);
+  render();
+}
+function frameColors() {
+  const cells = Array(64).fill(COLORS.off);
+  if (state === 'over') {
+    // Death animation: flash the whole grid red, then leave it dark until restart.
+    const t = performance.now() - overAt;
+    if (t < GAMEOVER_FLASH_MS && Math.floor(t / GAMEOVER_BLINK_MS) % 2 === 0) cells.fill(COLORS.over);
+    return cells;
+  }
+  GAMES[game].draw(cells);
+  return cells;
+}
+function render() {
+  const cells = frameColors();
+  cells.forEach((rgb,i) => {
+    const lit = rgb.some(v => v > 0), color = rgb.join(',');
+    pads[i].style.backgroundColor = lit ? 'rgb(' + color + ')' : '#202127';
+    pads[i].style.setProperty('--glow','rgba(' + color + ',.15)'); pads[i].classList.toggle('lit',lit);
+  });
+  $('score').textContent = String(score).padStart(3,'0'); $('best').textContent = String(bests[game]).padStart(3,'0');
+  const def = GAMES[game];
+  $('thirdLabel').textContent = def.metric;
+  $('thirdValue').textContent = def.value();
+  $('stateLabel').textContent = state.toUpperCase();
+  $('gameState').textContent = {ready:'Ready when you are.',running:def.running,paused:'Take a breather.',over:'Game over. Go again?',won:def.won}[state];
+  $('gameHint').textContent = state === 'paused' ? (pauseReason || 'Press Enter or the green play / pause button to resume.') : state === 'over' ? 'Final score: ' + score + '. Press Enter to play again.' : def.hint;
+  $('start').textContent = {ready:'Start game ↵',running:'Pause game',paused:'Resume game ↵',over:'Play again ↵',won:'Play again ↵'}[state];
+  document.querySelectorAll('[data-game]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.game === game)));
+  $('controlsTitle').textContent = 'How to play ' + def.label;
+  $('directionLabel').textContent = def.steer;
+  $('spaceLabel').textContent = def.spaceLabel;
+  $('padHelp').textContent = def.padHelp;
+  $('rules').textContent = def.rules;
+  $('nextSection').hidden = game !== 'tetris';
+  if (game === 'tetris') {
+    $('nextName').textContent = nextType;
+    [...$('nextPiece').children].forEach((cell,i) => { cell.style.background = SHAPES[nextType][Math.floor(i / 4)]?.[i % 4] ? 'rgb(' + COLORS[nextType].join(',') + ')' : 'transparent'; });
+  }
+  paintMidi(cells);
+}
+function tick(time) {
+  const delta = lastTime ? Math.min(time - lastTime,100) : 0; lastTime = time;
+  if (state === 'running') {
+    elapsed += delta;
+    const interval = GAMES[game].interval(GAMES[game].speeds[$('speed').value]);
+    if (elapsed >= interval) { elapsed -= interval; GAMES[game].step(); render(); }
+  }
+  if (state === 'over') {
+    // Drive the red flash / clear animation; phases stop once the grid has settled dark.
+    const phase = Math.min(Math.floor((performance.now() - overAt) / GAMEOVER_BLINK_MS), GAMEOVER_FLASH_MS / GAMEOVER_BLINK_MS);
+    if (phase !== overPhase) { overPhase = phase; render(); }
+  }
+  // Coalesce bursts of pad presses; the next frame flushes any throttled LED update.
+  if (midiOutput && time - lastMidiPaint > 34) paintMidi(frameColors());
+  requestAnimationFrame(tick);
+}
+
+// Modern Launchpads share Novation's 8×8 Programmer Mode surface. Older models
+// still accept the same grid notes, but use palette velocities instead of RGB SysEx.
+function sysex(profile, command, data = []) { return [0xF0,0x00,0x20,0x29,0x02,profile.product,command,...data,0xF7]; }
+function midiMessage(message, error = false) { $('connectionMessage').textContent = message; $('connectionMessage').classList.toggle('error',error); }
+function setConnectionUI() {
+  const connected = !!midiOutput;
+  $('connect').textContent = midiBusy ? 'Connecting…' : connected ? 'Disconnect & restore' : 'Connect Launchpad';
+  $('connect').disabled = midiBusy;
+  $('midiInput').disabled = connected || midiBusy; $('midiOutput').disabled = connected || midiBusy;
+  $('connectionBadge').textContent = connected ? deviceProfile.label + ' connected' : 'Keyboard mode';
+  $('connectionBadge').classList.toggle('connected',connected);
+  $('deviceLabel').textContent = connected ? deviceProfile.label.toUpperCase() : 'MIDI';
+  if (!connected) $('midiActivity').textContent = 'MIDI NOT CONNECTED';
+}
+function availablePorts(ports) {
+  return [...ports.values()].filter(port => {
+    const name = (port.name || '').replace(/[^a-z0-9]/gi,'').toLowerCase();
+    return port.state === 'connected' && !name.includes('daw') && (name.includes('launchpad') || /lp(?:mini|x|pro|mk)/.test(name));
+  });
+}
+function populatePorts() {
+  for (const [select,collection] of [[$('midiInput'),midiAccess.inputs],[$('midiOutput'),midiAccess.outputs]]) {
+    const selected = select.value, ports = availablePorts(collection);
+    select.replaceChildren();
+    if (!ports.length) select.add(new Option('No Launchpad MIDI port found',''));
+    else { for (const port of ports) select.add(new Option(port.name,port.id)); if (ports.some(port => port.id === selected)) select.value = selected; }
+  }
+  $('portFields').hidden = false;
+}
+function gridIndex(x, y) { return (8 - y) * 10 + x + 1; }
+function controlColor(name) {
+  if (name === 'pause') return state === 'over' ? COLORS.food : COLORS.head;
+  if (name === 'restart') return COLORS.L;
+  if (name === 'switch') return COLORS.T;
+  // Game and difficulty keys stay lit dimly, and full brightness marks the active one.
+  if (GAMES[name]) return game === name ? GAMES[name].tint : GAMES[name].tint.map(v => Math.round(v * .14));
+  if (SPEEDS.includes(name)) return $('speed').value === name ? COLORS.I : COLORS.I.map(v => Math.round(v * .14));
+  return [60,68,82];
+}
+function controlIndex(area, position, profile = deviceProfile) {
+  if (area === 'top') return profile.topBase + position;
+  if (area === 'left') return profile.leftBase - position * 10;
+  if (area === 'bottom') return profile.bottomBase + position;
+  return profile.sideBase - position * 10;
+}
+function receiveMidi(event) {
+  const data = event.data;
+  if (data.length < 3) return;
+  const status = data[0] & 0xF0, index = data[1], value = data[2];
+  // Ignore Note Off, Note On velocity zero, CC releases, clock, and SysEx.
+  if ((status !== 0x90 && status !== 0xB0) || value === 0) return;
+  $('midiActivity').textContent = 'MIDI IN / ' + (status === 0xB0 ? 'CC ' : 'NOTE ') + index;
+  const surround = deviceProfile.layout === 'surround';
+  if (index >= deviceProfile.topBase && index < deviceProfile.topBase + 8) action(topControls[index - deviceProfile.topBase][0]);
+  else if (index % 10 === 9 && index >= 19 && index <= 89) action(sideControls[(89 - index) / 10][0]);
+  // Column 0 and row 0 exist only on the surround layout; corners 0, 9 and 90 stay unmapped.
+  else if (surround && index % 10 === 0 && index >= 10 && index <= 80) action(leftControls[(80 - index) / 10][0]);
+  else if (surround && index >= 1 && index <= 8) action(bottomControls[index - 1][0]);
+  else { const x = index % 10 - 1, y = 8 - Math.floor(index / 10); if (x >= 0 && x < SIZE && y >= 0 && y < SIZE) gridAction(x,y); }
+}
+const MIDI_PALETTE = [
+  [0,[0,0,0]],[5,[255,40,40]],[9,[255,120,35]],[13,[255,220,45]],[21,[70,220,90]],
+  [29,[170,255,55]],[37,[40,235,220]],[45,[50,115,255]],[53,[150,75,255]],[57,[255,70,170]],[3,[245,245,245]]
+];
+function paletteVelocity(rgb) {
+  if (!rgb.some(value => value > 0)) return 0;
+  let nearest = 0, distance = Infinity;
+  for (const [velocity,color] of MIDI_PALETTE) {
+    const distanceHere = color.reduce((sum,value,i) => sum + (value - rgb[i]) ** 2,0);
+    if (distanceHere < distance) { distance = distanceHere; nearest = velocity; }
+  }
+  return nearest;
+}
+function standardPaint(cells, force) {
+  const messages = [], changes = [];
+  function add(kind, index, rgb) {
+    const velocity = paletteVelocity(rgb.map(value => value * brightness)), key = kind + ':' + velocity;
+    const cacheKey = kind + ':' + index;
+    if (force || ledCache.get(cacheKey) !== key) { messages.push(kind === 'note' ? [0x90,index,velocity] : [0xB0,index,velocity]); changes.push([cacheKey,key]); }
+  }
+  cells.forEach((rgb,i) => add('note',gridIndex(i % SIZE,Math.floor(i / SIZE)),rgb));
+  document.querySelectorAll('.control').forEach(button => {
+    const color = controlColor(button.dataset.action);
+    add('cc',controlIndex(button.dataset.area,Number(button.dataset.position)),color);
+  });
+  if (!messages.length) return;
+  try { messages.forEach(message => midiOutput.send(message)); for (const [index,key] of changes) ledCache.set(index,key); lastMidiPaint = performance.now(); }
+  catch (error) { loseConnection('MIDI output failed: ' + error.message + '. Reconnect to continue on hardware.'); }
+}
+function paintMidi(cells, force = false) {
+  if (!midiOutput || (!force && performance.now() - lastMidiPaint < 33)) return;
+  if (!deviceProfile.rgb) { standardPaint(cells,force); return; }
+  const entries = [], changes = [];
+  function add(index, rgb) {
+    const scaled = rgb.map(v => Math.min(127,Math.round(v / 255 * 127 * brightness))), key = scaled.join(','), cacheKey = 'rgb:' + index;
+    if (force || ledCache.get(cacheKey) !== key) { entries.push(3,index,...scaled); changes.push([cacheKey,key]); }
+  }
+  cells.forEach((rgb,i) => add(gridIndex(i % SIZE,Math.floor(i / SIZE)),rgb));
+  document.querySelectorAll('.control').forEach(button => {
+    const color = controlColor(button.dataset.action);
+    add(controlIndex(button.dataset.area,Number(button.dataset.position)),color);
+  });
+  add(99,COLORS.off);
+  if (!entries.length) return;
+  try { midiOutput.send(sysex(deviceProfile,3,entries)); for (const [index,key] of changes) ledCache.set(index,key); lastMidiPaint = performance.now(); }
+  catch (error) { loseConnection('MIDI output failed: ' + error.message + '. Reconnect to continue on hardware.'); }
+}
+function restore(output, profile = deviceProfile) {
+  if (profile.rgb) {
+    const off = [];
+    for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) off.push(3,gridIndex(x,y),0,0,0);
+    for (let i = 0; i < 8; i++) { off.push(3,controlIndex('top',i,profile),0,0,0); off.push(3,controlIndex('side',i,profile),0,0,0); }
+    if (profile.layout === 'surround') for (let i = 0; i < 8; i++) { off.push(3,controlIndex('left',i,profile),0,0,0); off.push(3,controlIndex('bottom',i,profile),0,0,0); }
+    off.push(3,99,0,0,0); output.send(sysex(profile,3,off)); output.send(sysex(profile,14,[0]));
+  } else {
+    for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) output.send([0x90,gridIndex(x,y),0]);
+    for (let i = 0; i < 8; i++) { output.send([0xB0,controlIndex('top',i,profile),0]); output.send([0xB0,controlIndex('side',i,profile),0]); }
+    if (profile.layout === 'surround') for (let i = 0; i < 8; i++) { output.send([0xB0,controlIndex('left',i,profile),0]); output.send([0xB0,controlIndex('bottom',i,profile),0]); }
+  }
+}
+function loseConnection(message) {
+  const input = midiInput, output = midiOutput, profile = deviceProfile;
+  midiInput = null; midiOutput = null; ledCache.clear();
+  if (input) { input.onmidimessage = null; input.close().catch(() => {}); }
+  if (output) {
+    if (output.state === 'connected') { try { restore(output,profile); } catch { /* A failed port may not accept a restore. */ } }
+    output.close().catch(() => {});
+  }
+  pause('Controller disconnected. Reconnect, or press Enter to continue with the keyboard.');
+  setConnectionUI(); midiMessage(message,true);
+}
+async function disconnect() {
+  const input = midiInput, output = midiOutput, profile = deviceProfile; midiInput = null; midiOutput = null;
+  if (input) input.onmidimessage = null;
+  let restored = true;
+  try { if (output && output.state === 'connected') restore(output,profile); } catch { restored = false; }
+  await Promise.allSettled([input?.close(),output?.close()]); ledCache.clear();
+  pause('Launchpad released. Press Enter to continue with the keyboard.');
+  setConnectionUI(); midiMessage(restored ? 'Disconnected. Live Mode restored when supported; keyboard play is still available.' : 'Disconnected. Could not clear Launchpad LEDs; unplug and reconnect the controller.',!restored);
+}
+async function connect() {
+  if (midiBusy) return;
+  if (midiOutput) { midiBusy = true; await disconnect(); midiBusy = false; setConnectionUI(); return; }
+  if (!window.isSecureContext) { midiMessage('MIDI requires a trusted page. Open this file locally in Chrome, or use the localhost instructions below.',true); return; }
+  if (!navigator.requestMIDIAccess) { midiMessage('This browser does not support Web MIDI. Open this HTML file in Chrome or Edge. Keyboard play works here.',true); return; }
+  midiBusy = true; setConnectionUI();
+  let input, output, profile;
+  try {
+    if (!midiAccess) {
+      try { midiAccess = await navigator.requestMIDIAccess({sysex:true}); }
+      catch (error) {
+        if (error.name !== 'NotAllowedError' && error.name !== 'SecurityError') throw error;
+        // Legacy Launchpads need ordinary MIDI only; do not make SysEx permission a hard requirement for them.
+        midiAccess = await navigator.requestMIDIAccess();
+      }
+      midiAccess.onstatechange = () => {
+        if ((midiInput && midiInput.state === 'disconnected') || (midiOutput && midiOutput.state === 'disconnected')) loseConnection('Launchpad unplugged. Check the cable, then click Connect Launchpad.');
+        populatePorts();
+      };
+    }
+    populatePorts();
+    input = midiAccess.inputs.get($('midiInput').value); output = midiAccess.outputs.get($('midiOutput').value);
+    if (!input || !output) throw new Error('No Launchpad MIDI input/output found. Check data cable, close other MIDI apps, then reconnect.');
+    profile = selectedProfileId ? profileForId(selectedProfileId) : profileForPort(output);
+    const relayout = profile.layout !== deviceProfile.layout;
+    deviceProfile = profile;
+    // Sniffing the port can land on a differently shaped model than the surface was drawn for.
+    if (relayout) { buildSurface(); ledCache.clear(); render(); }
+    setConnectionUI();
+    if (profile.rgb && !midiAccess.sysexEnabled) throw new Error('SysEx permission is required for RGB LEDs on ' + profile.label + '. Allow MIDI and SysEx in site settings.');
+    await input.open(); await output.open();
+    if (input.state !== 'connected' || output.state !== 'connected') throw new Error('Launchpad disconnected while opening its MIDI ports.');
+    if (profile.programmer) {
+      output.send(sysex(profile,14,[1]));
+      // Allow controller to change layout before sending initial frame.
+      await new Promise(resolve => setTimeout(resolve,100));
+      if (input.state !== 'connected' || output.state !== 'connected') throw new Error('Launchpad disconnected while entering Programmer Mode.');
+    }
+    midiInput = input; midiOutput = output; input.onmidimessage = receiveMidi;
+    ledCache.clear(); paintMidi(frameColors(),true);
+    midiMessage(profile.rgb ? profile.label + ' open; Programmer Mode sent. Press a pad to verify input. Disconnect restores Live Mode.' : profile.label + ' open; standard MIDI lighting enabled. Press a pad to verify input.');
+  } catch (error) {
+    if (input) { input.onmidimessage = null; await input.close().catch(() => {}); }
+    if (output) { try { if (output.state === 'connected' && profile) restore(output,profile); } catch { /* Best-effort recovery. */ } await output.close().catch(() => {}); }
+    midiInput = null; midiOutput = null;
+    midiMessage(error.name === 'NotAllowedError' || error.name === 'SecurityError' ? 'MIDI permission blocked. Allow MIDI in Chrome site settings, then try again. See connection help below.' : error.message,true);
+  } finally { midiBusy = false; setConnectionUI(); }
+}
+// Home-screen model icons: a 10 x 10 lattice of 6-unit keys on a 7-unit pitch, so
+// every icon draws its 8 x 8 grid at one scale whatever edge buttons surround it.
+const ICON_LAYOUTS = {
+  'top-right': {offset:3.5, pads:[0,1], top:[0,0], right:[8,1]},
+  surround: {offset:0, pads:[1,1], top:[1,0], bottom:[1,9], left:[0,1], right:[9,1]}
+};
+const ICON_EDGES = [['top',1,0],['bottom',1,0],['left',0,1],['right',0,1]];
+function modelIcon(name, vague) {
+  const layout = ICON_LAYOUTS[name];
+  if (!layout) return '';
+  const at = n => 0.5 + n * 7;
+  let pads = '';
+  for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++)
+    pads += `M${at(layout.pads[0] + col)} ${at(layout.pads[1] + row)}h6v6h-6z`;
+  let keys = '';
+  for (const [edge,stepX,stepY] of ICON_EDGES) {
+    const start = layout[edge];
+    if (!start) continue;
+    for (let i = 0; i < SIZE; i++)
+      keys += `<circle cx="${at(start[0] + stepX * i) + 3}" cy="${at(start[1] + stepY * i) + 3}" r="2.5"/>`;
+  }
+  return `<svg viewBox="0 0 70 70" fill="currentColor" focusable="false"><g transform="translate(${layout.offset},${layout.offset})"><path d="${pads}"/><g class="keys${vague ? ' faint' : ''}">${keys}</g></g></svg>`;
+}
+document.querySelectorAll('.model-card').forEach(card => {
+  const profile = profileForId(card.querySelector('input[name="model"]').value);
+  card.querySelector('.model-icon').innerHTML = modelIcon(profile.layout,profile.vague);
+});
+function markModel(value) {
+  const profile = profileForId(value);
+  $('continue').disabled = false;
+  $('modelHint').textContent = profile.label + ' selected. Continue when you are ready.';
+}
+function enterPlay() {
+  const selected = document.querySelector('input[name="model"]:checked');
+  if (!selected) return;
+  selectedProfileId = selected.value; deviceProfile = profileForId(selectedProfileId);
+  try { localStorage.setItem('pad-arcade-model',selectedProfileId); } catch { /* Storage may be blocked for local files. */ }
+  buildSurface(); ledCache.clear(); render();
+  $('homeView').hidden = true; $('playView').hidden = false;
+  $('deviceLabel').textContent = deviceProfile.label.toUpperCase();
+  $('connectionMessage').textContent = deviceProfile.label + ' selected. Connect your Launchpad, or play with keyboard.';
+  window.scrollTo({top:0,behavior:'smooth'});
+  $('playView').focus({preventScroll:true});
+}
+async function changeModel() {
+  if (midiOutput) { midiBusy = true; await disconnect(); midiBusy = false; }
+  // Keep the current pick highlighted so the picker shows what is in use.
+  $('playView').hidden = true; $('homeView').hidden = false;
+  const current = document.querySelector('input[name="model"]:checked');
+  if (current) markModel(current.value);
+  window.scrollTo({top:0,behavior:'smooth'}); setConnectionUI();
+  (current || document.querySelector('input[name="model"]')).focus({preventScroll:true});
+}
+$('modelForm').addEventListener('submit',event => { event.preventDefault(); enterPlay(); });
+document.querySelectorAll('input[name="model"]').forEach(input => input.addEventListener('change',event => markModel(event.target.value)));
+// Double-clicking a card is a common shortcut for "pick this and move on".
+document.querySelectorAll('.model-card').forEach(card => card.addEventListener('dblclick',() => enterPlay()));
+$('changeModel').addEventListener('click',changeModel);
+try {
+  const remembered = localStorage.getItem('pad-arcade-model');
+  const input = remembered && document.querySelector(`input[name="model"][value="${CSS.escape(remembered)}"]`);
+  if (input) { input.checked = true; markModel(input.value); }
+} catch { /* Storage may be blocked for local files. */ }
+$('connect').addEventListener('click',connect);
+$('start').addEventListener('click',playPause);
+$('restart').addEventListener('click',() => action('restart'));
+document.querySelectorAll('[data-game]').forEach(button => button.addEventListener('click',() => selectGame(button.dataset.game)));
+$('brightness').addEventListener('input',event => { brightness = Number(event.target.value) / 100; $('brightnessValue').textContent = event.target.value + '%'; ledCache.clear(); paintMidi(frameColors(),true); });
+$('speed').addEventListener('change',() => { elapsed = 0; });
+document.addEventListener('keydown',event => {
+  if (event.ctrlKey || event.metaKey || event.altKey || event.target.closest('input,select,textarea,[contenteditable="true"]')) return;
+  const key = event.key.toLowerCase();
+  // Let Enter/Space activate focused buttons normally instead of firing twice.
+  if ((key === 'enter' || key === ' ') && event.target.closest('button,summary,a')) return;
+  const map = {arrowup:'up',w:'up',arrowdown:'down',s:'down',arrowleft:'left',a:'left',arrowright:'right',d:'right',p:'pause',enter:'pause',r:'restart',' ':GAMES[game].space};
+  const name = map[key]; if (!name) return;
+  event.preventDefault();
+  if (event.repeat && !GAMES[game].repeat.includes(name)) return;
+  action(name);
+});
+document.addEventListener('visibilitychange',() => { if (document.hidden) pause('Tab hidden. Press Enter or play / pause when you return.'); lastTime = 0; });
+window.addEventListener('pagehide',() => { if (midiOutput) { try { restore(midiOutput); } catch { /* Unplugging always restores Live Mode. */ } } });
+resetGame(); requestAnimationFrame(tick);
+</script>
+</body>
+</html>
