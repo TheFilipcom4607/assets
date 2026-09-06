@@ -202,7 +202,7 @@
         <div class="key-row"><span id="spaceLabel">Pause / resume</span><kbd>Space</kbd></div>
         <div class="key-row"><span>Start / pause / resume</span><span><kbd>Enter</kbd> / <kbd>P</kbd></span></div>
         <div class="key-row"><span>Restart</span><kbd>R</kbd></div>
-        <p class="note" id="padHelp">On hardware: use the four top-left arrow buttons, or tap the grid's top, bottom, left, or right region to steer.</p>
+        <p class="note" id="padHelp">Tap a pad relative to the head to steer: above it goes up, right of it goes right, below goes down, left goes left. The four top-left arrow buttons still work.</p>
         <p class="note">The screen mirrors common 8×8 Launchpad layouts. On models with edge buttons, right edge runs up / rotate, left, right, down, drop, play / pause, restart, switch game; top runs arrows, Snake, Tetris, play / pause, restart. Pro MK3 adds two rails: its left column picks the game (Snake, Tetris, Simon, Breakout) and sets difficulty, and its bottom row repeats the arrows, hard drop, play / pause, restart and switch.</p>
         <div class="setting"><label for="speed">Difficulty</label><select id="speed"><option value="easy">Chill</option><option value="normal" selected>Classic</option><option value="hard">Fast</option></select></div>
         <div class="setting" id="nextSection" hidden><span class="eyebrow">Next piece</span><div class="next"><span id="nextName" class="eyebrow"></span><div id="nextPiece" aria-label="Next tetromino preview"></div></div></div>
@@ -386,13 +386,23 @@ const GAMES = {
     reset() { snake = [{x:3,y:4},{x:2,y:4},{x:1,y:4}]; direction = {x:1,y:0}; turns = []; food = newFood(); },
     step() { stepSnake(); },
     input(name) { const move = {up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[name]; if (move) snakeTurn(...move); },
-    grid(x,y) { const dx = x - 3.5, dy = y - 3.5; this.input(Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down')); },
+    // Steer relative to the head: a pad above it goes up, a pad to its right goes right, and so on.
+    grid(x,y) {
+      const head = snake[0], dx = x - head.x, dy = y - head.y;
+      if (!dx && !dy) return;
+      const heading = turns.length ? turns[turns.length - 1] : direction;
+      // A perfect diagonal is ambiguous, so break the tie on the axis the snake is not already travelling along.
+      let horizontal = Math.abs(dx) === Math.abs(dy) ? heading.x === 0 : Math.abs(dx) > Math.abs(dy);
+      // A pad behind the head asks for an illegal reverse; when it also sits off to one side, steer that way instead.
+      if ((horizontal ? Math.sign(dx) === -heading.x : Math.sign(dy) === -heading.y) && (horizontal ? dy : dx)) horizontal = !horizontal;
+      this.input(horizontal ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down'));
+    },
     draw(cells) { snake.forEach((p,i) => { cells[p.y * SIZE + p.x] = i === 0 ? COLORS.head : COLORS.snake; }); if (food) cells[food.y * SIZE + food.x] = COLORS.food; },
     value() { return snake.length + ' / 64'; },
     running:'Find your next bite.', won:'All 64 pads. You win!',
     hint:"Eat the pink pixel. Don't hit the walls or yourself.",
     steer:'Steer', spaceLabel:'Pause / resume',
-    padHelp:"On hardware: use the four top-left arrow buttons, or tap the grid's top, bottom, left, or right region to steer.",
+    padHelp:"Tap a pad relative to the head to steer: above it goes up, right of it goes right, below goes down, left goes left. The four top-left arrow buttons still work.",
     rules:'Every snack earns 10 points and makes you faster. Fill all 64 pads to win. WASD also works.'
   },
   tetris: {
