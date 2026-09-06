@@ -417,7 +417,19 @@ const GAMES = {
       if (name === 'down') stepTetris(true);
       if (name === 'drop') { while (fits(piece.shape,piece.x,piece.y + 1)) { piece.y++; score += 2; } lockPiece(); }
     },
-    grid(x,y) { this.input(x < 3 ? 'left' : x > 4 ? 'right' : y < 4 ? 'up' : 'drop'); },
+    // Steer relative to the piece: a pad beside it slides it that far, the piece itself rotates, a pad below drops.
+    grid(x,y) {
+      let left = SIZE, right = -1, bottom = -1;
+      for (let py = 0; py < piece.shape.length; py++) for (let px = 0; px < piece.shape[py].length; px++) if (piece.shape[py][px]) {
+        left = Math.min(left,piece.x + px); right = Math.max(right,piece.x + px); bottom = Math.max(bottom,piece.y + py);
+      }
+      if (x < left || x > right) {
+        // Slide the near edge onto the tapped column, one step at a time so the stack still blocks it.
+        const step = x < left ? -1 : 1;
+        for (let i = Math.abs(x - (x < left ? left : right)); i > 0 && fits(piece.shape,piece.x + step,piece.y); i--) piece.x += step;
+      }
+      else this.input(y > bottom ? 'drop' : 'up');
+    },
     draw(cells) {
       board.forEach((row,y) => row.forEach((type,x) => { if (type) cells[y * SIZE + x] = COLORS[type]; }));
       let ghostY = piece.y;
@@ -432,7 +444,7 @@ const GAMES = {
     running:'Make room for one more.', won:'Board cleared. You win!',
     hint:'Stack, rotate, clear. Dim pixels show where you will land.',
     steer:'Move / rotate ↑ / soft drop ↓', spaceLabel:'Hard drop',
-    padHelp:'Grid controls: left 3 columns move left; right 3 move right. Middle 2 columns: top half rotates, bottom half hard-drops. Arrow buttons also work.',
+    padHelp:'Tap a pad beside the falling piece to slide it to that column, tap the lit piece itself to rotate, or tap below it to hard-drop. The arrow buttons still work.',
     rules:'Clear 1 / 2 / 3 / 4 rows for 100 / 300 / 500 / 800 × level. Level up every 5 rows. Soft drop: 1 per cell; hard drop: 2. WASD also works.'
   },
   simon: {
@@ -551,7 +563,13 @@ function action(name) {
   render();
 }
 function gridAction(x, y) {
-  if (state !== 'running') return;
+  if (state !== 'running') {
+    // A pad also starts, resumes and restarts, but not during the death flash: the
+    // tap a player had already committed to when they died should not skip past it.
+    if ((state === 'over' || state === 'won') && performance.now() - overAt < GAMEOVER_FLASH_MS) return;
+    if (state === 'over' || state === 'won') resetGame();
+    state = 'running'; pauseReason = ''; elapsed = 0; render(); return;
+  }
   GAMES[game].grid(x,y);
   render();
 }
@@ -579,7 +597,7 @@ function render() {
   $('thirdValue').textContent = def.value();
   $('stateLabel').textContent = state.toUpperCase();
   $('gameState').textContent = {ready:'Ready when you are.',running:def.running,paused:'Take a breather.',over:'Game over. Go again?',won:def.won}[state];
-  $('gameHint').textContent = state === 'paused' ? (pauseReason || 'Press Enter or the green play / pause button to resume.') : state === 'over' ? 'Final score: ' + score + '. Press Enter to play again.' : def.hint;
+  $('gameHint').textContent = state === 'paused' ? (pauseReason || 'Press Enter, any pad, or the green play / pause button to resume.') : state === 'over' ? 'Final score: ' + score + '. Press Enter or any pad to play again.' : def.hint;
   $('start').textContent = {ready:'Start game ↵',running:'Pause game',paused:'Resume game ↵',over:'Play again ↵',won:'Play again ↵'}[state];
   document.querySelectorAll('[data-game]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.game === game)));
   $('controlsTitle').textContent = 'How to play ' + def.label;
@@ -879,7 +897,7 @@ document.addEventListener('keydown',event => {
   if (event.repeat && !GAMES[game].repeat.includes(name)) return;
   action(name);
 });
-document.addEventListener('visibilitychange',() => { if (document.hidden) pause('Tab hidden. Press Enter or play / pause when you return.'); lastTime = 0; });
+document.addEventListener('visibilitychange',() => { if (document.hidden) pause('Tab hidden. Press Enter, any pad, or play / pause when you return.'); lastTime = 0; });
 window.addEventListener('pagehide',() => { if (midiOutput) { try { restore(midiOutput); } catch { /* Unplugging always restores Live Mode. */ } } });
 resetGame(); requestAnimationFrame(tick);
 </script>
