@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Outage Generator</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#fff; --line:#e2e5ea; --text:#1c2024; --muted:#6b7280;
+    --accent:#f38020; --accent-dark:#d96b12; --blue:#0051c3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--text);background:var(--bg);height:100vh;overflow:hidden}
+  .app{display:flex;height:100vh}
+
+  /* ---------- sidebar ---------- */
+  .side{width:400px;min-width:400px;background:var(--panel);border-right:1px solid var(--line);
+        display:flex;flex-direction:column;height:100vh}
+  .side header{padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+  .side header h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+  .side header p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+  .scroll{overflow-y:auto;padding:16px 20px 28px;flex:1}
+
+  .grp{margin-bottom:22px}
+  .grp > h2{margin:0 0 10px;font-size:11px;font-weight:600;text-transform:uppercase;
+            letter-spacing:.07em;color:var(--muted)}
+  label.f{display:block;margin-bottom:12px}
+  label.f > span{display:block;font-size:12px;font-weight:500;margin-bottom:5px;color:#3b4149}
+  input[type=text],input[type=number],select,textarea{
+    width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:#fff;
+    font:inherit;font-size:13px;color:var(--text)}
+  textarea{resize:vertical;min-height:70px;line-height:1.5}
+  input:focus,select:focus,textarea:focus{outline:2px solid rgba(243,128,32,.35);outline-offset:-1px;border-color:var(--accent)}
+  .row{display:flex;gap:8px}
+  .row > *{flex:1;min-width:0}
+  .chk{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;font-size:13px}
+  .chk input{margin:2px 0 0;flex:none}
+  .chk small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
+  .hint{font-size:11.5px;color:var(--muted);margin:-6px 0 12px}
+
+  .seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-bottom:16px}
+  .seg button{flex:1;padding:8px 4px;border:0;background:#fff;font:inherit;font-size:12.5px;
+              cursor:pointer;color:#3b4149;border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:600}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;
+       border:1px solid var(--line);border-radius:7px;background:#fff;font:inherit;font-size:13px;
+       cursor:pointer;color:var(--text)}
+  .btn:hover{background:#f3f4f6}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+  .btn.sm{padding:5px 9px;font-size:12px}
+
+  .side footer{border-top:1px solid var(--line);padding:14px 20px;display:flex;gap:8px;background:var(--panel)}
+  .side footer .btn{flex:1}
+
+  /* ---------- preview ---------- */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .bar{height:48px;display:flex;align-items:center;gap:8px;padding:0 14px;
+       border-bottom:1px solid var(--line);background:var(--panel)}
+  .bar .spacer{flex:1}
+  .bar .url{font-size:12px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+            background:#f1f2f4;padding:4px 10px;border-radius:20px;max-width:340px;overflow:hidden;
+            text-overflow:ellipsis;white-space:nowrap}
+  .stage{flex:1;overflow:auto;background:#dfe2e7;display:flex;justify-content:center;padding:0}
+  .stage.pad{padding:24px}
+  iframe{border:0;background:#fff;width:100%;height:100%;display:block}
+  .stage.pad iframe{width:390px;height:100%;max-height:844px;border-radius:14px;
+                    box-shadow:0 10px 40px rgba(0,0,0,.18);flex:none}
+  .stage.code{display:block;background:#1b1f24;padding:0}
+  #codeView{margin:0;padding:20px 22px;color:#dfe4ea;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+            white-space:pre;overflow:auto;height:100%}
+  .hint code{background:#eef0f3;padding:1px 4px;border-radius:3px;font-size:11px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1c2024;color:#fff;
+         padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;
+         transition:opacity .2s;z-index:99}
+  .toast.on{opacity:1}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <header>
+      <h1>Outage Generator</h1>
+      <p>Build a page. Blame the cloud. Fix prod in peace.</p>
+    </header>
+
+    <div class="scroll">
+      <div class="seg" id="typeSeg">
+        <button type="button" data-type="5xx" aria-pressed="true">Server error</button>
+        <button type="button" data-type="1xxx" aria-pressed="false">Access denied</button>
+        <button type="button" data-type="wait" aria-pressed="false">Interstitial</button>
+      </div>
+
+      <div class="grp">
+        <h2>Basics</h2>
+
+        <label class="f" data-show="5xx 1xxx"><span>Error code</span>
+          <select id="code"></select>
+        </label>
+
+        <label class="f" data-show="wait"><span>Interstitial style</span>
+          <select id="waitStyle">
+            <option value="modern">Modern — "Verify you are human"</option>
+            <option value="classic">Classic — "Checking your browser"</option>
+          </select>
+        </label>
+
+        <label class="f"><span>Hostname</span>
+          <input type="text" id="host" value="example.com" spellcheck="false">
+        </label>
+
+        <label class="f"><span>Browser tab title</span>
+          <input type="text" id="pageTitle" placeholder="Auto from error code" spellcheck="false">
+        </label>
+
+        <label class="f" data-show="wait"><span>"Please allow up to N seconds"</span>
+          <input type="number" id="waitSecs" value="5" min="1" max="60">
+        </label>
+      </div>
+
+      <div class="grp">
+        <h2>Edge details</h2>
+
+        <label class="f"><span>Datacenter</span>
+          <select id="colo"></select>
+        </label>
+        <label class="chk"><input type="checkbox" id="randomColo">
+          <span>Random datacenter each load<small>Picks a different city on every refresh.</small></span></label>
+
+        <label class="f"><span>Ray ID</span>
+          <div class="row">
+            <input type="text" id="ray" spellcheck="false">
+            <button type="button" class="btn sm" id="reroll" style="flex:none">Re-roll</button>
+          </div>
+        </label>
+        <label class="chk"><input type="checkbox" id="liveRay" checked>
+          <span>New Ray ID each load<small>Looks like a fresh request every refresh.</small></span></label>
+
+        <label class="f"><span>Timestamp</span>
+          <input type="text" id="stamp" spellcheck="false" placeholder="2026-09-11 16:28:03 UTC">
+        </label>
+        <label class="chk"><input type="checkbox" id="liveTime" checked>
+          <span>Live UTC clock<small>Always shows the real current time when opened.</small></span></label>
+
+        <label class="f"><span>Visitor IP shown on reveal</span>
+          <input type="text" id="ip" value="203.0.113.42" spellcheck="false">
+        </label>
+        <label class="chk"><input type="checkbox" id="realIp">
+          <span>Use the visitor's real IP<small>Fetches it client-side. Leave off to show the fixed value above.</small></span></label>
+      </div>
+
+      <div class="grp" data-show="5xx">
+        <h2>Status columns</h2>
+        <div class="row">
+          <label class="f"><span>Browser</span><select id="st0"><option>Working</option><option>Error</option></select></label>
+          <label class="f"><span>Cloudflare</span><select id="st1"><option>Working</option><option>Error</option></select></label>
+          <label class="f"><span>Host</span><select id="st2"><option>Working</option><option>Error</option></select></label>
+        </div>
+        <p class="hint">The white arrow under the band points at the first column marked Error.</p>
+      </div>
+
+      <div class="grp">
+        <h2>Copy</h2>
+        <label class="f"><span>Heading</span>
+          <input type="text" id="heading" spellcheck="false">
+        </label>
+        <label class="f" data-show="5xx 1xxx"><span>What happened?</span>
+          <textarea id="happened"></textarea>
+        </label>
+        <label class="f" data-show="5xx 1xxx"><span>What can I do?</span>
+          <textarea id="cando"></textarea>
+        </label>
+        <label class="f" data-show="wait"><span>Body text</span>
+          <textarea id="waitBody"></textarea>
+        </label>
+        <p class="hint">HTML is allowed. Tokens <code>{host}</code> <code>{ip}</code> <code>{ray}</code> <code>{colo}</code> <code>{code}</code> are substituted. Changing the error code resets these fields to the real wording.</p>
+      </div>
+
+      <div class="grp">
+        <h2>Extras</h2>
+        <label class="chk"><input type="checkbox" id="countdown">
+          <span>Auto-retry countdown<small>Adds a "retrying in Ns" line that reloads the page.</small></span></label>
+        <label class="f" data-show="countdown"><span>Retry after (seconds)</span>
+          <input type="number" id="countdownSecs" value="30" min="5" max="600">
+        </label>
+        <label class="chk"><input type="checkbox" id="noIndex" checked>
+          <span>Add noindex meta tag<small>Keeps the joke out of search results.</small></span></label>
+      </div>
+
+      <div class="grp">
+        <h2>Deploy</h2>
+        <label class="f"><span>Target</span>
+          <select id="target">
+            <option value="static">Static file — drop it on any host</option>
+            <option value="worker">Cloudflare Worker — kill switch + auto-lift</option>
+            <option value="nginx">nginx</option>
+            <option value="apache">Apache .htaccess</option>
+            <option value="caddy">Caddy</option>
+            <option value="express">Express / Node</option>
+          </select>
+        </label>
+        <div class="row">
+          <label class="f"><span>HTTP status</span>
+            <select id="statusCode">
+              <option value="503">503 Service Unavailable</option>
+              <option value="500">500 Internal Server Error</option>
+              <option value="502">502 Bad Gateway</option>
+              <option value="200">200 OK</option>
+            </select>
+          </label>
+          <label class="f"><span>Retry-After (s)</span>
+            <input type="number" id="retryAfter" value="300" min="0" max="86400">
+          </label>
+        </div>
+        <p class="hint">503 with Retry-After is what keeps search engines from treating the outage as permanent. A plain HTML file returns 200, which does not.</p>
+        <label class="f" data-show="bypassable"><span>Bypass token</span>
+          <input type="text" id="bypass" spellcheck="false">
+        </label>
+        <p class="hint" data-show="bypassable">Visit <code>?bypass=&lt;token&gt;</code> to see the real site while everyone else gets the outage.</p>
+        <label class="f" data-show="worker"><span>Auto-lift after (minutes, 0 = never)</span>
+          <input type="number" id="liftAfter" value="0" min="0" max="10080">
+        </label>
+        <button type="button" class="btn" id="linkBtn" style="width:100%;margin-top:4px">Copy config link</button>
+      </div>
+    </div>
+
+    <footer>
+      <button type="button" class="btn" id="copyBtn">Copy HTML</button>
+      <button type="button" class="btn primary" id="dlBtn">Download</button>
+    </footer>
+  </aside>
+
+  <main class="main">
+    <div class="bar">
+      <span class="url" id="fakeUrl">https://example.com/</span>
+      <span class="spacer"></span>
+      <button type="button" class="btn sm" id="vpDesktop" aria-pressed="true">Desktop</button>
+      <button type="button" class="btn sm" id="vpMobile" aria-pressed="false">Mobile</button>
+      <button type="button" class="btn sm" id="viewPage" aria-pressed="true">Page</button>
+      <button type="button" class="btn sm" id="viewCode" aria-pressed="false">Deploy code</button>
+      <button type="button" class="btn sm" id="reloadBtn">Reload</button>
+      <button type="button" class="btn sm" id="tabBtn">Open in tab</button>
+    </div>
+    <div class="stage" id="stage"><iframe id="pv" title="Preview"></iframe></div>
+    <div class="stage code" id="codeStage" hidden><pre id="codeView"></pre></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script id="cf-css" type="text/plain">
+.container{width:100%}.bg-white{--bg-opacity:1;background-color:#fff;background-color:rgba(255,255,255,var(--bg-opacity))}.bg-center{background-position:50%}.bg-no-repeat{background-repeat:no-repeat}.border-gray-300{--border-opacity:1;border-color:#ebebeb;border-color:rgba(235,235,235,var(--border-opacity))}.rounded{border-radius:.25rem}.border-solid{border-style:solid}.border-0{border-width:0}.border{border-width:1px}.border-t{border-top-width:1px}.cursor-pointer{cursor:pointer}.block{display:block}.inline-block{display:inline-block}.table{display:table}.hidden{display:none}.float-left{float:left}.clearfix:after{content:"";display:table;clear:both}.font-mono{font-family:monaco,courier,monospace}.font-light{font-weight:300}.font-normal{font-weight:400}.font-semibold{font-weight:600}.h-12{height:3rem}.h-20{height:5rem}.text-13{font-size:13px}.text-15{font-size:15px}.text-60{font-size:60px}.text-2xl{font-size:1.5rem}.text-3xl{font-size:1.875rem}.leading-tight{line-height:1.25}.leading-normal{line-height:1.5}.leading-relaxed{line-height:1.625}.leading-1\.3{line-height:1.3}.my-8{margin-top:2rem;margin-bottom:2rem}.mx-auto{margin-left:auto;margin-right:auto}.mr-2{margin-right:.5rem}.mb-2{margin-bottom:.5rem}.mt-3{margin-top:.75rem}.mb-4{margin-bottom:1rem}.ml-4{margin-left:1rem}.mt-6{margin-top:1.5rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mb-10{margin-bottom:2.5rem}.ml-10{margin-left:2.5rem}.mb-15{margin-bottom:3.75rem}.-ml-6{margin-left:-1.5rem}.overflow-hidden{overflow:hidden}.p-0{padding:0}.py-2{padding-top:.5rem;padding-bottom:.5rem}.px-4{padding-left:1rem;padding-right:1rem}.py-8{padding-top:2rem;padding-bottom:2rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-15{padding-top:3.75rem;padding-bottom:3.75rem}.pr-6{padding-right:1.5rem}.pt-10{padding-top:2.5rem}.absolute{position:absolute}.relative{position:relative}.left-1\/2{left:50%}.-bottom-4{bottom:-1rem}.resize{resize:both}.text-center{text-align:center}.text-black-dark{--text-opacity:1;color:#404040;color:rgba(64,64,64,var(--text-opacity))}.text-gray-600{--text-opacity:1;color:#999;color:rgba(153,153,153,var(--text-opacity))}.text-red-error{--text-opacity:1;color:#bd2426;color:rgba(189,36,38,var(--text-opacity))}.text-green-success{--text-opacity:1;color:#9bca3e;color:rgba(155,202,62,var(--text-opacity))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.w-12{width:3rem}.w-240{width:60rem}.w-1\/2{width:50%}.w-1\/3{width:33.333333%}.w-full{width:100%}.transition{-webkit-transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,-webkit-transform;transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,-webkit-transform;transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,transform;transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,transform,-webkit-transform}body,html{--text-opacity:1;color:#404040;color:rgba(64,64,64,var(--text-opacity));-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-size:16px}*,body,html{margin:0;padding:0}*{box-sizing:border-box}a{--text-opacity:1;color:#2f7bbf;color:rgba(47,123,191,var(--text-opacity));text-decoration:none;-webkit-transition-property:all;transition-property:all;-webkit-transition-duration:.15s;transition-duration:.15s;-webkit-transition-timing-function:cubic-bezier(0,0,.2,1);transition-timing-function:cubic-bezier(0,0,.2,1)}a:hover{--text-opacity:1;color:#f68b1f;color:rgba(246,139,31,var(--text-opacity))}img{display:block;width:100%;height:auto}#what-happened-section p{font-size:15px;line-height:1.5}strong{font-weight:600}.bg-gradient-gray{background-image:-webkit-linear-gradient(top,#dedede,#ebebeb 3%,#ebebeb 97%,#dedede);background-image:linear-gradient(180deg,#dedede,#ebebeb 3%,#ebebeb 97%,#dedede)}.cf-error-source:after{position:absolute;--bg-opacity:1;background-color:#fff;background-color:rgba(255,255,255,var(--bg-opacity));width:2.5rem;height:2.5rem;--transform-translate-x:0;--transform-translate-y:0;--transform-rotate:0;--transform-skew-x:0;--transform-skew-y:0;--transform-scale-x:1;--transform-scale-y:1;-webkit-transform:translateX(var(--transform-translate-x)) translateY(var(--transform-translate-y)) rotate(var(--transform-rotate)) skewX(var(--transform-skew-x)) skewY(var(--transform-skew-y)) scaleX(var(--transform-scale-x)) scaleY(var(--transform-scale-y));-ms-transform:translateX(var(--transform-translate-x)) translateY(var(--transform-translate-y)) rotate(var(--transform-rotate)) skewX(var(--transform-skew-x)) skewY(var(--transform-skew-y)) scaleX(var(--transform-scale-x)) scaleY(var(--transform-scale-y));transform:translateX(var(--transform-translate-x)) translateY(var(--transform-translate-y)) rotate(var(--transform-rotate)) skewX(var(--transform-skew-x)) skewY(var(--transform-skew-y)) scaleX(var(--transform-scale-x)) scaleY(var(--transform-scale-y));--transform-rotate:45deg;content:"";bottom:-1.75rem;left:50%;margin-left:-1.25rem;box-shadow:0 0 4px 4px #dedede}@media screen and (max-width:720px){.cf-error-source:after{display:none}}.cf-icon-browser{background-image:url(data:image/svg+xml;utf8,%3Csvg%20id%3D%22a%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%2080.7362%22%3E%3Cpath%20d%3D%22M89.8358.1636H10.1642C4.6398.1636.1614%2C4.6421.1614%2C10.1664v60.4033c0%2C5.5244%2C4.4784%2C10.0028%2C10.0028%2C10.0028h79.6716c5.5244%2C0%2C10.0027-4.4784%2C10.0027-10.0028V10.1664c0-5.5244-4.4784-10.0028-10.0027-10.0028ZM22.8323%2C9.6103c1.9618%2C0%2C3.5522%2C1.5903%2C3.5522%2C3.5521s-1.5904%2C3.5522-3.5522%2C3.5522-3.5521-1.5904-3.5521-3.5522%2C1.5903-3.5521%2C3.5521-3.5521ZM12.8936%2C9.6103c1.9618%2C0%2C3.5522%2C1.5903%2C3.5522%2C3.5521s-1.5904%2C3.5522-3.5522%2C3.5522-3.5521-1.5904-3.5521-3.5522%2C1.5903-3.5521%2C3.5521-3.5521ZM89.8293%2C70.137H9.7312V24.1983h80.0981v45.9387ZM89.8293%2C16.1619H29.8524v-5.999h59.977v5.999Z%22%20style%3D%22fill%3A%20%23999%3B%22/%3E%3C/svg%3E)}.cf-icon-cloud{background-image:url(data:image/svg+xml;utf8,%3Csvg%20id%3D%22a%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20152%2078.9141%22%3E%3Cpath%20d%3D%22M132.2996%2C77.9927v-.0261c10.5477-.2357%2C19.0305-8.8754%2C19.0305-19.52%2C0-10.7928-8.7161-19.5422-19.4678-19.5422-2.9027%2C0-5.6471.6553-8.1216%2C1.7987C123.3261%2C18.6624%2C105.3419.9198%2C83.202.9198c-17.8255%2C0-32.9539%2C11.5047-38.3939%2C27.4899-3.0292-2.2755-6.7818-3.6403-10.8622-3.6403-10.0098%2C0-18.1243%2C8.1145-18.1243%2C18.1243%2C0%2C1.7331.258%2C3.4033.7122%2C4.9905-.2899-.0168-.5769-.0442-.871-.0442-8.2805%2C0-14.993%2C6.7503-14.993%2C15.0772%2C0%2C8.2795%2C6.6381%2C14.994%2C14.8536%2C15.0701v.0054h.1069c.0109%2C0%2C.0215.0016.0325.0016s.0215-.0016.0325-.0016%22%20style%3D%22fill%3A%20%23999%3B%22/%3E%3C/svg%3E)}.cf-icon-server{background-image:url(data:image/svg+xml;utf8,%3Csvg%20id%3D%22a%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2095%2075%22%3E%3Cpath%20d%3D%22M94.0103%2C45.0775l-12.9885-38.4986c-1.2828-3.8024-4.8488-6.3624-8.8618-6.3619l-49.91.0065c-3.9995.0005-7.556%2C2.5446-8.8483%2C6.3295L1.0128%2C42.8363c-.3315.971-.501%2C1.9899-.5016%2C3.0159l-.0121%2C19.5737c-.0032%2C5.1667%2C4.1844%2C9.3569%2C9.3513%2C9.3569h75.2994c5.1646%2C0%2C9.3512-4.1866%2C9.3512-9.3512v-17.3649c0-1.0165-.1657-2.0262-.4907-2.9893ZM86.7988%2C65.3097c0%2C1.2909-1.0465%2C2.3374-2.3374%2C2.3374H9.9767c-1.2909%2C0-2.3374-1.0465-2.3374-2.3374v-18.1288c0-1.2909%2C1.0465-2.3374%2C2.3374-2.3374h74.4847c1.2909%2C0%2C2.3374%2C1.0465%2C2.3374%2C2.3374v18.1288Z%22%20style%3D%22fill%3A%20%23999%3B%22/%3E%3Ccircle%20cx%3D%2274.6349%22%20cy%3D%2256.1889%22%20r%3D%224.7318%22%20style%3D%22fill%3A%20%23999%3B%22/%3E%3Ccircle%20cx%3D%2259.1472%22%20cy%3D%2256.1889%22%20r%3D%224.7318%22%20style%3D%22fill%3A%20%23999%3B%22/%3E%3C/svg%3E)}.cf-icon-ok{background-image:url(data:image/svg+xml;utf8,%3Csvg%20id%3D%22a%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%2223.4815%22%20style%3D%22fill%3A%20%239bca3e%3B%22/%3E%3Cpolyline%20points%3D%2217.453%2024.9841%2021.7183%2030.4504%2030.2076%2016.8537%22%20style%3D%22fill%3A%20none%3B%20stroke%3A%20%23fff%3B%20stroke-linecap%3A%20round%3B%20stroke-linejoin%3A%20round%3B%20stroke-width%3A%204px%3B%22/%3E%3C/svg%3E)}.cf-icon-error{background-image:url(data:image/svg+xml;utf8,%3Csvg%20id%3D%22a%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2047.9145%2047.9641%22%3E%3Ccircle%20cx%3D%2223.9572%22%20cy%3D%2223.982%22%20r%3D%2223.4815%22%20style%3D%22fill%3A%20%23bd2426%3B%22/%3E%3Cline%20x1%3D%2219.0487%22%20y1%3D%2219.0768%22%20x2%3D%2227.8154%22%20y2%3D%2228.8853%22%20style%3D%22fill%3A%20none%3B%20stroke%3A%20%23fff%3B%20stroke-linecap%3A%20round%3B%20stroke-linejoin%3A%20round%3B%20stroke-width%3A%203px%3B%22/%3E%3Cline%20x1%3D%2227.8154%22%20y1%3D%2219.0768%22%20x2%3D%2219.0487%22%20y2%3D%2228.8853%22%20style%3D%22fill%3A%20none%3B%20stroke%3A%20%23fff%3B%20stroke-linecap%3A%20round%3B%20stroke-linejoin%3A%20round%3B%20stroke-width%3A%203px%3B%22/%3E%3C/svg%3E)}#cf-wrapper .feedback-hidden{display:none}#cf-wrapper .feedback-success{min-height:33px;line-height:33px}#cf-wrapper .cf-button{color:#0051c3;font-size:13px;border-color:#0045a6;-webkit-transition-timing-function:ease;transition-timing-function:ease;-webkit-transition-duration:.2s;transition-duration:.2s;-webkit-transition-property:background-color,border-color,color;transition-property:background-color,border-color,color}#cf-wrapper .cf-button:hover{color:#fff;background-color:#003681}.cf-error-footer .hidden{display:none}.cf-error-footer .cf-footer-ip-reveal-btn{-webkit-appearance:button;-moz-appearance:button;appearance:button;text-decoration:none;background:none;color:inherit;border:none;padding:0;font:inherit;cursor:pointer;color:#0051c3;-webkit-transition:color .15s ease;transition:color .15s ease}.cf-error-footer .cf-footer-ip-reveal-btn:hover{color:#ee730a}.code-label{background-color:#d9d9d9;color:#313131;font-weight:500;border-radius:1.25rem;font-size:.75rem;line-height:4.5rem;padding:.25rem .5rem;height:4.5rem;white-space:nowrap;vertical-align:middle}@media (max-width:639px){.sm\:block{display:block}.sm\:hidden{display:none}.sm\:mb-1{margin-bottom:.25rem}.sm\:mb-2{margin-bottom:.5rem}.sm\:py-4{padding-top:1rem;padding-bottom:1rem}.sm\:px-8{padding-left:2rem;padding-right:2rem}.sm\:text-left{text-align:left}}@media (max-width:720px){.md\:border-gray-400{--border-opacity:1;border-color:#dedede;border-color:rgba(222,222,222,var(--border-opacity))}.md\:border-solid{border-style:solid}.md\:border-0{border-width:0}.md\:border-b{border-bottom-width:1px}.md\:block{display:block}.md\:inline-block{display:inline-block}.md\:hidden{display:none}.md\:float-none{float:none}.md\:text-3xl{font-size:1.875rem}.md\:m-0{margin:0}.md\:mt-0{margin-top:0}.md\:mb-2{margin-bottom:.5rem}.md\:p-0{padding:0}.md\:py-8{padding-top:2rem;padding-bottom:2rem}.md\:px-8{padding-left:2rem;padding-right:2rem}.md\:pr-0{padding-right:0}.md\:pb-10{padding-bottom:2.5rem}.md\:top-0{top:0}.md\:right-0{right:0}.md\:left-auto{left:auto}.md\:text-left{text-align:left}.md\:w-full{width:100%}}@media (max-width:1023px){.lg\:text-sm{font-size:.875rem}.lg\:text-2xl{font-size:1.5rem}.lg\:text-4xl{font-size:2.25rem}.lg\:leading-relaxed{line-height:1.625}.lg\:px-8{padding-left:2rem;padding-right:2rem}.lg\:pt-6{padding-top:1.5rem}.lg\:w-full{width:100%}}
+#cf-error-details p{margin-bottom:1rem}#cf-error-details p:last-child{margin-bottom:0}.cf-retry{margin-top:.75rem;color:#999}
+</script>
+<script>
+/* ============================================================
+   Data
+   ============================================================ */
+const COLOS = ["Amsterdam","Ashburn","Atlanta","Auckland","Bangkok","Barcelona","Berlin","Bogotá",
+"Boston","Brussels","Bucharest","Budapest","Buenos Aires","Cape Town","Chicago","Copenhagen","Dallas",
+"Denver","Dubai","Dublin","Düsseldorf","Frankfurt am Main","Hamburg","Helsinki","Hong Kong",
+"Istanbul","Jakarta","Johannesburg","Kuala Lumpur","Kyiv","Lagos","Lisbon","London","Los Angeles",
+"Madrid","Manchester","Marseille","Melbourne","Mexico City","Miami","Milan","Montreal","Mumbai",
+"Munich","Nairobi","New York","Oslo","Osaka","Paris","Phoenix","Prague","Riyadh","Rome","San Francisco",
+"San Jose","Santiago","São Paulo","Seattle","Seoul","Singapore","Sofia","Stockholm","Sydney",
+"Taipei","Tel Aviv","Tokyo","Toronto","Vienna","Warsaw","Zürich"];
+
+const OWNER = (visitor, owner) =>
+  '<p><strong>If you are a visitor of this website:</strong><br>' + visitor + '</p>' +
+  '<p><strong>If you are the owner of this website:</strong><br>' + owner + '</p>';
+
+const RETRY = 'Please try again in a few minutes.';
+
+const P5 = {
+  "500":{t:"Internal server error",st:["ok","bad","ok"],
+    h:"There is an internal server error on Cloudflare's network.", d:"<p>"+RETRY+"</p>"},
+  "502":{t:"Bad gateway",st:["ok","bad","ok"],
+    h:"The web server reported a bad gateway error.", d:"<p>"+RETRY+"</p>"},
+  "504":{t:"Gateway time-out",st:["ok","bad","ok"],
+    h:"The web server reported a gateway time-out error.", d:"<p>"+RETRY+"</p>"},
+  "520":{t:"Web server is returning an unknown error",st:["ok","ok","bad"],
+    h:"There is an unknown connection issue between Cloudflare and the origin web server. As a result, the web page can not be displayed.",
+    d:OWNER(RETRY,"Contact your hosting provider letting them know your web server is returning an empty or invalid response.")},
+  "521":{t:"Web server is down",st:["ok","ok","bad"],
+    h:"The web server is not returning a connection. As a result, the web page is not displaying.",
+    d:OWNER(RETRY,"Contact your hosting provider letting them know your web server is not responding.")},
+  "522":{t:"Connection timed out",st:["ok","ok","bad"],
+    h:"The initial connection between Cloudflare's network and the origin web server timed out. As a result, the web page can not be displayed.",
+    d:OWNER(RETRY,"Contact your hosting provider letting them know your web server is not completing requests. An Error 522 means that the request was able to connect to your web server, but that the request didn't finish.")},
+  "523":{t:"Origin is unreachable",st:["ok","ok","bad"],
+    h:"Cloudflare cannot reach the origin web server. As a result, the web page can not be displayed.",
+    d:OWNER(RETRY,"Check your DNS settings. If you are using a CNAME origin record, make sure it is valid and resolvable.")},
+  "524":{t:"A timeout occurred",st:["ok","ok","bad"],
+    h:"Cloudflare was able to make a TCP connection to the origin web server, but the origin did not reply with an HTTP response before the connection timed out.",
+    d:OWNER(RETRY,"Check your web server's resources and logs. A 524 means the request kept an open connection but did not finish within the time limit.")},
+  "525":{t:"SSL handshake failed",st:["ok","ok","bad"],
+    h:"Cloudflare is unable to establish an SSL connection to the origin server.",
+    d:OWNER(RETRY,"Ensure a valid SSL certificate is installed on your origin web server and that port 443 is open.")},
+  "526":{t:"Invalid SSL certificate",st:["ok","ok","bad"],
+    h:"Cloudflare could not validate the SSL certificate on the origin web server.",
+    d:OWNER(RETRY,"Ensure the certificate on your origin is not expired and is signed by a trusted certificate authority.")}
+};
+
+const P1 = {
+  "1020":{t:"Access denied", s:"You do not have access to {host}.",
+    h:"This website is using a security service to protect itself from online attacks. The action you just performed triggered the security solution. There are several actions that could trigger this block including submitting a certain word or phrase, a SQL command or malformed data.",
+    d:"<p>You can email the site owner to let them know you were blocked. Please include what you were doing when this page came up and the Cloudflare Ray ID found at the bottom of this page.</p>"},
+  "1015":{t:"You are being rate limited", s:"Error 1015",
+    h:"The owner of this website ({host}) has banned you temporarily from accessing this website.",
+    d:"<p>"+RETRY+"</p>"},
+  "1006":{t:"Access denied", s:"Your IP address has been banned.",
+    h:"The owner of this website ({host}) has banned your IP address ({ip}).",
+    d:"<p>Please contact the owner of this site for further assistance.</p>"},
+  "1009":{t:"Access denied", s:"The owner of this website has banned the country or region your IP address is in.",
+    h:"The owner of this website ({host}) has banned the country or region your IP address is in from accessing this website.",
+    d:"<p>Please contact the owner of this site for further assistance.</p>"},
+  "1010":{t:"Access denied", s:"The owner of this website has banned your access based on your browser's signature.",
+    h:"The owner of this website ({host}) has banned your access based on your browser's signature ({ray}).",
+    d:"<p>Please contact the owner of this site for further assistance.</p>"}
+};
+
+const PW = {
+  modern:{t:"Verify you are human",
+    b:"{host} needs to review the security of your connection before proceeding."},
+  classic:{t:"Checking your browser before accessing {host}.",
+    b:"This process is automatic. Your browser will redirect to your requested content shortly.<br>Please allow up to {secs} seconds…"}
+};
+
+/* ============================================================
+   Art — Cloudflare wordmark, used only by the interstitial
+   ============================================================ */
+const CF_LOGO = '<svg viewBox="0 0 64 26" width="64" height="26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+ + '<path fill="#f6821f" d="M44.6 17.9c.4-1.3.2-2.5-.4-3.4-.6-.8-1.6-1.3-2.8-1.4l-23-.3c-.2 0-.3-.1-.4-.2 0-.1-.1-.3 0-.4.1-.2.2-.4.5-.4l23.2-.3c2.8-.1 5.8-2.4 6.8-5.1l1.3-3.4c.1-.1.1-.3 0-.4C48.6 1.4 44.9 0 41.2 0c-6.4 0-11.8 4.1-13.8 9.8-1.3-1-2.9-1.5-4.7-1.3-3.1.3-5.6 2.8-5.9 5.9-.1.8 0 1.6.2 2.3C11.9 16.8 8 20.8 8 25.7c0 .4 0 .9.1 1.3 0 .2.2.3.4.3h42.4c.2 0 .4-.1.5-.3l.9-3.1z"/>'
+ + '<path fill="#fbad41" d="M52.9 12.9h-.7c-.1 0-.3.1-.3.3l-.9 3.1c-.4 1.3-.2 2.5.4 3.4.6.8 1.6 1.3 2.8 1.4l4.9.3c.2 0 .3.1.4.2 0 .1.1.3 0 .4-.1.2-.2.4-.5.4l-5.1.3c-2.8.1-5.8 2.4-6.8 5.1l-.3.9c-.1.2 0 .4.2.4h17.5c.2 0 .4-.1.4-.3.3-1.1.5-2.2.5-3.4 0-6.8-5.6-12.4-12.5-12.5z"/></svg>';
+
+/* ============================================================
+   Builder — Cloudflare's own error-page markup and stylesheet
+   ============================================================ */
+const CF_CSS = document.getElementById("cf-css").textContent.trim();
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function strip(s){return String(s).replace(/<[^>]*>/g,"");}
+
+function tok(s,c){
+  return String(s)
+    .replace(/\{host\}/g, esc(c.host))
+    .replace(/\{ip\}/g,   esc(c.ip))
+    .replace(/\{ray\}/g,  esc(c.ray))
+    .replace(/\{colo\}/g, esc(c.colo))
+    .replace(/\{code\}/g, esc(c.code))
+    .replace(/\{secs\}/g, esc(c.waitSecs));
+}
+
+function docTop(c,title,css){
+  return '<!DOCTYPE html>\n'
+   + '<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->\n'
+   + '<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->\n'
+   + '<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->\n'
+   + '<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->\n'
+   + '<head>\n<title>' + esc(title) + '</title>\n'
+   + '<meta charset="UTF-8" />\n'
+   + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />\n'
+   + '<meta http-equiv="X-UA-Compatible" content="IE=Edge" />\n'
+   + (c.noIndex ? '<meta name="robots" content="noindex, nofollow" />\n' : '')
+   + '<meta name="viewport" content="width=device-width,initial-scale=1" />\n'
+   + '<style>\n' + css + '\n</style>\n</head>';
+}
+
+/* Cloudflare's own reveal script, verbatim */
+const CF_REVEAL = '<script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();<\/script>';
+
+function runtime(c){
+  const cfg = JSON.stringify({
+    liveRay:!!c.liveRay, liveTime:!!c.liveTime, randomColo:!!c.randomColo,
+    colos:c.randomColo?COLOS:[], realIp:!!c.realIp,
+    countdown:c.countdown?Number(c.countdownSecs)||30:0
+  });
+  return '<script>\n(function(){\n'
+ + 'var C=' + cfg + ';\n'
+ + 'var H="0123456789abcdef";\n'
+ + 'function hex(n){var o="";for(var i=0;i<n;i++){o+=H.charAt(Math.floor(Math.random()*16));}return o;}\n'
+ + 'function p2(n){return (n<10?"0":"")+n;}\n'
+ + 'function utc(){var d=new Date();return d.getUTCFullYear()+"-"+p2(d.getUTCMonth()+1)+"-"+p2(d.getUTCDate())+" "+p2(d.getUTCHours())+":"+p2(d.getUTCMinutes())+":"+p2(d.getUTCSeconds())+" UTC";}\n'
+ + 'function put(sel,v){var n=document.querySelectorAll(sel);for(var i=0;i<n.length;i++){n[i].textContent=v;}}\n'
+ + 'if(C.liveRay){put(".js-ray",hex(16));}\n'
+ + 'if(C.liveTime){put(".js-ts",utc());}\n'
+ + 'if(C.randomColo&&C.colos.length){put(".js-colo",C.colos[Math.floor(Math.random()*C.colos.length)]);}\n'
+ + 'if(C.realIp&&window.fetch){\n'
+ + '  fetch("/cdn-cgi/trace",{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){\n'
+ + '    var L=t.split(String.fromCharCode(10));\n'
+ + '    for(var i=0;i<L.length;i++){if(L[i].indexOf("ip=")===0){put("#cf-footer-ip",L[i].slice(3));}}\n'
+ + '  }).catch(function(){});\n'
+ + '}\n'
+ + 'var el=document.getElementById("cf-retry");\n'
+ + 'if(C.countdown>0&&el){\n'
+ + '  var left=C.countdown;\n'
+ + '  (function tick(){\n'
+ + '    el.textContent="Retrying automatically in "+left+" second"+(left===1?"":"s")+"…";\n'
+ + '    if(left<=0){location.reload();return;}\n'
+ + '    left--;setTimeout(tick,1000);\n'
+ + '  })();\n'
+ + '}\n'
+ + '})();\n<\/script>';
+}
+
+function cfFooter(c){
+  return '        <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">\n'
+ + '            <p class="text-13">\n'
+ + '                <span class="cf-footer-item sm:block sm:mb-1">Ray ID: <strong class="font-semibold js-ray">' + esc(c.ray) + '</strong></span>\n'
+ + '                <span class="cf-footer-separator sm:hidden">&bull;</span>\n'
+ + '                <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">\n'
+ + '                    Your IP:\n'
+ + '                    <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>\n'
+ + '                    <span class="hidden" id="cf-footer-ip">' + esc(c.ip) + '</span>\n'
+ + '                    <span class="cf-footer-separator sm:hidden">&bull;</span>\n'
+ + '                </span>\n'
+ + '                \n'
+ + '                <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/" id="brand_link" target="_blank">Cloudflare</a></span>\n'
+ + '            </p>\n'
+ + '        </div><!-- /.error-footer -->';
+}
+
+function cfBand(c){
+  const cols = [
+    {id:"cf-browser-status",    icon:"cf-icon-browser", who:"You",
+     label:"Browser",    style:""},
+    {id:"cf-cloudflare-status", icon:"cf-icon-cloud",   who:'<span class="js-colo">' + esc(c.colo) + '</span>',
+     label:"Cloudflare", style:' style="color: #2f7bbf;"'},
+    {id:"cf-host-status",       icon:"cf-icon-server",  who:"Website",
+     label:"Host",       style:""}
+  ];
+  let source = c.statuses.indexOf("bad");
+  if (source < 0) source = 1;
+
+  const inner = cols.map((x,i) => {
+    const bad = c.statuses[i] === "bad";
+    const src = i === source ? "cf-error-source " : " ";
+    return '                    <div id="' + x.id + '" class="' + src + 'relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">\n'
+     + '                        <div class="relative mb-10 md:m-0">\n'
+     + '                            <span class="' + x.icon + ' block md:hidden h-20 bg-center bg-no-repeat"></span>\n'
+     + '                            <span class="' + (bad ? "cf-icon-error" : "cf-icon-ok") + ' w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>\n'
+     + '                        </div>\n'
+     + '                        <span class="md:block w-full truncate">' + x.who + '</span>\n'
+     + '                        <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3"' + x.style + '>' + x.label + '</h3>\n'
+     + '                        <span class="leading-1.3 text-2xl" style="color: ' + (bad ? "#bd2426" : "#9bca3e") + '">' + (bad ? "Error" : "Working") + '</span>\n'
+     + '                    </div>';
+  }).join("\n");
+
+  return '        <div class="my-8 bg-gradient-gray">\n'
+ + '            <div class="w-240 lg:w-full mx-auto">\n'
+ + '                <div class="clearfix md:px-8">\n' + inner + '\n'
+ + '                </div>\n'
+ + '            </div>\n'
+ + '        </div>';
+}
+
+function build(c){
+  if (c.type === "wait") return buildWait(c);
+
+  const heading = tok(c.heading, c);
+  const title = c.pageTitle || (c.type === "5xx"
+      ? c.code + ": " + strip(heading)
+      : "Attention Required! | Cloudflare");
+  const retry = c.countdown ? '\n            <div class="cf-retry" id="cf-retry"></div>' : "";
+
+  const lede = c.type === "5xx"
+    ? '                Visit <a href="https://www.cloudflare.com/5xx-error-landing" target="_blank" rel="noopener noreferrer">cloudflare.com</a> for more information.'
+    : '                ' + tok(c.summary || "", c);
+
+  const header = '        <header class="mx-auto pt-10 lg:pt-6 lg:px-8 w-240 lg:w-full mb-8">\n'
+   + '            <h1 class="inline-block sm:block sm:mb-2 font-light text-60 lg:text-4xl text-black-dark leading-tight mr-2">\n'
+   + '                <span class="inline-block">' + heading + '</span>\n'
+   + '                <span class="code-label">Error code ' + esc(c.code) + '</span>\n'
+   + '            </h1>\n'
+   + '            <div>\n' + lede + '\n            </div>\n'
+   + '            <div class="mt-3"><span class="js-ts">' + esc(c.stamp) + '</span></div>' + retry + '\n'
+   + '        </header>';
+
+  const detail = '        <div class="w-240 lg:w-full mx-auto mb-8 lg:px-8">\n'
+   + '            <div class="clearfix">\n'
+   + '                <div class="w-1/2 md:w-full float-left pr-6 md:pb-10 md:pr-0 leading-relaxed">\n'
+   + '                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What happened?</h2>\n'
+   + '                    ' + tok(c.happened, c) + '\n'
+   + '                </div>\n'
+   + '                <div class="w-1/2 md:w-full float-left leading-relaxed">\n'
+   + '                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What can I do?</h2>\n'
+   + '                    ' + tok(c.cando, c) + '\n'
+   + '                </div>\n'
+   + '            </div>\n'
+   + '        </div>';
+
+  return docTop(c, title, CF_CSS) + '\n<body>\n'
+   + '<div id="cf-wrapper">\n'
+   + '    <div id="cf-error-details" class="p-0">\n'
+   + header + '\n'
+   + (c.type === "5xx" ? cfBand(c) + '\n' : "")
+   + '\n' + detail + '\n\n'
+   + cfFooter(c) + '\n'
+   + '    </div>\n'
+   + '</div>\n'
+   + CF_REVEAL + '\n'
+   + runtime(c) + '\n'
+   + '</body>\n</html>';
+}
+
+function waitCss(){return `
+body,html{color:#404040;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif;font-size:16px}
+*,body,html{margin:0;padding:0}*{box-sizing:border-box}
+a{color:#2f7bbf;text-decoration:none}a:hover{color:#f68b1f}
+body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.box{width:100%;max-width:600px}
+h1{font-size:38px;font-weight:500;line-height:1.25;margin-bottom:18px}
+h2{font-size:24px;font-weight:400;line-height:1.3;margin-bottom:22px}
+.card{border:1px solid #d7d7d7;border-radius:8px;background:#fafafa;padding:18px 20px;display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.spin{width:26px;height:26px;border:3px solid #d9d9d9;border-top-color:#f6821f;border-radius:50%;animation:sp 1s linear infinite;flex:none}
+.bigspin{width:44px;height:44px;border:4px solid #dedede;border-top-color:#f6821f;border-radius:50%;animation:sp 1s linear infinite;margin-bottom:26px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.card .mark{margin-left:auto;flex:none;display:flex}
+.body{margin-bottom:30px;line-height:1.625}
+.foot{border-top:1px solid #ebebeb;padding-top:14px;font-size:13px;color:#999}
+.foot .sep{margin:0 6px}
+.cf-retry{margin-top:10px;font-size:13px;color:#999}
+@media (max-width:600px){h1{font-size:28px}h2{font-size:20px}}`;}
+
+function buildWait(c){
+  const modern = c.waitStyle === "modern";
+  const title = c.pageTitle || (modern ? "Just a moment…" : "Attention Required! | Cloudflare");
+  const retry = c.countdown ? '<div class="cf-retry" id="cf-retry"></div>' : "";
+
+  const inner = modern
+    ? '<h1>' + esc(c.host) + '</h1><h2>' + tok(c.heading,c) + '</h2>'
+      + '<div class="card"><div class="spin"></div><div>Verifying…</div>'
+      + '<div class="mark">' + CF_LOGO + '</div></div>'
+      + '<div class="body">' + tok(c.waitBody,c) + '</div>'
+    : '<h1>' + esc(c.host) + '</h1><h2>' + tok(c.heading,c) + '</h2>'
+      + '<div class="bigspin"></div>'
+      + '<div class="body">' + tok(c.waitBody,c) + '</div>';
+
+  const foot = modern
+    ? '<div class="foot">Ray ID: <strong class="js-ray">' + esc(c.ray) + '</strong>'
+      + '<span class="sep">&bull;</span>Performance &amp; security by <a href="https://www.cloudflare.com/" rel="noopener noreferrer" target="_blank">Cloudflare</a>' + retry + '</div>'
+    : '<div class="foot">DDoS protection by <a href="https://www.cloudflare.com/" rel="noopener noreferrer" target="_blank">Cloudflare</a>'
+      + '<span class="sep">&bull;</span>Ray ID: <strong class="js-ray">' + esc(c.ray) + '</strong>' + retry + '</div>';
+
+  return docTop(c, title, waitCss()) + '\n<body>\n<div class="box">' + inner + foot + '</div>\n'
+   + runtime(c) + '\n</body>\n</html>';
+}
+</script>
+<script>
+/* ============================================================
+   Editor
+   ============================================================ */
+const $ = id => document.getElementById(id);
+let TYPE = "5xx";
+
+/* extra field only relevant to the 1xxx screens */
+$("heading").closest("label").insertAdjacentHTML("afterend",
+  '<label class="f" data-show="1xxx"><span>Summary line</span>' +
+  '<input type="text" id="summary" spellcheck="false"></label>');
+
+/* datacenters */
+COLOS.forEach(n => {
+  const o = document.createElement("option");
+  o.textContent = n; o.value = n;
+  if (n === "San Francisco") o.selected = true;
+  $("colo").appendChild(o);
+});
+
+function utcNow(){
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  return d.getUTCFullYear()+"-"+p(d.getUTCMonth()+1)+"-"+p(d.getUTCDate())+" "
+       + p(d.getUTCHours())+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+" UTC";
+}
+function rollRay(){
+  let o=""; for(let i=0;i<16;i++) o += "0123456789abcdef"[Math.floor(Math.random()*16)];
+  return o;
+}
+
+$("ray").value = rollRay();
+$("stamp").value = utcNow();
+
+/* ---- populate the code list for the active screen type ---- */
+function fillCodes(){
+  const sel = $("code");
+  sel.innerHTML = "";
+  if (TYPE === "wait") return;
+  const src = TYPE === "5xx" ? P5 : P1;
+  Object.keys(src).forEach(k => {
+    const o = document.createElement("option");
+    o.value = k; o.textContent = k + " — " + src[k].t;
+    sel.appendChild(o);
+  });
+  sel.value = TYPE === "5xx" ? "500" : "1020";
+}
+
+/* ---- reset the copy fields to the real Cloudflare wording ---- */
+function applyPreset(){
+  if (TYPE === "wait"){
+    const p = PW[$("waitStyle").value];
+    $("heading").value = p.t;
+    $("waitBody").value = p.b;
+    return;
+  }
+  const src = TYPE === "5xx" ? P5 : P1;
+  const p = src[$("code").value];
+  if (!p) return;
+  $("heading").value = p.t;
+  $("happened").value = p.h;
+  $("cando").value = p.d;
+  $("summary").value = p.s || "";
+  if (TYPE === "5xx"){
+    $("st0").value = p.st[0] === "bad" ? "Error" : "Working";
+    $("st1").value = p.st[1] === "bad" ? "Error" : "Working";
+    $("st2").value = p.st[2] === "bad" ? "Error" : "Working";
+  }
+}
+
+/* ---- show only the controls that apply ---- */
+function syncVisibility(){
+  document.querySelectorAll("[data-show]").forEach(el => {
+    const want = el.getAttribute("data-show").split(" ");
+    let on = want.includes(TYPE);
+    if (want.includes("countdown")) on = $("countdown").checked;
+    if (want.includes("worker")) on = $("target").value === "worker";
+    if (want.includes("bypassable")) on = $("target").value === "worker" || $("target").value === "express";
+    el.hidden = !on;
+  });
+  $("stamp").disabled = $("liveTime").checked;
+  $("ray").disabled   = $("liveRay").checked;
+  $("colo").disabled  = $("randomColo").checked;
+  $("ip").disabled    = $("realIp").checked;
+}
+
+function readCfg(){
+  return {
+    type: TYPE,
+    code: $("code").value || "",
+    host: $("host").value.trim() || "example.com",
+    pageTitle: $("pageTitle").value.trim(),
+    colo: $("colo").value,
+    randomColo: $("randomColo").checked,
+    ray: $("ray").value.trim() || rollRay(),
+    liveRay: $("liveRay").checked,
+    stamp: $("stamp").value.trim() || utcNow(),
+    liveTime: $("liveTime").checked,
+    ip: $("ip").value.trim() || "203.0.113.42",
+    realIp: $("realIp").checked,
+    statuses: [$("st0").value, $("st1").value, $("st2").value].map(v => v === "Error" ? "bad" : "ok"),
+    heading: $("heading").value,
+    summary: $("summary").value,
+    happened: $("happened").value,
+    cando: $("cando").value,
+    waitStyle: $("waitStyle").value,
+    waitSecs: $("waitSecs").value || "5",
+    waitBody: $("waitBody").value,
+    countdown: $("countdown").checked,
+    countdownSecs: $("countdownSecs").value || "30",
+    noIndex: $("noIndex").checked,
+    target: $("target").value,
+    statusCode: $("statusCode").value,
+    retryAfter: $("retryAfter").value || "300",
+    bypass: $("bypass").value.trim() || "let-me-in",
+    liftAfter: $("liftAfter").value || "0"
+  };
+}
+
+let HTML = "", SNIP = "";
+let t = null;
+function render(){
+  syncVisibility();
+  HTML = build(readCfg());
+  const old = $("pv"), fresh = document.createElement("iframe");
+  fresh.id = "pv"; fresh.title = "Preview"; fresh.srcdoc = HTML;
+  old.replaceWith(fresh);
+  const cfg = readCfg();
+  SNIP = snippet(cfg, HTML);
+  $("codeView").textContent = SNIP;
+  $("fakeUrl").textContent = "https://" + ($("host").value.trim() || "example.com") + "/";
+  saveState();
+}
+function schedule(){ clearTimeout(t); t = setTimeout(render, 120); }
+
+/* ---- wiring ---- */
+document.querySelectorAll("#typeSeg button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#typeSeg button").forEach(x => x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    TYPE = b.dataset.type;
+    fillCodes(); applyPreset(); render();
+  });
+});
+$("code").addEventListener("change", () => { applyPreset(); render(); });
+$("waitStyle").addEventListener("change", () => { applyPreset(); render(); });
+$("reroll").addEventListener("click", () => { $("ray").value = rollRay(); render(); });
+
+document.querySelectorAll("input, select, textarea").forEach(el => {
+  if (el.id === "code" || el.id === "waitStyle") return;
+  el.addEventListener("input", schedule);
+  el.addEventListener("change", schedule);
+});
+
+/* viewport + preview actions */
+function vp(mobile){
+  $("stage").classList.toggle("pad", mobile);
+  $("vpMobile").setAttribute("aria-pressed", String(mobile));
+  $("vpDesktop").setAttribute("aria-pressed", String(!mobile));
+  $("vpMobile").classList.toggle("primary", mobile);
+  $("vpDesktop").classList.toggle("primary", !mobile);
+}
+$("vpDesktop").addEventListener("click", () => vp(false));
+$("vpMobile").addEventListener("click", () => vp(true));
+$("reloadBtn").addEventListener("click", render);
+
+$("tabBtn").addEventListener("click", () => {
+  const w = window.open("", "_blank");
+  if (!w) return toast("Popup blocked");
+  w.document.open(); w.document.write(HTML); w.document.close();
+});
+
+let CODEVIEW = false;
+function setView(code){
+  CODEVIEW = code;
+  $("stage").hidden = code;
+  $("codeStage").hidden = !code;
+  $("viewCode").setAttribute("aria-pressed", String(code));
+  $("viewPage").setAttribute("aria-pressed", String(!code));
+  $("viewCode").classList.toggle("primary", code);
+  $("viewPage").classList.toggle("primary", !code);
+  $("copyBtn").textContent = code ? "Copy snippet" : "Copy HTML";
+  $("dlBtn").textContent = code ? "Save " + FILENAME[$("target").value] : "Download";
+}
+$("viewPage").addEventListener("click", () => setView(false));
+$("viewCode").addEventListener("click", () => setView(true));
+$("target").addEventListener("change", () => setView(CODEVIEW));
+
+function save(name, text, type){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], {type: type}));
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast("Downloaded " + name);
+}
+
+$("dlBtn").addEventListener("click", () => {
+  const c = readCfg();
+  if (CODEVIEW) return save(FILENAME[c.target], SNIP, "text/plain");
+  save("outage-" + (c.type === "wait" ? "interstitial" : c.code) + ".html", HTML, "text/html");
+});
+
+$("copyBtn").addEventListener("click", async () => {
+  const text = CODEVIEW ? SNIP : HTML;
+  try { await navigator.clipboard.writeText(text); toast(CODEVIEW ? "Snippet copied" : "HTML copied"); }
+  catch(e){ toast("Copy blocked — use Download"); }
+});
+
+$("linkBtn").addEventListener("click", async () => {
+  const hash = "#c=" + btoa(encodeURIComponent(JSON.stringify(saveState())));
+  history.replaceState(null, "", location.pathname + hash);
+  try { await navigator.clipboard.writeText(location.href); toast("Config link copied"); }
+  catch(e){ toast("Link is in the address bar"); }
+});
+
+let tt = null;
+function toast(msg){
+  const el = $("toast");
+  el.textContent = msg; el.classList.add("on");
+  clearTimeout(tt); tt = setTimeout(() => el.classList.remove("on"), 1800);
+}
+
+/* ============================================================
+   Deploy snippets — the part a plain HTML file leaves you to figure out
+   ============================================================ */
+function jsLiteral(html){
+  return html.replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\$\{/g,"\\${");
+}
+
+const FILENAME = {static:"DEPLOY.md", worker:"worker.js", nginx:"outage.conf",
+                  apache:".htaccess", caddy:"Caddyfile", express:"outage-middleware.js"};
+
+function snippet(c, html){
+  const file = "outage-" + (c.type === "wait" ? "interstitial" : c.code) + ".html";
+  const st = c.statusCode, ra = c.retryAfter;
+  const L = [];
+
+  if (c.target === "static"){
+    L.push("Static drop-in — works on any host, no server config",
+      "",
+      "1. Download the page and rename it:",
+      "     " + file + "  ->  index.html",
+      "",
+      "2. Put it where your site is served from. Keep the real index.html",
+      "   somewhere safe so you can swap it back.",
+      "",
+      "   Cloudflare Pages   wrangler pages deploy ./outage",
+      "   Netlify            drop the folder on app.netlify.com/drop",
+      "   S3                 aws s3 cp index.html s3://YOUR-BUCKET/index.html",
+      "   Anything else      scp index.html you@host:/var/www/html/index.html",
+      "",
+      "Caveat: a static file answers 200 OK. Crawlers and uptime monitors will",
+      "read that as \"the site is fine and this is the content\". If the outage",
+      "lasts more than a few minutes, use one of the server targets so the page",
+      "goes out as " + st + " with Retry-After: " + ra + ".");
+    return L.join("\n");
+  }
+
+  if (c.target === "worker"){
+    L.push("// worker.js — Cloudflare Worker. Route it at yoursite.com/*",
+      "//   npx wrangler deploy worker.js --name outage --compatibility-date 2025-01-01",
+      "// Take it down again with:  npx wrangler delete --name outage",
+      "",
+      "const STATUS      = " + st + ";",
+      "const RETRY_AFTER = " + ra + ";        // seconds",
+      "const BYPASS      = " + JSON.stringify(c.bypass) + ";   // ?bypass=... to see the real site",
+      "const LIFT_AFTER  = " + (Number(c.liftAfter)||0) + ";        // minutes; 0 = until you delete the worker",
+      "const DEPLOYED_AT = " + Date.now() + ";",
+      "",
+      "const PAGE = `" + jsLiteral(html) + "`;",
+      "",
+      "export default {",
+      "  async fetch(request) {",
+      "    // the outage lifts itself so you cannot forget to take it down",
+      "    if (LIFT_AFTER && Date.now() > DEPLOYED_AT + LIFT_AFTER * 60000) return fetch(request);",
+      "",
+      "    const url = new URL(request.url);",
+      "    const cookie = request.headers.get(\"Cookie\") || \"\";",
+      "",
+      "    // ?bypass=TOKEN drops a cookie, then you browse the real site normally",
+      "    if (url.searchParams.get(\"bypass\") === BYPASS) {",
+      "      url.searchParams.delete(\"bypass\");",
+      "      return new Response(null, { status: 302, headers: {",
+      "        \"Location\": url.toString(),",
+      "        \"Set-Cookie\": `outage_bypass=${BYPASS}; Path=/; Max-Age=86400; Secure; HttpOnly; SameSite=Lax`",
+      "      }});",
+      "    }",
+      "    if (cookie.includes(`outage_bypass=${BYPASS}`)) return fetch(request);",
+      "",
+      "    // let health checks and ACME keep working while the site is \"down\"",
+      "    if (url.pathname.startsWith(\"/.well-known/\")) return fetch(request);",
+      "",
+      "    return new Response(PAGE, { status: STATUS, headers: {",
+      "      \"Content-Type\": \"text/html; charset=utf-8\",",
+      "      \"Retry-After\": String(RETRY_AFTER),",
+      "      \"Cache-Control\": \"no-store\"",
+      "    }});",
+      "  }",
+      "};");
+    return L.join("\n");
+  }
+
+  if (c.target === "nginx"){
+    L.push("# outage.conf — put " + file + " at /var/www/outage/outage.html",
+      "#   sudo nginx -t && sudo systemctl reload nginx",
+      "# Undo by commenting out the location / block below and reloading again.",
+      "",
+      "server {",
+      "    listen 443 ssl;",
+      "    server_name " + c.host + ";",
+      "    # ... your existing ssl_certificate lines stay as they are ...",
+      "",
+      "    # keep your own health endpoint reachable while the site is down",
+      "    location = /healthz { proxy_pass http://127.0.0.1:8080; }",
+      "    location ^~ /.well-known/ { root /var/www/html; }",
+      "",
+      "    location / {",
+      "        return " + st + ";",
+      "    }",
+      "",
+      "    error_page " + st + " @outage;",
+      "    location @outage {",
+      "        root /var/www/outage;",
+      "        rewrite ^ /outage.html break;",
+      "        add_header Retry-After " + ra + " always;",
+      "        add_header Cache-Control \"no-store\" always;",
+      "    }",
+      "}");
+    return L.join("\n");
+  }
+
+  if (c.target === "apache"){
+    L.push("# .htaccess — put it next to " + file + ", renamed outage.html",
+      "# Needs mod_rewrite and mod_headers.",
+      "",
+      "RewriteEngine On",
+      "",
+      "# keep the outage page itself and ACME reachable",
+      "RewriteCond %{REQUEST_URI} !^/outage\\.html$",
+      "RewriteCond %{REQUEST_URI} !^/\\.well-known/",
+      "RewriteRule ^ - [R=" + st + ",L]",
+      "",
+      "ErrorDocument " + st + " /outage.html",
+      "Header always set Retry-After \"" + ra + "\"",
+      "Header always set Cache-Control \"no-store\"");
+    return L.join("\n");
+  }
+
+  if (c.target === "caddy"){
+    L.push("# Caddyfile — put " + file + " at /var/www/outage/outage.html",
+      "#   caddy reload --config /etc/caddy/Caddyfile",
+      "",
+      c.host + " {",
+      "    @live path /.well-known/* /healthz",
+      "    handle @live {",
+      "        reverse_proxy 127.0.0.1:8080",
+      "    }",
+      "",
+      "    handle {",
+      "        header Retry-After \"" + ra + "\"",
+      "        header Cache-Control \"no-store\"",
+      "        root * /var/www/outage",
+      "        rewrite * /outage.html",
+      "        file_server",
+      "        handle_errors { respond " + st + " }",
+      "    }",
+      "}");
+    return L.join("\n");
+  }
+
+  // express
+  L.push("// outage-middleware.js — require it FIRST, before your routes.",
+    "//   const outage = require(\"./outage-middleware\");",
+    "//   app.use(outage);",
+    "// Put " + file + " next to this file as outage.html.",
+    "",
+    "const fs = require(\"fs\");",
+    "const path = require(\"path\");",
+    "",
+    "const PAGE = fs.readFileSync(path.join(__dirname, \"outage.html\"), \"utf8\");",
+    "const BYPASS = " + JSON.stringify(c.bypass) + ";",
+    "const ALLOW = [/^\\/healthz$/, /^\\/\\.well-known\\//];",
+    "",
+    "module.exports = function outage(req, res, next) {",
+    "  if (ALLOW.some((re) => re.test(req.path))) return next();",
+    "",
+    "  if (req.query.bypass === BYPASS) {",
+    "    res.cookie(\"outage_bypass\", BYPASS, { maxAge: 86400000, httpOnly: true, sameSite: \"lax\" });",
+    "    return res.redirect(req.path);",
+    "  }",
+    "  if (req.cookies && req.cookies.outage_bypass === BYPASS) return next();",
+    "",
+    "  res.status(" + st + ")",
+    "     .set({ \"Retry-After\": \"" + ra + "\", \"Cache-Control\": \"no-store\" })",
+    "     .type(\"html\")",
+    "     .send(PAGE);",
+    "};");
+  return L.join("\n");
+}
+
+/* ============================================================
+   Config links — hand someone the exact page you are looking at
+   ============================================================ */
+const FIELDS = ["code","host","pageTitle","colo","randomColo","ray","liveRay","stamp","liveTime",
+  "ip","realIp","st0","st1","st2","heading","summary","happened","cando","waitStyle","waitSecs",
+  "waitBody","countdown","countdownSecs","noIndex","target","statusCode","retryAfter","bypass","liftAfter"];
+
+function saveState(){
+  const o = {t:TYPE};
+  FIELDS.forEach(id => { const el = $(id); if (el) o[id] = el.type === "checkbox" ? el.checked : el.value; });
+  try { localStorage.setItem("outage-cfg", JSON.stringify(o)); } catch(e){}
+  return o;
+}
+
+function loadState(o){
+  if (!o || !o.t) return false;
+  TYPE = o.t;
+  document.querySelectorAll("#typeSeg button").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.type === TYPE)));
+  fillCodes();
+  FIELDS.forEach(id => {
+    const el = $(id);
+    if (!el || !(id in o)) return;
+    if (el.type === "checkbox") el.checked = !!o[id]; else el.value = o[id];
+  });
+  return true;
+}
+
+function readHash(){
+  const m = /[#&]c=([^&]+)/.exec(location.hash);
+  if (!m) return null;
+  try { return JSON.parse(decodeURIComponent(atob(m[1]))); } catch(e){ return null; }
+}
+
+/* boot */
+$("bypass").value = "let-me-in-" + rollRay().slice(0, 4);
+vp(false);
+fillCodes();
+applyPreset();
+
+let restored = false;
+try { restored = loadState(readHash()) || loadState(JSON.parse(localStorage.getItem("outage-cfg"))); }
+catch(e){}
+if (!restored) applyPreset();
+if ($("liveTime").checked) $("stamp").value = utcNow();
+
+setView(false);
+render();
+</script>
+</body>
+</html>
