@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prusament to Bambu X2D</title>
+<style>
+  :root { --bg:#fff; --fg:#1b1b1b; --mut:#666; --line:#ddd; --acc:#00ae42; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161616; --fg:#eee; --mut:#999; --line:#333; } }
+  body { background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,sans-serif; max-width:560px; margin:0 auto; padding:24px 16px; }
+  h1 { font-size:1.4rem; margin:0 0 4px; }
+  p, small { color:var(--mut); }
+  input { width:100%; box-sizing:border-box; padding:10px; font-size:1rem; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--fg); }
+  ul { list-style:none; padding:0; margin:12px 0; max-height:50vh; overflow:auto; border:1px solid var(--line); border-radius:6px; }
+  li { padding:9px 12px; cursor:pointer; border-bottom:1px solid var(--line); }
+  li:last-child { border-bottom:0; }
+  li:hover { background:var(--line); }
+  #status { min-height:3em; }
+  ol { color:var(--mut); padding-left:20px; }
+</style>
+</head>
+<body>
+<h1>Prusament → Bambu Studio (X2D)</h1>
+<p>Pick a Prusament filament. Its PrusaSlicer profile (Core One) is downloaded from Prusa's GitHub, converted, and saved as a Bambu Studio filament preset for the <b>Bambu Lab X2D, 0.4 nozzle</b>.</p>
+<input id="q" placeholder="Search, e.g. pa11 cf, petg, pc blend" autofocus disabled>
+<ul id="list"></ul>
+<div id="status">Loading profiles…</div>
+<ol>
+  <li>Click a filament; a .json file downloads.</li>
+  <li>Bambu Studio: File → Import → Import Configs…</li>
+  <li>It appears under the filament list → Custom.</li>
+</ol>
+<small>Unofficial; not affiliated with Prusa Research or Bambu Lab. Temperatures, bed temps, density and cost come from Prusa's profile; fan, flow and speed come from Bambu's matching X2D profile (needs Bambu Studio's X2D profiles installed). Materials with no Bambu equivalent (e.g. PVB) use PLA as a base, so test-print before trusting them.</small>
+
+<script>
+const PRUSA = "https://raw.githubusercontent.com/prusa3d/PrusaSlicer-settings-prusa-fff/main/PrusaResearch";
+const BAMBU = "https://raw.githubusercontent.com/bambulab/BambuStudio/master/resources/profiles/BBL/filament";
+const PLATES = ["hot_plate_temp","textured_plate_temp","cool_plate_temp","eng_plate_temp","supertack_plate_temp"];
+const $ = id => document.getElementById(id);
+let secs = {}, names = [];
+
+const get = async url => { const r = await fetch(url); if (!r.ok) throw new Error(r.status + " " + url); return r.text(); };
+
+function parse(text) {
+  const out = new Map(); let cur = null;
+  for (let line of text.split("\n")) {
+    line = line.trim();
+    if (!line || line[0] === ";" || line[0] === "#") continue;
+    const m = line.match(/^\[(\w+):(.+)\]$/);
+    if (m) { cur = {}; out.set(m[1] + ":" + m[2].trim(), cur); }
+    else if (cur && line.includes("=")) { const i = line.indexOf("="); cur[line.slice(0, i).trim()] = line.slice(i + 1).trim(); }
+  }
+  return out;
+}
+
+function resolve(name, seen = []) {
+  const sec = secs.get("filament:" + name);
+  if (!sec || seen.includes(name)) return {};
+  let out = {};
+  for (const p of (sec.inherits || "").split(";").map(s => s.trim()).filter(Boolean))
+    Object.assign(out, resolve(p, [...seen, name]));
+  for (const [k, v] of Object.entries(sec)) if (k !== "inherits") out[k] = v;
+  return out;
+}
+
+const num = v => v.trim().replace(/%$/, "");
+
+async function bambuParent(name, p) {
+  const t = (p.filament_type || "PLA").toUpperCase(), n = name.toLowerCase();
+  const cf = n.includes("carbon") || n.includes(" cf"), gf = n.includes("glass") || n.includes(" gf");
+  const map = { PLA: cf ? "PLA-CF" : "PLA", PETG: cf ? "PETG-CF" : "PETG", PET: "PETG", PA: cf ? "PA-CF" : "PA",
+    PC: "PC", PP: cf ? "PP-CF" : gf ? "PP-GF" : "PP", ASA: "ASA", ABS: "ABS", FLEX: "TPU", TPU: "TPU", PVA: "PVA", HIPS: "HIPS" };
+  p._fallback = !(t in map);
+  const base = map[t] || "PLA";
+  for (const suf of [" @BBL X2D 0.4 nozzle", " @BBL X2D"]) {
+    const parent = `Generic ${base}${suf}`;
+    try { return [parent, JSON.parse(await get(`${BAMBU}/${encodeURIComponent(parent)}.json`))]; } catch (e) {}
+  }
+  throw new Error("No X2D parent profile found for " + base);
+}
+
+async function convert(name, p) {
+  const [parent, pj] = await bambuParent(name, p);
+  const out = { type: "filament", name, from: "User", instantiation: "true", inherits: parent, version: "02.00.00.00",
+    filament_vendor: ["Prusament"], filament_settings_id: [name],
+    compatible_printers: (pj.compatible_printers && pj.compatible_printers.length) ? pj.compatible_printers : ["Bambu Lab X2D 0.4 nozzle"] };
+  if (p.temperature) {
+    out.nozzle_temperature = Array(6).fill(num(p.temperature));
+    out.nozzle_temperature_initial_layer = Array(6).fill(num(p.first_layer_temperature || p.temperature));
+    out.nozzle_temperature_range_high = [String(Math.floor(parseFloat(num(p.temperature))) + 10)];
+  }
+  if (p.bed_temperature) for (const k of PLATES) {
+    out[k] = [num(p.bed_temperature)];
+    out[k + "_initial_layer"] = [num(p.first_layer_bed_temperature || p.bed_temperature)];
+  }
+  if (p._fallback) {
+    if (p.min_fan_speed) out.fan_min_speed = [num(p.min_fan_speed)];
+    if (p.max_fan_speed) out.fan_max_speed = [num(p.max_fan_speed)];
+    if (p.filament_max_volumetric_speed) out.filament_max_volumetric_speed = Array(6).fill(num(p.filament_max_volumetric_speed));
+  }
+  if (p.filament_density) out.filament_density = [num(p.filament_density)];
+  if (p.filament_cost) out.filament_cost = [num(p.filament_cost)];
+  return [out, parent];
+}
+
+async function pick(name) {
+  $("status").textContent = "Converting " + name + "…";
+  try {
+    const src = secs.has("filament:" + name + " @COREONE") ? name + " @COREONE" : name;
+    const [res, parent] = await convert(name, resolve(src));
+    const blob = new Blob([JSON.stringify(res, null, 4)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name.replace(/[^\w.-]+/g, "_") + ".json"; a.click();
+    $("status").textContent = `Saved ${a.download} (Prusa: ${src}; Bambu base: ${parent}).`;
+  } catch (e) { $("status").textContent = "Error: " + e.message; }
+}
+
+function render() {
+  const words = $("q").value.toLowerCase().replace(/\bcf\b/g, "carbon fiber").split(/\s+/).filter(Boolean);
+  $("list").replaceChildren(...names.filter(n => words.every(w => n.toLowerCase().includes(w))).map(n => {
+    const li = document.createElement("li"); li.textContent = n; li.onclick = () => pick(n); return li;
+  }));
+}
+
+(async () => {
+  try {
+    const idx = await get(PRUSA + "/index.idx");
+    const ver = idx.split("\n").map(l => l.match(/^(\d+\.\d+\.\d+)\s/)).find(Boolean)[1];
+    secs = parse(await get(`${PRUSA}/${ver}.ini`));
+    names = [...secs.keys()].filter(k => k.startsWith("filament:Prusament") && !k.includes("@")).map(k => k.slice(9)).sort();
+    $("q").disabled = false; $("q").oninput = render; render();
+    $("status").textContent = `Loaded ${names.length} Prusament profiles (Prusa profile bundle ${ver}).`;
+  } catch (e) { $("status").textContent = "Failed to load profiles: " + e.message; }
+})();
+</script>
+</body>
+</html>
