@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Address → Coordinates (+ QTH)</title>
+  <title>Address → Coordinates (+ QTH)</title>
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 
   <link rel="stylesheet" href="https://assets.thefilip.com/style.css">
   <style>
@@ -13,20 +17,20 @@
   </style>
 </head>
 <body>
-  <h2>Address → Coordinates (+ QTH)</h2>
+  <h2>Address → Coordinates (+ QTH)</h2>
 
   <label for="address">Enter address:</label>
   <input type="text" id="address"
-         placeholder="e.g. 1600 Amphitheatre Parkway, Mountain View, CA">
+         placeholder="e.g. 1600 Amphitheatre Parkway, Mountain View, CA">
 
   <label for="format">Output format:</label>
   <select id="format">
-    <option value="dmm">D° MM.mmm (N / S E / W)</option>
-    <option value="dec">Decimal (lat, lon) – 6 dec</option>
-    <option value="decShort">Decimal (lat, lon) – 3 + 4 dec</option>
+    <option value="dmm">D° MM.mmm (N / S E / W)</option>
+    <option value="dec">Decimal (lat, lon) – 6 dec</option>
+    <option value="decShort">Decimal (lat, lon) – 3 + 4 dec</option>
   </select>
 
-  <button id="go">Convert & Copy</button>
+  <button id="go">Convert & Copy</button>
   <div id="result" class="hidden"></div>
 
   <script>
@@ -84,12 +88,12 @@
 
         // show
         const out = document.getElementById('result');
-        out.innerHTML = `<span>${coordStr}</span><span>QTH Locator: <strong>${qth}</strong></span>`;
+        out.innerHTML = `<span>${coordStr}</span><span>QTH Locator: <strong>${qth}</strong></span>`;
         out.classList.remove('hidden');
 
         // copy
         await copyText(`${coordStr}  |  ${qth}`);
-        out.lastElementChild.innerHTML += '  (Copied!)';
+        out.lastElementChild.innerHTML += '  (Copied!)';
 
       } catch(e) {
         alert('Error: ' + e.message);
