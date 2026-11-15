@@ -8,70 +8,73 @@
 <title>Anduril Simulator</title>
 <meta name="description" content="A flashlight simulator that runs the real Anduril firmware, compiled from source, on a simulated MCU.">
 <meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#08090b">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔦</text></svg>">
 </head>
 <body>
 
-<header class="bar">
+<header class="top">
   <div class="brand">
     <span class="brand-dot" aria-hidden="true"></span>
     <h1>Anduril Simulator</h1>
-    <span class="brand-sub">the real firmware, in your browser</span>
+    <a class="brand-link" href="notes.html">How it works</a>
   </div>
 
-  <div class="config">
-   <div class="config-main">
-    <div class="field">
+  <div class="pick">
+    <div class="field field-light">
       <label for="preset">Light</label>
       <select id="preset"></select>
     </div>
-    <div class="field">
+    <div class="field field-fw">
       <label for="version">Firmware</label>
       <select id="version"></select>
     </div>
-   </div>
-   <div class="config-parts">
-    <div class="field">
-      <label for="aux">Aux LEDs</label>
-      <select id="aux">
-        <option value="none">None</option>
-        <option value="single">Single colour</option>
-        <option value="rgb">RGB</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="btn">Button LED</label>
-      <select id="btn">
-        <option value="none">None</option>
-        <option value="single">Single colour</option>
-        <option value="rgb">RGB</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="rgbpwm">RGB dimming</label>
-      <select id="rgbpwm">
-        <option value="0">Stepped</option>
-        <option value="1">Smooth</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="usb">USB-C</label>
-      <select id="usb">
-        <option value="none">None</option>
-        <option value="charge">Charging</option>
-        <option value="auto">Powerbank</option>
-        <option value="host">Powerbank (host)</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="therm">Temp sensor</label>
-      <select id="therm">
-        <option value="1">Fitted</option>
-        <option value="0">Not fitted</option>
-      </select>
-    </div>
-   </div>
+    <details class="parts" id="parts">
+      <summary class="btn">Parts</summary>
+      <div class="parts-panel">
+        <div class="field">
+          <label for="aux">Aux LEDs</label>
+          <select id="aux">
+            <option value="none">None</option>
+            <option value="single">Single colour</option>
+            <option value="rgb">RGB</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="btn">Button LED</label>
+          <select id="btn">
+            <option value="none">None</option>
+            <option value="single">Single colour</option>
+            <option value="rgb">RGB</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rgbpwm">RGB dimming</label>
+          <select id="rgbpwm">
+            <option value="0">Stepped</option>
+            <option value="1">Smooth</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="usb">USB-C</label>
+          <select id="usb">
+            <option value="none">None</option>
+            <option value="charge">Charging</option>
+            <option value="auto">Powerbank</option>
+            <option value="host">Powerbank (host)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="therm">Temp sensor</label>
+          <select id="therm">
+            <option value="1">Fitted</option>
+            <option value="0">Not fitted</option>
+          </select>
+        </div>
+        <p class="hint">Picking a part turns the light into "Custom".</p>
+      </div>
+    </details>
   </div>
 </header>
 
@@ -79,61 +82,143 @@
 
 <main>
 
-  <section class="card stage">
-    <div class="lamp">
+  <!-- the light itself -->
+  <section class="hero">
+    <div class="scene">
       <div class="lamp-glow" id="lampGlow" aria-hidden="true"></div>
-      <div class="head">
-        <div class="aux" id="auxring" hidden><i></i><i></i><i></i><i></i></div>
-        <div class="emitter" id="emitter"><i></i><i></i><i></i><i></i></div>
+      <svg class="light" id="light" viewBox="0 0 640 200" role="img" aria-label="The flashlight, seen from the side">
+        <defs>
+          <linearGradient id="gMetal" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3a404b"/>
+            <stop offset="0.28" stop-color="#5b6370"/>
+            <stop offset="0.45" stop-color="#2c313a"/>
+            <stop offset="0.8" stop-color="#15181d"/>
+            <stop offset="1" stop-color="#262b33"/>
+          </linearGradient>
+          <linearGradient id="gBezel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#9aa1ab"/>
+            <stop offset="0.3" stop-color="#e3e6ea"/>
+            <stop offset="0.5" stop-color="#7d848f"/>
+            <stop offset="0.85" stop-color="#3d424a"/>
+            <stop offset="1" stop-color="#8a919b"/>
+          </linearGradient>
+          <pattern id="pKnurl" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="1.4" height="7" fill="rgba(0,0,0,0.38)"/>
+          </pattern>
+          <linearGradient id="gBeam" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#fff6e6" stop-opacity="0.95"/>
+            <stop offset="0.35" stop-color="#ffe9c6" stop-opacity="0.45"/>
+            <stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="fSoft" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6"/>
+          </filter>
+        </defs>
+
+        <!-- beam -->
+        <g class="beam">
+          <polygon points="318,70 318,130 640,0 640,200" fill="url(#gBeam)"/>
+          <ellipse cx="330" cy="100" rx="26" ry="34" fill="#fff8ec" filter="url(#fSoft)"/>
+        </g>
+
+        <!-- tailcap, tube, head -->
+        <rect x="58" y="66" width="44" height="68" rx="9" fill="url(#gMetal)"/>
+        <rect x="58" y="66" width="44" height="68" rx="9" fill="url(#pKnurl)" opacity="0.5"/>
+        <rect x="100" y="70" width="10" height="60" fill="#14171c"/>
+        <rect x="108" y="68" width="112" height="64" fill="url(#gMetal)"/>
+        <rect x="118" y="68" width="92" height="64" fill="url(#pKnurl)"/>
+        <rect x="218" y="64" width="90" height="72" rx="4" fill="url(#gMetal)"/>
+        <rect x="236" y="64" width="2" height="72" fill="rgba(0,0,0,0.35)"/>
+        <rect x="300" y="62" width="16" height="76" rx="3" fill="url(#gBezel)"/>
+
+        <!-- the switch on top of the head, with its backlight ring -->
+        <g class="switch">
+          <g class="btn-led" id="eswitchLed">
+            <ellipse class="btn-led-glow" cx="262" cy="62" rx="24" ry="9" filter="url(#fSoft)"/>
+            <ellipse class="btn-led-ring" cx="262" cy="62" rx="17" ry="4.5"/>
+          </g>
+          <path d="M248 62 Q262 48 276 62 Z" fill="url(#gBezel)"/>
+        </g>
+
+        <!-- the lens, and the aux LEDs shining through it -->
+        <ellipse cx="317" cy="100" rx="5" ry="34" fill="#1a1d23"/>
+        <ellipse class="lens-lit" cx="317" cy="100" rx="5" ry="30" fill="#fff6e6"/>
+        <g class="aux" id="auxring">
+          <!-- inside the group, so the stops inherit its colour -->
+          <defs>
+            <radialGradient id="gAux">
+              <stop offset="0" class="aux-stop" stop-opacity="0.9"/>
+              <stop offset="1" class="aux-stop" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="322" cy="100" rx="30" ry="46" fill="url(#gAux)"/>
+          <circle class="aux-dot" cx="318" cy="72" r="3.2"/>
+          <circle class="aux-dot" cx="318" cy="128" r="3.2"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="hero-bar">
+      <div class="readout-big">
+        <p class="output"><span class="output-num" id="lumens">0</span><span class="output-unit">lm</span></p>
+        <p class="mode"><span class="chip" id="stateChip">Off</span><span class="output-sub" id="levelReadout">off</span></p>
+      </div>
+      <div class="eswitch-slot">
+        <button id="eswitch" class="eswitch" aria-label="E-switch: press and hold">
+          <span class="eswitch-dot" aria-hidden="true"></span>
+          <span class="eswitch-text">Press &amp; hold<small>or hold Space</small></span>
+        </button>
       </div>
     </div>
 
-    <p class="output">
-      <span class="output-num" id="lumens">0</span><span class="output-unit">lm</span>
-      <span class="output-sub" id="levelReadout">off</span>
-    </p>
+    <div class="hero-extra">
+      <div class="usb" id="usbPanel" hidden>
+        <div class="usb-row">
+          <span class="label">USB-C</span>
+          <div class="seg" role="group" aria-label="What is plugged into the USB-C port">
+            <button class="btn" data-plug="none">Nothing</button>
+            <button class="btn" data-plug="charger">Charger</button>
+            <button class="btn" data-plug="device">Phone</button>
+          </div>
+        </div>
+        <p class="usb-status" id="usbStatus"></p>
+        <p class="hint" id="usbHint"></p>
+      </div>
 
-    <div class="eswitch-slot">
-      <button id="eswitch" class="eswitch" aria-label="E-switch: press and hold">
-        <span class="cap" aria-hidden="true"><span class="eswitch-led" id="eswitchLed"></span></span>
-        <span class="eswitch-text">Press &amp; hold<small>or hold Space</small></span>
-      </button>
-    </div>
-
-    <div class="usb" id="usbPanel" hidden>
-      <div class="usb-row">
-        <span class="usb-label">USB-C</span>
-        <div class="seg" role="group" aria-label="What is plugged into the USB-C port">
-          <button class="btn" data-plug="none">Nothing</button>
-          <button class="btn" data-plug="charger">Charger</button>
-          <button class="btn" data-plug="device">Phone</button>
+      <div class="tools">
+        <button id="reconnect" class="btn" title="Unscrew and refit the tailcap">Reconnect battery</button>
+        <button id="wipe" class="btn" title="Erase saved settings, like a brand new light">Wipe memory</button>
+        <div class="field field-inline" title="Runs at normal speed whenever the button is held">
+          <label for="speed">Speed</label>
+          <select id="speed">
+            <option value="1">1&times;</option>
+            <option value="4">4&times;</option>
+            <option value="16">16&times;</option>
+          </select>
         </div>
       </div>
-      <p class="usb-status" id="usbStatus"></p>
-      <p class="hint" id="usbHint"></p>
     </div>
 
     <details class="about" id="presetAbout" hidden>
       <summary>About this light</summary>
       <p id="presetNote"></p>
     </details>
+  </section>
 
-    <div class="tools">
-      <button id="reconnect" class="btn" title="Unscrew and refit the tailcap">Reconnect battery</button>
-      <button id="wipe" class="btn" title="Erase saved settings, like a brand new light">Wipe memory</button>
-      <div class="field field-inline" title="Runs at normal speed whenever the button is held">
-        <label for="speed">Fast-forward</label>
-        <select id="speed">
-          <option value="1">1&times;</option>
-          <option value="4">4&times;</option>
-          <option value="16">16&times;</option>
-        </select>
-      </div>
-    </div>
+  <!-- what you can do right now -->
+  <section class="card guide">
+    <h2>What the button does now <span class="muted" id="guideState"></span></h2>
+    <ul class="moves" id="guideList"></ul>
+    <p class="hint" id="guideHint">C = clicks, H = click that many times and hold the last one. 3C is three clicks; 2H is click, then hold.</p>
+  </section>
+
+  <section class="card log">
+    <h2>What the light heard <button id="clearLog" class="btn btn-mini">Clear</button></h2>
+    <ol id="logList"></ol>
   </section>
 
   <section class="card readouts">
-    <h2>Firmware</h2>
+    <h2>Inside the firmware</h2>
     <dl id="firmwareReadout">
       <dt>state</dt><dd id="rState">-</dd>
       <dt>stack</dt><dd id="rStack">-</dd>
@@ -151,14 +236,9 @@
   </section>
 
   <section class="card env">
-    <h2>Environment</h2>
+    <h2>Battery &amp; temperature</h2>
     <div class="controls" id="envControls"></div>
     <p class="hint" id="envHint"></p>
-  </section>
-
-  <section class="card log">
-    <h2>Event log <button id="clearLog" class="btn btn-mini">Clear</button></h2>
-    <ol id="logList"></ol>
   </section>
 
   <section class="card source">

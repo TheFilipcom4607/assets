@@ -8,7 +8,9 @@ const els = {
   version: $('version'), aux: $('aux'), btn: $('btn'),
   therm: $('therm'), rgbpwm: $('rgbpwm'), usb: $('usb'), speed: $('speed'),
   eswitch: $('eswitch'),
-  eswitchLed: $('eswitchLed'), emitter: $('emitter'), auxring: $('auxring'),
+  eswitchLed: $('eswitchLed'), eswitchDot: document.querySelector('.eswitch-dot'),
+  light: $('light'), auxring: $('auxring'), stateChip: $('stateChip'),
+  guideList: $('guideList'), guideState: $('guideState'), guideHint: $('guideHint'),
   lampGlow: $('lampGlow'), lumens: $('lumens'), levelReadout: $('levelReadout'),
   reconnect: $('reconnect'), wipe: $('wipe'), clearLog: $('clearLog'),
   logList: $('logList'), envControls: $('envControls'), envHint: $('envHint'),
@@ -356,12 +358,14 @@ async function loadBuild() {
   state.mirrorButton = picks.aux === 'rgb' && picks.btn === 'rgb';
   const frontAux = (hw.aux1 && !hw.aux1btn) || (hw.auxrgb && !hw.rgbbtn);
   const buttonLed = (hw.aux1 && hw.aux1btn) || (hw.auxrgb && hw.rgbbtn) || state.mirrorButton;
-  els.auxring.hidden = !frontAux;
+  state.frontAux = !!frontAux;
+  state.buttonLed = !!buttonLed;
+  els.auxring.classList.toggle('absent', !frontAux);
   els.eswitchLed.classList.toggle('absent', !buttonLed);
+  els.eswitchDot.classList.toggle('absent', !buttonLed);
   paintLed(els.eswitchLed, null);
+  paintLed(els.eswitchDot, null);
   paintLed(els.auxring, null);
-  const preset = PRESETS.find((x) => x.id === els.preset.value);
-  els.emitter.classList.toggle('quad', (preset?.emitters || 1) === 4);
 
   refreshUsbPanel();
 
@@ -374,6 +378,7 @@ async function loadBuild() {
     : 'This build has no temperature sensor, so nothing here throttles the output.';
 
   addLog(`power connected — ${version.tag}, ${key}`, 'state');
+  renderGuide();
 }
 
 // ---- USB-C ------------------------------------------------------------------
@@ -512,30 +517,21 @@ function render(physics) {
   const rel = Math.min(1, lm / Math.max(1, state.env.maxLumens));
   const v = Math.pow(rel, 0.42);                     // eyes are not linear
 
-  // even a couple of lumens is a visibly lit emitter, so lift the bottom end
-  const lit = lm > 0 ? 0.16 + 0.84 * v : 0;
-  const mix = (a, b) => Math.round(a + (b - a) * lit);
-  const em = els.emitter.style;
-  if (lm > 0) {
-    em.setProperty('--die', `rgb(${mix(0x30, 0xff)}, ${mix(0x33, 0xf6)}, ${mix(0x3b, 0xe4)})`);
-    em.setProperty('--lit', lit.toFixed(3));
-    em.boxShadow = `0 0 ${10 + 110 * v}px ${2 + 34 * v}px rgba(255, 216, 160, ${0.12 + 0.55 * v})`;
-  } else {
-    em.removeProperty('--die');
-    em.setProperty('--lit', '0');
-    em.boxShadow = '';
-  }
+  // even a couple of lumens is visible, so lift the bottom end
+  els.light.style.setProperty('--beam', lm > 0 ? (0.12 + 0.88 * v).toFixed(3) : '0');
 
   const leds = ledColor(sim);
-  if (!els.auxring.hidden) paintLed(els.auxring, leds.front);
-  if (leds.button) paintLed(els.eswitchLed, leds.button);
+  paintLed(els.auxring, state.frontAux ? leds.front : null);
+  paintLed(els.eswitchLed, state.buttonLed ? leds.button : null);
+  paintLed(els.eswitchDot, state.buttonLed ? leds.button : null);
 
   els.lampGlow.style.opacity = (lm > 0 ? 0.10 + 0.5 * v : 0).toFixed(3);
   els.lumens.textContent = lm >= 1 ? Math.round(lm).toLocaleString() : (lm > 0 ? '<1' : '0');
   const level = sim.get('fw_actual_level');
   const mode = sim.get('fw_channel_mode');
   els.levelReadout.textContent = level
-    ? `level ${level} / ${sim.get('fw_ramp_size')}${mode ? ' · aux channel' : ''}` : 'off';
+    ? `level ${level} of ${sim.get('fw_ramp_size')}${mode ? ' · aux as the light' : ''}` : '';
+  els.stateChip.textContent = friendlyState(sim.stateName(sim.get('fw_current_state')));
 }
 
 function renderReadouts(physics) {
@@ -634,6 +630,7 @@ function logTransitions(physics) {
     state.rampLog = null;
     p.state = st;
     updateSourceTarget();
+    renderGuide();
   }
 
   const level = sim.get('fw_actual_level');
@@ -666,6 +663,164 @@ function logTransitions(physics) {
     addLog(`USB-C: ${physics.usb.text}`, physics.usb.state === 'blocked' ? 'warn' : '');
   }
   p.usb = physics.usb.state;
+}
+
+// ---- what the button does now ----------------------------------------------
+
+// From the newest release's own event handlers (ui/anduril/*.c).  `adv`
+// marks gestures the Simple UI ignores; `cap` hides gestures for features
+// this build does not have (bits from sim_capabilities in sim_main.c).
+const CAP = { thermal: 1 << 0, momentary: 1 << 6, tactical: 1 << 7, strobe: 1 << 12,
+              sunset: 1 << 19, manualMem: 1 << 20, powerbank: 1 << 21, rgbPwm: 1 << 22 };
+
+const MOVES = {
+  off: [
+    ['1C', 'On, at the brightness you used last'],
+    ['1H', 'On at the lowest level; keep holding to ramp up'],
+    ['2C', 'On at the top of the ramp'],
+    ['2H', 'Momentary: bright while held (top of ramp in Simple UI, full turbo in Advanced)'],
+    ['3C', 'Battery check: blinks the voltage, e.g. 3, pause, 9 = 3.9 V'],
+    ['3H', 'Strobe and party modes', { adv: 1, cap: CAP.strobe }],
+    ['4C', 'Lockout, so it cannot turn on in a pocket'],
+    ['5C', 'Momentary mode: light only while held; leave by loosening the tailcap', { adv: 1, cap: CAP.momentary }],
+    ['6C', 'Tactical mode', { adv: 1, cap: CAP.tactical }],
+    ['7C', 'Next aux LED pattern: low, high, blinking, off'],
+    ['7H', 'Cycle aux LED colours; let go on the one you want'],
+    ['9H', 'Misc settings menu', { adv: 1 }],
+    ['10C', 'Switch to Simple UI', { adv: 1 }],
+    ['10H', 'Simple UI: switch to Advanced UI. Advanced UI: set up the Simple UI ramp'],
+    ['13H', 'Factory reset (hold until it flickers, then let go)'],
+    ['15C', 'Blink out the firmware version'],
+  ],
+  ramp: [
+    ['1C', 'Off'],
+    ['1H', 'Brighter (let go and hold again to go dimmer)'],
+    ['2H', 'Dimmer'],
+    ['2C', 'Jump to the top of the ramp, and back'],
+    ['3C', 'Smooth ramp or steps (or next channel, if more channels are enabled)'],
+    ['3H', 'Momentary turbo; in the "any colour" channel it changes the hue', { adv: 1 }],
+    ['4C', 'Lockout'],
+    ['5C', 'Momentary mode', { adv: 1, cap: CAP.momentary }],
+    ['5H', 'Sunset timer: each second held adds 5 minutes, then it dims and turns off', { adv: 1, cap: CAP.sunset }],
+    ['6C', 'Smooth ramp or steps, when there are several channels', { adv: 1 }],
+    ['7H', 'Ramp settings: floor, ceiling, number of steps', { adv: 1 }],
+    ['9H', 'Choose which channels 3C cycles through (aux colours, any colour)', { adv: 1 }],
+    ['10C', 'Remember this level for every turn-on (manual memory)', { adv: 1, cap: CAP.manualMem }],
+    ['10H', 'Ramp extras: manual memory timer, smooth steps, 2C style', { adv: 1 }],
+  ],
+  lockout: [
+    ['1H', 'Light at the lowest level while held'],
+    ['2H', 'Light a little brighter while held'],
+    ['3C', 'Unlock, stay off'],
+    ['4C', 'Unlock and turn on'],
+    ['4H', 'Unlock and turn on at the lowest level'],
+    ['5C', 'Unlock and turn on at the top of the ramp'],
+    ['7C', 'Next aux pattern while locked'],
+    ['7H', 'Cycle aux colours while locked'],
+    ['10H', 'Auto-lock: lock by itself after a set time off', { adv: 1 }],
+  ],
+  battcheck: [
+    ['1C', 'Off'],
+    ['1H', 'Batt Color: show the voltage as a colour until you leave', { cap: CAP.rgbPwm }],
+    ['2H', 'Powerbank host mode on/off (lets the port power a phone)', { cap: CAP.powerbank }],
+    ['2C', 'Next blinky: temperature check, beacon, SOS', { adv: 1 }],
+    ['7H', 'Voltage calibration', { adv: 1 }],
+  ],
+  tempcheck: [
+    ['1C', 'Off'],
+    ['2C', 'Next blinky: beacon'],
+    ['7H', 'Thermal settings: room temperature, heat limit'],
+  ],
+  beacon: [
+    ['1C', 'Off'],
+    ['1H', 'Set the time between flashes: hold for as many seconds as you want'],
+    ['2C', 'Next blinky: SOS'],
+  ],
+  sos: [['1C', 'Off'], ['2C', 'Next blinky: back to battery check']],
+  strobe: [
+    ['1C', 'Off'],
+    ['2C', 'Next mode: candle, bike flasher, party strobe, lightning…'],
+    ['4C', 'Previous mode'],
+    ['1H', 'Faster or brighter'],
+    ['2H', 'Slower or dimmer'],
+    ['3C', 'Next channel for this mode'],
+    ['5C', 'Momentary strobe', { cap: CAP.momentary }],
+  ],
+  tactical: [
+    ['1H', 'High while held'],
+    ['2H', 'Low while held'],
+    ['3H', 'Strobe while held'],
+    ['6C', 'Leave tactical mode'],
+    ['7H', 'Choose the three tactical levels'],
+  ],
+  momentary: [['hold', 'Light while the button is held. Leave by loosening the tailcap (Reconnect battery).']],
+  config: [
+    ['wait', 'The light blinks once per setting, then buzzes faintly: that is your cue'],
+    ['click', 'During the buzz, click N times to enter the value N'],
+    ['nothing', 'Do nothing during the buzz to keep the old value and move on'],
+  ],
+};
+
+const STATE_INFO = {
+  off_state: ['Off', 'off'],
+  smooth_povd_state: ['Off · showing voltage', 'off'],
+  steady_state: ['On', 'ramp'],
+  channel_mode_state: ['On', 'ramp'],
+  lockout_state: ['Locked', 'lockout'],
+  battcheck_state: ['Battery check', 'battcheck'],
+  tempcheck_state: ['Temperature check', 'tempcheck'],
+  beacon_state: ['Beacon', 'beacon'],
+  sos_state: ['SOS', 'sos'],
+  strobe_state: ['Strobe / party', 'strobe'],
+  momentary_state: ['Momentary', 'momentary'],
+  tactical_state: ['Tactical', 'tactical'],
+  version_check_state: ['Version check', null],
+  // Anduril 1
+  muggle_state: ['Muggle mode', null],
+  goodnight_state: ['Goodnight', null],
+};
+
+function stateInfo(name) {
+  if (STATE_INFO[name]) return STATE_INFO[name];
+  if (/config|number_entry/.test(name || '')) return ['Settings menu', 'config'];
+  return [name || '…', null];
+}
+
+const friendlyState = (name) => stateInfo(name)[0];
+
+function renderGuide() {
+  const sim = state.sim;
+  if (!sim) return;
+  const name = sim.stateName(sim.get('fw_current_state'));
+  const [label, key] = stateInfo(name);
+  els.guideState.textContent = `· ${label}`;
+  els.guideList.textContent = '';
+  const legacy = state.version?.layout === 'legacy';
+  const moves = legacy ? null : MOVES[key];
+  if (!moves) {
+    const li = document.createElement('li');
+    li.className = 'none';
+    li.textContent = legacy
+      ? 'This list is for Anduril 2. Anduril 1 is close, but not the same: see the log for what each gesture did.'
+      : 'Nothing to list for this state. Watch the log to see what the light does.';
+    els.guideList.append(li);
+    return;
+  }
+  for (const [gesture, text, opt = {}] of moves) {
+    if (opt.cap && !(sim.capabilities & opt.cap)) continue;
+    const li = document.createElement('li');
+    const g = document.createElement('kbd');
+    g.textContent = gesture;
+    const t = document.createElement('span');
+    t.textContent = text;
+    li.append(g, t);
+    if (opt.adv) {
+      const tag = document.createElement('em');
+      tag.textContent = 'Advanced';
+      li.append(tag);
+    }
+    els.guideList.append(li);
+  }
 }
 
 // ---- source viewer ----------------------------------------------------------
@@ -891,6 +1046,12 @@ async function main() {
     state.rampLog = null;
   });
   els.loadSource.addEventListener('click', showSource);
+  // the parts menu closes like any other menu
+  const parts = document.getElementById('parts');
+  document.addEventListener('pointerdown', (e) => {
+    if (parts.open && !parts.contains(e.target)) parts.open = false;
+  });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') parts.open = false; });
 
   await loadBuild();
   requestAnimationFrame(frame);
