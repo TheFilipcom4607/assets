@@ -212,7 +212,19 @@ main {
   padding: 4px var(--gutter) 32px;
 }
 
-.hero, .source { grid-column: 1 / -1; }
+main {
+  grid-template-areas:
+    "hero  hero"
+    "guide log"
+    "guide env"
+    "fw    source";
+}
+.hero { grid-area: hero; }
+.guide { grid-area: guide; }
+.log { grid-area: log; }
+.env { grid-area: env; }
+.readouts { grid-area: fw; }
+.source { grid-area: source; }
 
 .card {
   background: var(--card);
@@ -255,12 +267,23 @@ main {
   background:
     radial-gradient(900px 340px at 30% 40%, rgba(143, 178, 255, 0.05), transparent 70%),
     linear-gradient(180deg, #101217, #0b0c0f);
-  padding: 8px 24px 22px;
+  padding: 22px 24px;
   overflow: hidden;
   isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(260px, 1fr);
+  grid-template-areas:
+    "scene side"
+    "extra extra"
+    "about about";
+  gap: 0 28px;
+  align-items: center;
 }
 
-.scene { position: relative; }
+.scene { grid-area: scene; position: relative; }
+.side { grid-area: side; display: grid; gap: 18px; }
+.hero-extra { grid-area: extra; }
+.about { grid-area: about; }
 
 .lamp-glow {
   position: absolute;
@@ -283,7 +306,7 @@ main {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 300px;
+  max-height: 280px;
 }
 
 .light .beam, .light .lens-lit {
@@ -311,15 +334,6 @@ main {
 
 .absent { display: none !important; }
 
-.hero-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 24px;
-  flex-wrap: wrap;
-  margin-top: -6px;
-}
-
 .output {
   display: flex;
   align-items: baseline;
@@ -328,7 +342,7 @@ main {
   font-variant-numeric: tabular-nums;
 }
 
-.output-num { font-size: 44px; line-height: 1; letter-spacing: -0.03em; font-weight: 500; }
+.output-num { font-size: 52px; line-height: 1; letter-spacing: -0.03em; font-weight: 500; }
 .output-unit { font-size: 15px; color: var(--dim); }
 
 .mode { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
@@ -350,7 +364,7 @@ main {
 
 /* ============ e-switch ============ */
 
-.eswitch-slot { flex: 0 1 360px; min-width: 240px; }
+.eswitch-slot { min-width: 0; }
 
 .eswitch {
   display: flex;
@@ -612,7 +626,8 @@ input[type=range]::-moz-range-thumb {
   list-style: none;
   font-family: var(--mono);
   font-size: 12px;
-  max-height: 420px;
+  min-height: 120px;
+  max-height: 300px;
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -676,8 +691,16 @@ footer {
 
 @media (max-width: 860px) {
   :root { --gutter: 16px; }
-  main { grid-template-columns: minmax(0, 1fr); gap: 14px; }
-  .hero, .source { grid-column: auto; }
+  main {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "hero" "guide" "log" "env" "fw" "source";
+    gap: 14px;
+  }
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "scene" "side" "extra" "about";
+    gap: 8px;
+  }
   .top { align-items: stretch; }
   .pick { flex-basis: 100%; justify-content: stretch; }
   .field-light, .field-fw { max-width: none; }
@@ -707,9 +730,9 @@ footer {
 
   .hero { padding: 0 14px 16px; border-radius: 18px; }
   /* crop the long beam so the light itself is bigger */
-  .light { width: 135%; max-width: none; margin-left: -4%; }
+  .light { width: 125%; max-width: none; margin-left: -2%; }
   .output-num { font-size: 36px; }
-  .hero-bar { margin-top: 0; }
+  .side { gap: 0; }
   .hero-extra { margin-top: 14px; }
   .tools { margin-left: 0; }
   .seg { width: 100%; }

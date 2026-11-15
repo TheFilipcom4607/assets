@@ -86,63 +86,79 @@
   <section class="hero">
     <div class="scene">
       <div class="lamp-glow" id="lampGlow" aria-hidden="true"></div>
-      <svg class="light" id="light" viewBox="0 0 640 200" role="img" aria-label="The flashlight, seen from the side">
+      <svg class="light" id="light" viewBox="20 20 500 140" role="img" aria-label="The flashlight, seen from the side">
         <defs>
           <linearGradient id="gMetal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#3a404b"/>
-            <stop offset="0.28" stop-color="#5b6370"/>
-            <stop offset="0.45" stop-color="#2c313a"/>
-            <stop offset="0.8" stop-color="#15181d"/>
-            <stop offset="1" stop-color="#262b33"/>
+            <stop offset="0" stop-color="#2a2f37"/>
+            <stop offset="0.18" stop-color="#5d6572"/>
+            <stop offset="0.32" stop-color="#3a404a"/>
+            <stop offset="0.7" stop-color="#16191e"/>
+            <stop offset="0.92" stop-color="#22262d"/>
+            <stop offset="1" stop-color="#121418"/>
           </linearGradient>
           <linearGradient id="gBezel" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#9aa1ab"/>
-            <stop offset="0.3" stop-color="#e3e6ea"/>
-            <stop offset="0.5" stop-color="#7d848f"/>
-            <stop offset="0.85" stop-color="#3d424a"/>
-            <stop offset="1" stop-color="#8a919b"/>
+            <stop offset="0" stop-color="#8d949e"/>
+            <stop offset="0.2" stop-color="#eef0f2"/>
+            <stop offset="0.45" stop-color="#9da4ad"/>
+            <stop offset="0.8" stop-color="#3f444c"/>
+            <stop offset="1" stop-color="#777e88"/>
           </linearGradient>
-          <pattern id="pKnurl" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <rect width="1.4" height="7" fill="rgba(0,0,0,0.38)"/>
+          <linearGradient id="gEdge" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#000" stop-opacity="0.55"/>
+            <stop offset="0.12" stop-color="#000" stop-opacity="0"/>
+            <stop offset="0.88" stop-color="#000" stop-opacity="0"/>
+            <stop offset="1" stop-color="#000" stop-opacity="0.45"/>
+          </linearGradient>
+          <pattern id="pKnurlA" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(40)">
+            <rect width="1" height="5" fill="#000" fill-opacity="0.45"/>
+          </pattern>
+          <pattern id="pKnurlB" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-40)">
+            <rect width="1" height="5" fill="#000" fill-opacity="0.45"/>
           </pattern>
           <linearGradient id="gBeam" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#fff6e6" stop-opacity="0.95"/>
-            <stop offset="0.35" stop-color="#ffe9c6" stop-opacity="0.45"/>
+            <stop offset="0" stop-color="#fff6e6" stop-opacity="0.9"/>
+            <stop offset="0.4" stop-color="#ffe9c6" stop-opacity="0.35"/>
             <stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/>
           </linearGradient>
           <filter id="fSoft" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6"/>
+            <feGaussianBlur stdDeviation="5"/>
           </filter>
         </defs>
 
         <!-- beam -->
         <g class="beam">
-          <polygon points="318,70 318,130 640,0 640,200" fill="url(#gBeam)"/>
-          <ellipse cx="330" cy="100" rx="26" ry="34" fill="#fff8ec" filter="url(#fSoft)"/>
+          <polygon points="312,64 312,116 520,10 520,170" fill="url(#gBeam)"/>
+          <ellipse cx="322" cy="90" rx="20" ry="30" fill="#fff8ec" filter="url(#fSoft)"/>
         </g>
 
-        <!-- tailcap, tube, head -->
-        <rect x="58" y="66" width="44" height="68" rx="9" fill="url(#gMetal)"/>
-        <rect x="58" y="66" width="44" height="68" rx="9" fill="url(#pKnurl)" opacity="0.5"/>
-        <rect x="100" y="70" width="10" height="60" fill="#14171c"/>
-        <rect x="108" y="68" width="112" height="64" fill="url(#gMetal)"/>
-        <rect x="118" y="68" width="92" height="64" fill="url(#pKnurl)"/>
-        <rect x="218" y="64" width="90" height="72" rx="4" fill="url(#gMetal)"/>
-        <rect x="236" y="64" width="2" height="72" fill="rgba(0,0,0,0.35)"/>
-        <rect x="300" y="62" width="16" height="76" rx="3" fill="url(#gBezel)"/>
+        <!-- tailcap -->
+        <path d="M42 60 H80 V120 H42 Q32 120 32 110 V70 Q32 60 42 60 Z" fill="url(#gMetal)"/>
+        <rect x="36" y="60" width="44" height="60" fill="url(#gEdge)" opacity="0.6"/>
+        <rect x="80" y="63" width="6" height="54" fill="#0e1013"/>
+        <!-- tube, knurled -->
+        <rect x="86" y="62" width="104" height="56" fill="url(#gMetal)"/>
+        <rect x="96" y="62" width="84" height="56" fill="url(#pKnurlA)"/>
+        <rect x="96" y="62" width="84" height="56" fill="url(#pKnurlB)"/>
+        <rect x="86" y="62" width="104" height="56" fill="url(#gEdge)" opacity="0.5"/>
+        <!-- head -->
+        <path d="M190 62 L200 56 H292 Q298 56 298 62 V118 Q298 124 292 124 H200 L190 118 Z" fill="url(#gMetal)"/>
+        <rect x="212" y="56" width="1.5" height="68" fill="#000" fill-opacity="0.35"/>
+        <rect x="279" y="56" width="1.5" height="68" fill="#000" fill-opacity="0.35"/>
+        <!-- bezel -->
+        <rect x="297" y="54" width="15" height="72" rx="3" fill="url(#gBezel)"/>
 
-        <!-- the switch on top of the head, with its backlight ring -->
+        <!-- the switch on the head, its backlight ring showing at the base -->
         <g class="switch">
           <g class="btn-led" id="eswitchLed">
-            <ellipse class="btn-led-glow" cx="262" cy="62" rx="24" ry="9" filter="url(#fSoft)"/>
-            <ellipse class="btn-led-ring" cx="262" cy="62" rx="17" ry="4.5"/>
+            <ellipse class="btn-led-glow" cx="246" cy="55" rx="22" ry="6" filter="url(#fSoft)"/>
+            <rect class="btn-led-ring" x="230" y="53.5" width="32" height="3" rx="1.5"/>
           </g>
-          <path d="M248 62 Q262 48 276 62 Z" fill="url(#gBezel)"/>
+          <path d="M233 54 Q234 46 241 45.5 H251 Q258 46 259 54 Z" fill="url(#gBezel)"/>
         </g>
 
         <!-- the lens, and the aux LEDs shining through it -->
-        <ellipse cx="317" cy="100" rx="5" ry="34" fill="#1a1d23"/>
-        <ellipse class="lens-lit" cx="317" cy="100" rx="5" ry="30" fill="#fff6e6"/>
+        <rect x="311" y="58" width="3" height="64" rx="1.5" fill="#1a1d23"/>
+        <rect class="lens-lit" x="311" y="60" width="3" height="60" rx="1.5" fill="#fff6e6"/>
         <g class="aux" id="auxring">
           <!-- inside the group, so the stops inherit its colour -->
           <defs>
@@ -151,14 +167,14 @@
               <stop offset="1" class="aux-stop" stop-opacity="0"/>
             </radialGradient>
           </defs>
-          <ellipse cx="322" cy="100" rx="30" ry="46" fill="url(#gAux)"/>
-          <circle class="aux-dot" cx="318" cy="72" r="3.2"/>
-          <circle class="aux-dot" cx="318" cy="128" r="3.2"/>
+          <ellipse cx="316" cy="90" rx="22" ry="40" fill="url(#gAux)"/>
+          <circle class="aux-dot" cx="313" cy="66" r="2.6"/>
+          <circle class="aux-dot" cx="313" cy="114" r="2.6"/>
         </g>
       </svg>
     </div>
 
-    <div class="hero-bar">
+    <div class="side">
       <div class="readout-big">
         <p class="output"><span class="output-num" id="lumens">0</span><span class="output-unit">lm</span></p>
         <p class="mode"><span class="chip" id="stateChip">Off</span><span class="output-sub" id="levelReadout">off</span></p>
