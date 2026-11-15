@@ -44,12 +44,15 @@ const PICKERS = ['version', 'aux', 'btn', 'therm', 'rgbpwm', 'usb'];
 // USB-C port does, and roughly how much light and heat comes out.  `version`
 // is 'latest' unless the light ships something older.
 const PRESETS = [
-  { id: 'emisar-d4k', label: 'Emisar D4K (RGB aux + RGB button, powerbank)',
-    hw: { aux: 'rgb', btn: 'rgb', rgbpwm: '0', usb: 'auto' },
-    env: { maxLumens: 4300, ch2Amps: 12, capacityMah: 5000, batteryV: 4.0, maxRiseC: 80, timeConstantS: 60 },
-    note: 'RGB aux behind the optic and the same RGB colours in the button. The USB-C '
-      + 'port charges the cell, or powers a phone plugged into it. The charge chip '
-      + 'picks the direction by itself, so Anduril is not involved.' },
+  { id: 'emisar-d4kc', label: 'Emisar D4KC (40 W boost, smooth RGB aux, powerbank)',
+    hw: { aux: 'rgb', btn: 'single', rgbpwm: '1', usb: 'auto' },
+    env: { maxLumens: 3200, ch2Amps: 11, capacityMah: 4500, batteryV: 4.0, maxRiseC: 85, timeConstantS: 40 },
+    note: 'Hank\'s 21700 light on the Lume X1-C boost driver. The RGB aux dim smoothly (smooth '
+      + 'voltage colour after turning off, Batt Color mode, an "any colour" channel). The '
+      + 'switch backlight is set to cool white; pick Button LED → RGB if you ordered the '
+      + 'RGB one. USB-C charges at 5 V 2 A and powers a phone at 5 V 1.5 A, with the '
+      + 'direction picked by the charge chip. The chip\'s own red/green charge LEDs and the '
+      + 'driver\'s aux brightness setting (8H) and breathing patterns are not simulated.' },
   { id: 'emisar-d4v2', label: 'Emisar D4V2 (RGB aux, button LED)',
     hw: { aux: 'rgb', btn: 'single', rgbpwm: '0', usb: 'none' },
     env: { maxLumens: 4500, ch2Amps: 12, capacityMah: 3000, batteryV: 4.0, maxRiseC: 85, timeConstantS: 35 },
@@ -838,8 +841,8 @@ async function main() {
   els.preset.appendChild(custom);
 
   if (!restorePickers()) {
-    els.preset.value = 'emisar-d4k';
-    applyPreset('emisar-d4k');
+    els.preset.value = 'emisar-d4kc';
+    applyPreset('emisar-d4kc');
   }
   repairSelection();
   refreshPickerAvailability();

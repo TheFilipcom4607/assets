@@ -139,7 +139,7 @@ export const defaultEnvironment = () => ({
 //            'host'   powerbank; the firmware picks, with its host-enable pin
 //   plugged: 'none' | 'charger' | 'device'
 const CHARGE_AMPS = 2.0;       // into the cell, constant-current phase
-const POWERBANK_WATTS = 10;    // 5 V at 2 A out of the port
+const POWERBANK_WATTS = 7.5;   // 5 V at 1.5 A out of the port
 const POWERBANK_EFFICIENCY = 0.9;
 const POWERBANK_CUTOFF_V = 3.0;
 const CELL_FULL_V = 4.2;
