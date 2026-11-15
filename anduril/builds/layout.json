@@ -1,5 +1,5 @@
 {
- "__size": 208,
+ "__size": 236,
  "magic": 0,
  "cycles_lo": 4,
  "cycles_hi": 8,
@@ -41,5 +41,10 @@
  "eeprom_dirty": 192,
  "budget_cycles": 196,
  "reboot_requested": 200,
- "booted": 204
+ "booted": 204,
+ "has_rgb_pwm": 208,
+ "rgb_pwm_on": 212,
+ "rgb_pwm": 216,
+ "has_powerbank": 228,
+ "powerbank_host": 232
 }

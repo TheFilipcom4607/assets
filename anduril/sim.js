@@ -125,18 +125,32 @@ export const defaultEnvironment = () => ({
   batteryV: 3.9,         // cell voltage with no load
   internalR: 0.15,       // cell + spring resistance, ohms
   diodeDropV: 0.20,      // drop between the cell and the MCU
-  capacityMah: 0,        // 0 = the cell never runs down
+  capacityMah: 0,        // 0 = the cell never runs down (or charges up)
   maxLumens: 1500,
   ch1Amps: 0.35,         // the regulated 7135 channel at full
   ch2Amps: 5.0,          // the direct-drive FET at full
   ch1Lumens: 130,
 });
 
+// USB-C: what the port can do (hardware) and what is plugged into it.
+//   port:    'none'   no port
+//            'charge' charges the cell, nothing else
+//            'auto'   powerbank; the charge controller picks the direction
+//            'host'   powerbank; the firmware picks, with its host-enable pin
+//   plugged: 'none' | 'charger' | 'device'
+const CHARGE_AMPS = 2.0;       // into the cell, constant-current phase
+const POWERBANK_WATTS = 10;    // 5 V at 2 A out of the port
+const POWERBANK_EFFICIENCY = 0.9;
+const POWERBANK_CUTOFF_V = 3.0;
+const CELL_FULL_V = 4.2;
+const CELL_SWING_V = 1.2;      // full to empty, as a straight line
+
 export class World {
   constructor(env) {
     this.env = env;
     this.dieC = env.ambientC;
-    this.usedMah = 0;
+    this.port = 'none';
+    this.plugged = 'none';
   }
 
   // duty cycle of each PWM channel, 0..1
@@ -160,34 +174,69 @@ export class World {
     return (duties[0] ?? 0) * e.ch1Amps + (duties[1] ?? 0) * e.ch2Amps;
   }
 
+  // What the USB-C port is doing.  `amps` is current at the cell: positive
+  // charges it, negative drains it.
+  usb(sim) {
+    const e = this.env;
+    const host = this.port === 'host' && !!sim.get('powerbank_host');
+    const idle = (state, text) => ({ state, text, amps: 0, watts: 0, host });
+    if (this.port === 'none') return idle('absent', '');
+    if (this.plugged === 'charger') {
+      if (host) return idle('blocked', 'charger connected, but the port is in host mode');
+      if (e.batteryV >= CELL_FULL_V) return idle('full', 'charger connected, cell is full');
+      // constant current, tapering over the last 0.1 V like a CC/CV charger
+      const amps = Math.max(0.1, Math.min(CHARGE_AMPS, (CELL_FULL_V - e.batteryV) * 10 * CHARGE_AMPS));
+      const text = e.capacityMah > 0
+        ? `charging at ${amps.toFixed(1)} A`
+        : `charging at ${amps.toFixed(1)} A (set a cell capacity to see it fill)`;
+      return { state: 'charging', text, amps, watts: amps * e.batteryV, host };
+    }
+    if (this.plugged === 'device') {
+      if (this.port === 'charge') return idle('blocked', 'this port only charges the light');
+      if (this.port === 'host' && !host) {
+        return idle('waiting', 'phone connected, waiting for host mode (Batt Check, then 2H)');
+      }
+      if (e.batteryV <= POWERBANK_CUTOFF_V) return idle('empty', 'cell too low to power the phone');
+      const amps = POWERBANK_WATTS / (e.batteryV * POWERBANK_EFFICIENCY);
+      return { state: 'sourcing', text: `powering the phone, ${POWERBANK_WATTS} W`,
+               amps: -amps, watts: POWERBANK_WATTS, host };
+    }
+    return idle('idle', host ? 'host mode on, nothing plugged in' : 'nothing plugged in');
+  }
+
   // Advance the physical world by dt seconds, then hand the firmware what its
   // sensors would report.
   step(sim, dt) {
     const e = this.env;
     const duties = this.duties(sim);
-    const power = Math.min(1, this.amps(duties) / Math.max(0.01, e.ch2Amps + e.ch1Amps));
+    const amps = this.amps(duties);
+    const power = Math.min(1, amps / Math.max(0.01, e.ch2Amps + e.ch1Amps));
 
     // first-order thermal lag toward the temperature this output would settle at
     const target = e.ambientC + power * e.maxRiseC;
     const tau = Math.max(1, e.timeConstantS);
     this.dieC += (target - this.dieC) * (1 - Math.exp(-dt / tau));
 
-    // battery: sag under load, and optionally run down over time
-    const amps = this.amps(duties);
-    if (e.capacityMah > 0) this.usedMah += amps * dt / 3.6;
-    const sag = amps * e.internalR;
-    const drained = e.capacityMah > 0
-      ? Math.min(1, this.usedMah / e.capacityMah) : 0;
-    const openV = e.batteryV - drained * 1.0;  // rough discharge curve
-    const atMcu = Math.max(0.5, openV - sag - e.diodeDropV);
+    // battery: the LEDs and a plugged-in phone drain it, a charger fills it
+    const usb = this.usb(sim);
+    const net = amps - usb.amps;                 // out of the cell
+    if (e.capacityMah > 0 && net !== 0) {
+      const dV = (net * dt / 3.6) / e.capacityMah * CELL_SWING_V;   // A*s -> mAh -> V
+      let v = e.batteryV - dV;
+      if (net < 0) v = Math.min(v, Math.max(CELL_FULL_V, e.batteryV));
+      e.batteryV = Math.max(2.5, v);
+    }
+    // sag under load (or a slight lift while charging), then the drop to the MCU
+    const loadedV = e.batteryV - net * e.internalR;
+    const atMcu = Math.max(0.5, loadedV - e.diodeDropV);
 
     sim.set('env_millivolts', Math.round(atMcu * 1000));
     // the sensor reports in the firmware's own units: Celsius + 275, x10
     const reported = this.dieC + e.sensorErrorC;
     sim.set('env_decikelvin', Math.max(0, Math.round((reported + 275) * 10)));
 
-    return { duties, lumens: this.lumens(duties), amps, atMcu, openV: openV - sag,
-             dieC: this.dieC, reportedC: reported, drained };
+    return { duties, lumens: this.lumens(duties), amps, atMcu, openV: e.batteryV,
+             loadedV, dieC: this.dieC, reportedC: reported, usb };
   }
 }
 
@@ -196,6 +245,8 @@ export class World {
 const B_CLICK = 0b10000000, B_TIMEOUT = 0b01000000,
       B_HOLD = 0b00100000, B_PRESS = 0b00010000, B_COUNT = 0b00001111;
 
+// Words first, then Anduril's own shorthand (3C = three clicks, 2H = click
+// then hold) so the log lines up with the manual.
 export function describeEvent(ev) {
   if (!ev) return null;
   if (!(ev & B_CLICK)) {
@@ -214,8 +265,11 @@ export function describeEvent(ev) {
   }
   const n = ev & B_COUNT;
   const clicks = n === 1 ? '1 click' : `${n} clicks`;
-  if (ev & B_HOLD) return `${clicks}, holding`;
-  if (ev & B_TIMEOUT) return `${clicks}`;
-  if (ev & B_PRESS) return `${clicks} (button down)`;
-  return n ? `${clicks} (released)` : 'released';
+  if (ev & B_HOLD) {
+    // a hold that has ended carries the timeout flag as well
+    return ev & B_TIMEOUT ? `hold released (${n}H)` : `holding (${n}H)`;
+  }
+  if (ev & B_TIMEOUT) return `${clicks} (${n}C)`;
+  if (ev & B_PRESS) return `button down (press ${n})`;
+  return n ? `button up (press ${n})` : 'released';
 }

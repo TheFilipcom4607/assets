@@ -23,6 +23,8 @@ int main(void) {
     F(fw_channel_mode); F(fw_num_channel_modes); F(fw_go_to_standby);
     F(n_ticks); F(n_reboots); F(eeprom_writes); F(eeprom_dirty);
     F(budget_cycles); F(reboot_requested); F(booted);
+    F(has_rgb_pwm); F(rgb_pwm_on); F(rgb_pwm);
+    F(has_powerbank); F(powerbank_host);
     printf("\n}\n");
     return 0;
 }

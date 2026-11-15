@@ -3,9 +3,19 @@
  "rawBase": "https://raw.githubusercontent.com/ToyKeeper/anduril",
  "versions": [
   {
+   "tag": "r2026-10-26",
+   "label": "r2026-10-26",
+   "note": "latest release",
+   "layout": "modern",
+   "extras": [
+    "rgb-pwm",
+    "powerbank"
+   ]
+  },
+  {
    "tag": "r2026-08-12",
    "label": "r2026-08-12",
-   "note": "latest release",
+   "note": "August 2026 release",
    "layout": "modern"
   },
   {

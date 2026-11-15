@@ -100,10 +100,29 @@
       not a specific product.</li>
   <li><strong>No PWM flicker.</strong> The panel reports duty cycle; the display
       shows steady brightness.</li>
-  <li><strong>Aux LED brightness is approximated</strong> as off / dim / full.</li>
-  <li>This matrix covers aux LEDs, button LEDs and the temperature sensor. Tint
-      ramping, multi-channel lights and dual-switch (clicky + e-switch) lights
-      are not built here.</li>
+  <li><strong>Aux LED brightness is approximated</strong> as off / dim / full,
+      except on builds with smooth RGB dimming, where the three PWM duty cycles
+      are shown as they are.</li>
+  <li><strong>Smooth RGB</strong> is the scheme the Lume X1 boost drivers use:
+      the RGB pins sit on a timer, so the firmware can blend colours. That turns
+      on Anduril's smooth voltage colour after turning off, Batt Color mode, and
+      an extra channel mode that picks any hue with 3H. Only the newest release
+      has it.</li>
+  <li><strong>USB-C</strong> is modelled at the cell: a charger pushes about 2&nbsp;A
+      in, tapering near 4.2&nbsp;V, and a phone draws about 10&nbsp;W out. A plain
+      powerbank picks the direction in hardware. On "host mode" lights (the
+      Fireflies Lume drivers) the firmware drives a pin that picks the
+      direction, and Anduril's own <code>Batt Check &rarr; 2H</code> toggles it.
+      Set a cell capacity to see the voltage move.</li>
+  <li><strong>The light presets</strong> choose the aux and button layout, the
+      port and the rough output and heat of a real model. The ramp table and
+      driver stay this simulator's generic FET+1, so the brightness of each
+      level does not match the real light.</li>
+  <li><strong>RGB buttons on Hank lights</strong> are wired in parallel with the
+      RGB aux, so a light with both runs the same firmware as RGB aux alone and
+      the button shows the same colour.</li>
+  <li>Tint ramping, multi-channel lights and dual-switch (clicky + e-switch)
+      lights are not built here.</li>
   <li>Anduril&nbsp;1 is built for an attiny1634, the part it ran on in lights
       that had aux LEDs. It counts battery voltage in tenths of a volt where
       later releases use fiftieths, which the panel accounts for.</li>

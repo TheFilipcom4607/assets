@@ -2,7 +2,10 @@
 // (version x hardware x thermal-sensor) combination, and write the manifest
 // the web app loads.
 //
-//   node sim/tools/build.mjs [--versions r2026-08-12,...] [--quick]
+//   node sim/tools/build.mjs [--versions=r2026-08-12,...] [--quick]
+//
+// A partial run (--versions or --quick) only replaces the builds it made; the
+// rest of the manifest is kept, so it never drops firmware from the site.
 //
 // Every artifact is instantiated and booted before it is accepted, so a build
 // that cannot run never reaches the manifest.
@@ -163,7 +166,34 @@ const manifest = { generated: new Date().toISOString().slice(0, 10), repo: cfg.r
                    versions: [] };
 let ok = 0, failed = 0;
 
-for (const v of versions) {
+// what a partial run leaves alone
+let previous = null;
+if (only || quick) {
+  try { previous = JSON.parse(fs.readFileSync(path.join(OUT, 'manifest.json'), 'utf8')); } catch {}
+}
+const previousEntry = (tag) => previous?.versions.find((p) => p.tag === tag);
+
+// Optional hardware that only newer firmware knows how to drive.  Each one
+// multiplies the matrix, so they are built only where a version asks for them
+// (and only with a temperature sensor, which every such light has).
+function variantsFor(v, hw, th) {
+  const out = [{ suffix: '', pwm: 0, pb: 0 }];
+  if (!th.on) return out;
+  const extras = v.extras || [];
+  const pwm = extras.includes('rgb-pwm') && hw.auxrgb;
+  const pb = extras.includes('powerbank');
+  if (pwm) out.push({ suffix: '-pwm', pwm: 1, pb: 0 });
+  if (pb) out.push({ suffix: '-pb', pwm: 0, pb: 1 });
+  if (pwm && pb) out.push({ suffix: '-pwm-pb', pwm: 1, pb: 1 });
+  return quick ? out.slice(0, 1) : out;
+}
+
+for (const v of cfg.versions) {
+  if (!versions.includes(v)) {
+    const kept = previousEntry(v.tag);
+    if (kept) manifest.versions.push(kept);
+    continue;
+  }
   process.stdout.write(`\n=== ${v.tag} ===\n`);
   const src = checkout(v.tag);
   const commit = sh('git', ['-C', UPSTREAM, 'rev-parse', `${v.tag}^{commit}`]).toString().trim();
@@ -172,12 +202,13 @@ for (const v of versions) {
   const api = ledApi(src);
   const volts = voltScale(src);
   const sources = stateSources(src);
-  const entry = { ...v, commit, date, ledApi: api, voltScale: volts, builds: {} };
+  const entry = { ...v, commit, date, ledApi: api, voltScale: volts,
+                  builds: quick ? { ...(previousEntry(v.tag)?.builds || {}) } : {} };
   fs.mkdirSync(path.join(OUT, v.tag), { recursive: true });
 
   for (const hw of hardware) {
-    for (const th of thermal) {
-      const id = `${hw.id}-${th.id}`;
+    for (const th of thermal) for (const variant of variantsFor(v, hw, th)) {
+      const id = `${hw.id}${variant.suffix}-${th.id}`;
       const file = path.join(OUT, v.tag, `${id}.wasm`);
       try {
         compile(src, file, [
@@ -185,6 +216,7 @@ for (const v of versions) {
           `-DSIM_AUX1=${hw.aux1}`, `-DSIM_AUXRGB=${hw.auxrgb}`,
           `-DSIM_AUX1_BUTTON=${hw.aux1btn}`, `-DSIM_AUXRGB_BUTTON=${hw.rgbbtn}`,
           `-DSIM_THERM=${th.on}`,
+          `-DSIM_RGB_PWM=${variant.pwm}`, `-DSIM_POWERBANK=${variant.pb}`,
         ], legacy);
         const info = verify(file, layout);
         const { table } = tableNames(fs.readFileSync(file));
@@ -197,6 +229,8 @@ for (const v of versions) {
           wasm: `${v.tag}/${id}.wasm`,
           states: `${v.tag}/${id}.states.json`,
           bytes: fs.statSync(file).size,
+          ...(variant.pwm ? { rgbPwm: 1 } : {}),
+          ...(variant.pb ? { powerbank: 1 } : {}),
           ...info,
         };
         ok++;

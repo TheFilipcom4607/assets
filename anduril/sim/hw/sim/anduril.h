@@ -66,6 +66,21 @@
 // throttle back faster when high
 #define THERM_FASTER_LEVEL 130
 
+// ---- optional hardware: PWM-dimmable RGB and the USB-C powerbank ----
+#if SIM_RGB_PWM
+    // RGB aux ramp, as shipped for the Lume X1:
+    // ./bin/level_calc.py 1.6 1 150 7135 2 0.01 60 --pwm 255
+    #define PWM3_LEVELS \
+        2,2,3,3,3,4,4,5,5,6,6,7,7,8,9,9,10,11,12,12,13,14,15,16,17,18,19,19,20,21,22,24,25,26,27,28,29,30,31,33,34,35,36,38,39,40,42,43,44,46,47,48,50,51,53,54,56,57,59,60,62,63,65,67,68,70,72,73,75,77,78,80,82,84,85,87,89,91,93,94,96,98,100,102,104,106,108,110,112,114,116,118,120,122,124,126,128,130,132,134,136,138,140,143,145,147,149,151,154,156,158,160,163,165,167,170,172,174,177,179,181,184,186,188,191,193,196,198,201,203,206,208,211,213,216,218,221,223,226,228,231,234,236,239,242,244,247,250,252,255
+    // show the battery voltage as a smoothly blended colour
+    #define USE_SMOOTH_POVD
+    #define USE_AUXRGB_LEDS_WHILE_ON  25
+#endif
+#if SIM_POWERBANK
+    // Batt Check -> 2H switches the USB-C port to sending power out
+    #define USE_POWERBANK_HOST_MODE
+#endif
+
 // ---- aux LED behaviour ----
 #define USE_AUX_THRESHOLD_CONFIG
 #define DEFAULT_AUX_WHILE_ON  0b00  // off unless the user enables it

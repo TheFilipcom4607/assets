@@ -112,6 +112,15 @@ inline uint8_t mcu_vdd_raw2cooked(uint16_t measurement) {
     return (uint8_t)((uint32_t)(SIM_VOLT_SCALE * 6144UL) / m);
 }
 
+uint16_t mcu_vdd_raw2cooked16(uint16_t measurement) {
+    // In : 65536 * 1.5V / Vbat    Out: Vbat * 6400
+    // the same expression arch/attiny1616.c uses, with the default slope
+    if (! measurement) measurement = 1;
+    uint32_t v = (uint32_t)(1.5 * 4096 * 100 * VOLTAGE_SLOPE) / measurement;
+    if (v > 65535) v = 65535;
+    return (uint16_t)v;
+}
+
 inline uint16_t mcu_temp_raw2cooked(uint16_t measurement) {
     return measurement;  // already Kelvin << 6
 }

@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-24",
+ "generated": "2026-11-15",
  "repo": "https://github.com/ToyKeeper/anduril",
  "rawBase": "https://raw.githubusercontent.com/ToyKeeper/anduril",
  "hardware": [
@@ -74,9 +74,276 @@
  ],
  "versions": [
   {
+   "tag": "r2026-10-26",
+   "label": "r2026-10-26",
+   "note": "latest release",
+   "layout": "modern",
+   "extras": [
+    "rgb-pwm",
+    "powerbank"
+   ],
+   "commit": "71fe3012202e6a31ccb4aaf0a569b324a3c8826c",
+   "date": "2026-10-26",
+   "ledApi": 1,
+   "voltScale": 50,
+   "builds": {
+    "plain-therm": {
+     "wasm": "r2026-10-26/plain-therm.wasm",
+     "states": "r2026-10-26/plain-therm.states.json",
+     "bytes": 37470,
+     "capabilities": 2096867,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "plain-pb-therm": {
+     "wasm": "r2026-10-26/plain-pb-therm.wasm",
+     "states": "r2026-10-26/plain-pb-therm.states.json",
+     "bytes": 37706,
+     "powerbank": 1,
+     "capabilities": 4194019,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "plain-notherm": {
+     "wasm": "r2026-10-26/plain-notherm.wasm",
+     "states": "r2026-10-26/plain-notherm.states.json",
+     "bytes": 35551,
+     "capabilities": 2096866,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-therm": {
+     "wasm": "r2026-10-26/btn-therm.wasm",
+     "states": "r2026-10-26/btn-therm.states.json",
+     "bytes": 36567,
+     "capabilities": 2096871,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-pb-therm": {
+     "wasm": "r2026-10-26/btn-pb-therm.wasm",
+     "states": "r2026-10-26/btn-pb-therm.states.json",
+     "bytes": 36803,
+     "powerbank": 1,
+     "capabilities": 4194023,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-notherm": {
+     "wasm": "r2026-10-26/btn-notherm.wasm",
+     "states": "r2026-10-26/btn-notherm.states.json",
+     "bytes": 34642,
+     "capabilities": 2096870,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-therm": {
+     "wasm": "r2026-10-26/aux-therm.wasm",
+     "states": "r2026-10-26/aux-therm.states.json",
+     "bytes": 37472,
+     "capabilities": 2096871,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-pb-therm": {
+     "wasm": "r2026-10-26/aux-pb-therm.wasm",
+     "states": "r2026-10-26/aux-pb-therm.states.json",
+     "bytes": 37708,
+     "powerbank": 1,
+     "capabilities": 4194023,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "aux-notherm": {
+     "wasm": "r2026-10-26/aux-notherm.wasm",
+     "states": "r2026-10-26/aux-notherm.states.json",
+     "bytes": 35589,
+     "capabilities": 2096870,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-therm": {
+     "wasm": "r2026-10-26/auxrgb-therm.wasm",
+     "states": "r2026-10-26/auxrgb-therm.states.json",
+     "bytes": 39009,
+     "capabilities": 2096875,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-pwm-therm": {
+     "wasm": "r2026-10-26/auxrgb-pwm-therm.wasm",
+     "states": "r2026-10-26/auxrgb-pwm-therm.states.json",
+     "bytes": 42448,
+     "rgbPwm": 1,
+     "capabilities": 6291179,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-pb-therm": {
+     "wasm": "r2026-10-26/auxrgb-pb-therm.wasm",
+     "states": "r2026-10-26/auxrgb-pb-therm.states.json",
+     "bytes": 39245,
+     "powerbank": 1,
+     "capabilities": 4194027,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-pwm-pb-therm": {
+     "wasm": "r2026-10-26/auxrgb-pwm-pb-therm.wasm",
+     "states": "r2026-10-26/auxrgb-pwm-pb-therm.states.json",
+     "bytes": 42536,
+     "rgbPwm": 1,
+     "powerbank": 1,
+     "capabilities": 8388331,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "auxrgb-notherm": {
+     "wasm": "r2026-10-26/auxrgb-notherm.wasm",
+     "states": "r2026-10-26/auxrgb-notherm.states.json",
+     "bytes": 37126,
+     "capabilities": 2096874,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-therm": {
+     "wasm": "r2026-10-26/btn-auxrgb-therm.wasm",
+     "states": "r2026-10-26/btn-auxrgb-therm.states.json",
+     "bytes": 39066,
+     "capabilities": 2096879,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-pwm-therm": {
+     "wasm": "r2026-10-26/btn-auxrgb-pwm-therm.wasm",
+     "states": "r2026-10-26/btn-auxrgb-pwm-therm.states.json",
+     "bytes": 42511,
+     "rgbPwm": 1,
+     "capabilities": 6291183,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-pb-therm": {
+     "wasm": "r2026-10-26/btn-auxrgb-pb-therm.wasm",
+     "states": "r2026-10-26/btn-auxrgb-pb-therm.states.json",
+     "bytes": 39302,
+     "powerbank": 1,
+     "capabilities": 4194031,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-pwm-pb-therm": {
+     "wasm": "r2026-10-26/btn-auxrgb-pwm-pb-therm.wasm",
+     "states": "r2026-10-26/btn-auxrgb-pwm-pb-therm.states.json",
+     "bytes": 42599,
+     "rgbPwm": 1,
+     "powerbank": 1,
+     "capabilities": 8388335,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "btn-auxrgb-notherm": {
+     "wasm": "r2026-10-26/btn-auxrgb-notherm.wasm",
+     "states": "r2026-10-26/btn-auxrgb-notherm.states.json",
+     "bytes": 37183,
+     "capabilities": 2096878,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-therm": {
+     "wasm": "r2026-10-26/rgbbtn-therm.wasm",
+     "states": "r2026-10-26/rgbbtn-therm.states.json",
+     "bytes": 37316,
+     "capabilities": 2096875,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-pwm-therm": {
+     "wasm": "r2026-10-26/rgbbtn-pwm-therm.wasm",
+     "states": "r2026-10-26/rgbbtn-pwm-therm.states.json",
+     "bytes": 38422,
+     "rgbPwm": 1,
+     "capabilities": 6291179,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-pb-therm": {
+     "wasm": "r2026-10-26/rgbbtn-pb-therm.wasm",
+     "states": "r2026-10-26/rgbbtn-pb-therm.states.json",
+     "bytes": 37552,
+     "powerbank": 1,
+     "capabilities": 4194027,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-pwm-pb-therm": {
+     "wasm": "r2026-10-26/rgbbtn-pwm-pb-therm.wasm",
+     "states": "r2026-10-26/rgbbtn-pwm-pb-therm.states.json",
+     "bytes": 38510,
+     "rgbPwm": 1,
+     "powerbank": 1,
+     "capabilities": 8388331,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-notherm": {
+     "wasm": "r2026-10-26/rgbbtn-notherm.wasm",
+     "states": "r2026-10-26/rgbbtn-notherm.states.json",
+     "bytes": 35387,
+     "capabilities": 2096874,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-therm": {
+     "wasm": "r2026-10-26/rgbbtn-aux-therm.wasm",
+     "states": "r2026-10-26/rgbbtn-aux-therm.states.json",
+     "bytes": 38699,
+     "capabilities": 2096879,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-pwm-therm": {
+     "wasm": "r2026-10-26/rgbbtn-aux-pwm-therm.wasm",
+     "states": "r2026-10-26/rgbbtn-aux-pwm-therm.states.json",
+     "bytes": 39812,
+     "rgbPwm": 1,
+     "capabilities": 6291183,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-pb-therm": {
+     "wasm": "r2026-10-26/rgbbtn-aux-pb-therm.wasm",
+     "states": "r2026-10-26/rgbbtn-aux-pb-therm.states.json",
+     "bytes": 38935,
+     "powerbank": 1,
+     "capabilities": 4194031,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-pwm-pb-therm": {
+     "wasm": "r2026-10-26/rgbbtn-aux-pwm-pb-therm.wasm",
+     "states": "r2026-10-26/rgbbtn-aux-pwm-pb-therm.states.json",
+     "bytes": 39900,
+     "rgbPwm": 1,
+     "powerbank": 1,
+     "capabilities": 8388335,
+     "bootLevel": 50,
+     "rampSize": 150
+    },
+    "rgbbtn-aux-notherm": {
+     "wasm": "r2026-10-26/rgbbtn-aux-notherm.wasm",
+     "states": "r2026-10-26/rgbbtn-aux-notherm.states.json",
+     "bytes": 36816,
+     "capabilities": 2096878,
+     "bootLevel": 50,
+     "rampSize": 150
+    }
+   }
+  },
+  {
    "tag": "r2026-08-12",
    "label": "r2026-08-12",
-   "note": "latest release",
+   "note": "August 2026 release",
    "layout": "modern",
    "commit": "3057a0db8d87d9303fd50d662d0dbf49ef68f18e",
    "date": "2026-08-12",
@@ -86,7 +353,7 @@
     "plain-therm": {
      "wasm": "r2026-08-12/plain-therm.wasm",
      "states": "r2026-08-12/plain-therm.states.json",
-     "bytes": 36941,
+     "bytes": 36957,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -94,7 +361,7 @@
     "plain-notherm": {
      "wasm": "r2026-08-12/plain-notherm.wasm",
      "states": "r2026-08-12/plain-notherm.states.json",
-     "bytes": 35006,
+     "bytes": 35022,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -102,7 +369,7 @@
     "btn-therm": {
      "wasm": "r2026-08-12/btn-therm.wasm",
      "states": "r2026-08-12/btn-therm.states.json",
-     "bytes": 36031,
+     "bytes": 36060,
      "capabilities": 2096871,
      "bootLevel": 50,
      "rampSize": 150
@@ -110,7 +377,7 @@
     "btn-notherm": {
      "wasm": "r2026-08-12/btn-notherm.wasm",
      "states": "r2026-08-12/btn-notherm.states.json",
-     "bytes": 34128,
+     "bytes": 34157,
      "capabilities": 2096870,
      "bootLevel": 50,
      "rampSize": 150
@@ -118,7 +385,7 @@
     "aux-therm": {
      "wasm": "r2026-08-12/aux-therm.wasm",
      "states": "r2026-08-12/aux-therm.states.json",
-     "bytes": 36932,
+     "bytes": 36961,
      "capabilities": 2096871,
      "bootLevel": 50,
      "rampSize": 150
@@ -126,7 +393,7 @@
     "aux-notherm": {
      "wasm": "r2026-08-12/aux-notherm.wasm",
      "states": "r2026-08-12/aux-notherm.states.json",
-     "bytes": 35079,
+     "bytes": 35108,
      "capabilities": 2096870,
      "bootLevel": 50,
      "rampSize": 150
@@ -134,7 +401,7 @@
     "auxrgb-therm": {
      "wasm": "r2026-08-12/auxrgb-therm.wasm",
      "states": "r2026-08-12/auxrgb-therm.states.json",
-     "bytes": 38469,
+     "bytes": 38498,
      "capabilities": 2096875,
      "bootLevel": 50,
      "rampSize": 150
@@ -142,7 +409,7 @@
     "auxrgb-notherm": {
      "wasm": "r2026-08-12/auxrgb-notherm.wasm",
      "states": "r2026-08-12/auxrgb-notherm.states.json",
-     "bytes": 36616,
+     "bytes": 36645,
      "capabilities": 2096874,
      "bootLevel": 50,
      "rampSize": 150
@@ -150,7 +417,7 @@
     "btn-auxrgb-therm": {
      "wasm": "r2026-08-12/btn-auxrgb-therm.wasm",
      "states": "r2026-08-12/btn-auxrgb-therm.states.json",
-     "bytes": 38526,
+     "bytes": 38555,
      "capabilities": 2096879,
      "bootLevel": 50,
      "rampSize": 150
@@ -158,7 +425,7 @@
     "btn-auxrgb-notherm": {
      "wasm": "r2026-08-12/btn-auxrgb-notherm.wasm",
      "states": "r2026-08-12/btn-auxrgb-notherm.states.json",
-     "bytes": 36673,
+     "bytes": 36702,
      "capabilities": 2096878,
      "bootLevel": 50,
      "rampSize": 150
@@ -166,7 +433,7 @@
     "rgbbtn-therm": {
      "wasm": "r2026-08-12/rgbbtn-therm.wasm",
      "states": "r2026-08-12/rgbbtn-therm.states.json",
-     "bytes": 36776,
+     "bytes": 36805,
      "capabilities": 2096875,
      "bootLevel": 50,
      "rampSize": 150
@@ -174,7 +441,7 @@
     "rgbbtn-notherm": {
      "wasm": "r2026-08-12/rgbbtn-notherm.wasm",
      "states": "r2026-08-12/rgbbtn-notherm.states.json",
-     "bytes": 34877,
+     "bytes": 34906,
      "capabilities": 2096874,
      "bootLevel": 50,
      "rampSize": 150
@@ -182,7 +449,7 @@
     "rgbbtn-aux-therm": {
      "wasm": "r2026-08-12/rgbbtn-aux-therm.wasm",
      "states": "r2026-08-12/rgbbtn-aux-therm.states.json",
-     "bytes": 38159,
+     "bytes": 38188,
      "capabilities": 2096879,
      "bootLevel": 50,
      "rampSize": 150
@@ -190,7 +457,7 @@
     "rgbbtn-aux-notherm": {
      "wasm": "r2026-08-12/rgbbtn-aux-notherm.wasm",
      "states": "r2026-08-12/rgbbtn-aux-notherm.states.json",
-     "bytes": 36306,
+     "bytes": 36335,
      "capabilities": 2096878,
      "bootLevel": 50,
      "rampSize": 150
@@ -210,7 +477,7 @@
     "plain-therm": {
      "wasm": "r2025-07-07/plain-therm.wasm",
      "states": "r2025-07-07/plain-therm.states.json",
-     "bytes": 36672,
+     "bytes": 36688,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -218,7 +485,7 @@
     "plain-notherm": {
      "wasm": "r2025-07-07/plain-notherm.wasm",
      "states": "r2025-07-07/plain-notherm.states.json",
-     "bytes": 34832,
+     "bytes": 34848,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -226,7 +493,7 @@
     "btn-therm": {
      "wasm": "r2025-07-07/btn-therm.wasm",
      "states": "r2025-07-07/btn-therm.states.json",
-     "bytes": 36747,
+     "bytes": 36776,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -234,7 +501,7 @@
     "btn-notherm": {
      "wasm": "r2025-07-07/btn-notherm.wasm",
      "states": "r2025-07-07/btn-notherm.states.json",
-     "bytes": 34907,
+     "bytes": 34936,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -242,7 +509,7 @@
     "aux-therm": {
      "wasm": "r2025-07-07/aux-therm.wasm",
      "states": "r2025-07-07/aux-therm.states.json",
-     "bytes": 37514,
+     "bytes": 37543,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -250,7 +517,7 @@
     "aux-notherm": {
      "wasm": "r2025-07-07/aux-notherm.wasm",
      "states": "r2025-07-07/aux-notherm.states.json",
-     "bytes": 35718,
+     "bytes": 35747,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -258,7 +525,7 @@
     "auxrgb-therm": {
      "wasm": "r2025-07-07/auxrgb-therm.wasm",
      "states": "r2025-07-07/auxrgb-therm.states.json",
-     "bytes": 37358,
+     "bytes": 37387,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -266,7 +533,7 @@
     "auxrgb-notherm": {
      "wasm": "r2025-07-07/auxrgb-notherm.wasm",
      "states": "r2025-07-07/auxrgb-notherm.states.json",
-     "bytes": 35558,
+     "bytes": 35587,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -274,7 +541,7 @@
     "btn-auxrgb-therm": {
      "wasm": "r2025-07-07/btn-auxrgb-therm.wasm",
      "states": "r2025-07-07/btn-auxrgb-therm.states.json",
-     "bytes": 37559,
+     "bytes": 37588,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -282,7 +549,7 @@
     "btn-auxrgb-notherm": {
      "wasm": "r2025-07-07/btn-auxrgb-notherm.wasm",
      "states": "r2025-07-07/btn-auxrgb-notherm.states.json",
-     "bytes": 35744,
+     "bytes": 35773,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -290,7 +557,7 @@
     "rgbbtn-therm": {
      "wasm": "r2025-07-07/rgbbtn-therm.wasm",
      "states": "r2025-07-07/rgbbtn-therm.states.json",
-     "bytes": 35425,
+     "bytes": 35454,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -298,7 +565,7 @@
     "rgbbtn-notherm": {
      "wasm": "r2025-07-07/rgbbtn-notherm.wasm",
      "states": "r2025-07-07/rgbbtn-notherm.states.json",
-     "bytes": 33579,
+     "bytes": 33608,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -306,7 +573,7 @@
     "rgbbtn-aux-therm": {
      "wasm": "r2025-07-07/rgbbtn-aux-therm.wasm",
      "states": "r2025-07-07/rgbbtn-aux-therm.states.json",
-     "bytes": 36201,
+     "bytes": 36230,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -314,7 +581,7 @@
     "rgbbtn-aux-notherm": {
      "wasm": "r2025-07-07/rgbbtn-aux-notherm.wasm",
      "states": "r2025-07-07/rgbbtn-aux-notherm.states.json",
-     "bytes": 34401,
+     "bytes": 34430,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -334,7 +601,7 @@
     "plain-therm": {
      "wasm": "r2024-04-20/plain-therm.wasm",
      "states": "r2024-04-20/plain-therm.states.json",
-     "bytes": 36593,
+     "bytes": 36609,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -342,7 +609,7 @@
     "plain-notherm": {
      "wasm": "r2024-04-20/plain-notherm.wasm",
      "states": "r2024-04-20/plain-notherm.states.json",
-     "bytes": 34753,
+     "bytes": 34769,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -350,7 +617,7 @@
     "btn-therm": {
      "wasm": "r2024-04-20/btn-therm.wasm",
      "states": "r2024-04-20/btn-therm.states.json",
-     "bytes": 36668,
+     "bytes": 36697,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -358,7 +625,7 @@
     "btn-notherm": {
      "wasm": "r2024-04-20/btn-notherm.wasm",
      "states": "r2024-04-20/btn-notherm.states.json",
-     "bytes": 34828,
+     "bytes": 34857,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -366,7 +633,7 @@
     "aux-therm": {
      "wasm": "r2024-04-20/aux-therm.wasm",
      "states": "r2024-04-20/aux-therm.states.json",
-     "bytes": 37455,
+     "bytes": 37484,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -374,7 +641,7 @@
     "aux-notherm": {
      "wasm": "r2024-04-20/aux-notherm.wasm",
      "states": "r2024-04-20/aux-notherm.states.json",
-     "bytes": 35659,
+     "bytes": 35688,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -382,7 +649,7 @@
     "auxrgb-therm": {
      "wasm": "r2024-04-20/auxrgb-therm.wasm",
      "states": "r2024-04-20/auxrgb-therm.states.json",
-     "bytes": 37312,
+     "bytes": 37341,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -390,7 +657,7 @@
     "auxrgb-notherm": {
      "wasm": "r2024-04-20/auxrgb-notherm.wasm",
      "states": "r2024-04-20/auxrgb-notherm.states.json",
-     "bytes": 35512,
+     "bytes": 35541,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -398,7 +665,7 @@
     "btn-auxrgb-therm": {
      "wasm": "r2024-04-20/btn-auxrgb-therm.wasm",
      "states": "r2024-04-20/btn-auxrgb-therm.states.json",
-     "bytes": 37506,
+     "bytes": 37535,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -406,7 +673,7 @@
     "btn-auxrgb-notherm": {
      "wasm": "r2024-04-20/btn-auxrgb-notherm.wasm",
      "states": "r2024-04-20/btn-auxrgb-notherm.states.json",
-     "bytes": 35706,
+     "bytes": 35735,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -414,7 +681,7 @@
     "rgbbtn-therm": {
      "wasm": "r2024-04-20/rgbbtn-therm.wasm",
      "states": "r2024-04-20/rgbbtn-therm.states.json",
-     "bytes": 35400,
+     "bytes": 35429,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -422,7 +689,7 @@
     "rgbbtn-notherm": {
      "wasm": "r2024-04-20/rgbbtn-notherm.wasm",
      "states": "r2024-04-20/rgbbtn-notherm.states.json",
-     "bytes": 33554,
+     "bytes": 33583,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -430,7 +697,7 @@
     "rgbbtn-aux-therm": {
      "wasm": "r2024-04-20/rgbbtn-aux-therm.wasm",
      "states": "r2024-04-20/rgbbtn-aux-therm.states.json",
-     "bytes": 36217,
+     "bytes": 36246,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -438,7 +705,7 @@
     "rgbbtn-aux-notherm": {
      "wasm": "r2024-04-20/rgbbtn-aux-notherm.wasm",
      "states": "r2024-04-20/rgbbtn-aux-notherm.states.json",
-     "bytes": 34417,
+     "bytes": 34446,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -458,7 +725,7 @@
     "plain-therm": {
      "wasm": "r2023-12-03/plain-therm.wasm",
      "states": "r2023-12-03/plain-therm.states.json",
-     "bytes": 36575,
+     "bytes": 36591,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -466,7 +733,7 @@
     "plain-notherm": {
      "wasm": "r2023-12-03/plain-notherm.wasm",
      "states": "r2023-12-03/plain-notherm.states.json",
-     "bytes": 34731,
+     "bytes": 34747,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -474,7 +741,7 @@
     "btn-therm": {
      "wasm": "r2023-12-03/btn-therm.wasm",
      "states": "r2023-12-03/btn-therm.states.json",
-     "bytes": 36650,
+     "bytes": 36679,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -482,7 +749,7 @@
     "btn-notherm": {
      "wasm": "r2023-12-03/btn-notherm.wasm",
      "states": "r2023-12-03/btn-notherm.states.json",
-     "bytes": 34806,
+     "bytes": 34835,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -490,7 +757,7 @@
     "aux-therm": {
      "wasm": "r2023-12-03/aux-therm.wasm",
      "states": "r2023-12-03/aux-therm.states.json",
-     "bytes": 37136,
+     "bytes": 37165,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -498,7 +765,7 @@
     "aux-notherm": {
      "wasm": "r2023-12-03/aux-notherm.wasm",
      "states": "r2023-12-03/aux-notherm.states.json",
-     "bytes": 35340,
+     "bytes": 35369,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -506,7 +773,7 @@
     "auxrgb-therm": {
      "wasm": "r2023-12-03/auxrgb-therm.wasm",
      "states": "r2023-12-03/auxrgb-therm.states.json",
-     "bytes": 36956,
+     "bytes": 36985,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -514,7 +781,7 @@
     "auxrgb-notherm": {
      "wasm": "r2023-12-03/auxrgb-notherm.wasm",
      "states": "r2023-12-03/auxrgb-notherm.states.json",
-     "bytes": 35156,
+     "bytes": 35185,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -522,7 +789,7 @@
     "btn-auxrgb-therm": {
      "wasm": "r2023-12-03/btn-auxrgb-therm.wasm",
      "states": "r2023-12-03/btn-auxrgb-therm.states.json",
-     "bytes": 37150,
+     "bytes": 37179,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -530,7 +797,7 @@
     "btn-auxrgb-notherm": {
      "wasm": "r2023-12-03/btn-auxrgb-notherm.wasm",
      "states": "r2023-12-03/btn-auxrgb-notherm.states.json",
-     "bytes": 35350,
+     "bytes": 35379,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -538,7 +805,7 @@
     "rgbbtn-therm": {
      "wasm": "r2023-12-03/rgbbtn-therm.wasm",
      "states": "r2023-12-03/rgbbtn-therm.states.json",
-     "bytes": 35048,
+     "bytes": 35077,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -546,7 +813,7 @@
     "rgbbtn-notherm": {
      "wasm": "r2023-12-03/rgbbtn-notherm.wasm",
      "states": "r2023-12-03/rgbbtn-notherm.states.json",
-     "bytes": 33202,
+     "bytes": 33231,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150
@@ -554,7 +821,7 @@
     "rgbbtn-aux-therm": {
      "wasm": "r2023-12-03/rgbbtn-aux-therm.wasm",
      "states": "r2023-12-03/rgbbtn-aux-therm.states.json",
-     "bytes": 35848,
+     "bytes": 35877,
      "capabilities": 2096867,
      "bootLevel": 50,
      "rampSize": 150
@@ -562,7 +829,7 @@
     "rgbbtn-aux-notherm": {
      "wasm": "r2023-12-03/rgbbtn-aux-notherm.wasm",
      "states": "r2023-12-03/rgbbtn-aux-notherm.states.json",
-     "bytes": 34048,
+     "bytes": 34077,
      "capabilities": 2096866,
      "bootLevel": 50,
      "rampSize": 150

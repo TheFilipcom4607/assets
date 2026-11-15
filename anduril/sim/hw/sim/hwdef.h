@@ -27,6 +27,13 @@
 #define SIM_AUXRGB_BUTTON 0   // the RGB group sits in the button
 #endif
 
+#ifndef SIM_RGB_PWM
+#define SIM_RGB_PWM 0         // the RGB group sits on timer pins, so it can dim
+#endif
+#ifndef SIM_POWERBANK
+#define SIM_POWERBANK 0       // a USB-C port whose direction the firmware sets
+#endif
+
 // Anduril moved its aux LED drivers from fsm/misc.c into the arch layer, and
 // renamed the feature flags along the way.  SIM_LED_API says which vocabulary
 // the selected version speaks; the build script works it out from the sources.
@@ -77,7 +84,32 @@
     #include "fsm/chan-aux.h"
 #endif
 
-#ifdef SIM_AUX_CHANNELS_RGB
+#if SIM_RGB_PWM
+    // PWM on the RGB pins, the way the Lume X1 boost drivers do it: smooth
+    // colours for the voltage readout, and an HSV channel mode
+    #define RGB_BITS       8
+    #define USE_HSV2RGB
+    #define PWM3_DATATYPE  uint8_t   // aux RGB ramp
+    #define PWM3_GET(x)    PWM_GET8(pwm3_levels, x)
+    #define CH_R_PWM       sim_io.rgb_pwm[0]
+    #define CH_G_PWM       sim_io.rgb_pwm[1]
+    #define CH_B_PWM       sim_io.rgb_pwm[2]
+#endif
+
+#if defined(SIM_AUX_CHANNELS_RGB) && SIM_RGB_PWM
+    // main LEDs, then any colour by hue, then the seven fixed colours
+    #define NUM_CHANNEL_MODES  (2 + NUM_AUXRGB_CHANNEL_MODES)
+    enum channel_modes_e {
+        CM_MAIN = 0,
+        CM_HSV,
+        AUXRGB_CM_ENUMS
+    };
+    #define CHANNEL_MODES_ENABLED  0b0000000000000001
+    #define USE_CHANNEL_MODE_ARGS
+    #define CHANNEL_MODE_ARGS  0,0,AUXRGB_CM_ARGS
+    #define USE_CUSTOM_CHANNEL_3H_MODES
+    #define USE_CIRCULAR_TINT_3H
+#elif defined(SIM_AUX_CHANNELS_RGB)
     // the RGB channel-mode macros were renamed between releases
     #ifdef NUM_AUXRGB_CHANNEL_MODES
     #define NUM_CHANNEL_MODES  (1 + NUM_AUXRGB_CHANNEL_MODES)
@@ -144,7 +176,20 @@ extern uint16_t sim_pwm_cnt;
 #endif
 
 
+// ---- USB-C powerbank ----
+// One pin tells the charge controller which way power flows, exactly like
+// the "host enable" pin on the Fireflies Lume drivers.
+#if SIM_POWERBANK
+#define powerbank_is_in_host_mode  (sim_io.powerbank_host)
+void set_powerbank_host_mode()  { sim_io.powerbank_host = 1; }
+void set_powerbank_guest_mode() { sim_io.powerbank_host = 0; }
+#endif
+
+
 inline void hwdef_setup() {
+    sim_io.has_rgb_pwm   = SIM_RGB_PWM;
+    sim_io.has_powerbank = SIM_POWERBANK;
+    sim_io.powerbank_host = 0;   // accept a charge until told otherwise
     sim_io.pwm_channels = PWM_CHANNELS;
     sim_io.has_aux1     = SIM_AUX1;
     sim_io.has_auxrgb   = SIM_AUXRGB;

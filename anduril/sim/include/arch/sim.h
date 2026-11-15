@@ -86,6 +86,14 @@ inline uint16_t mcu_adc_result_volts();
 #define voltage_raw2cooked  mcu_vdd_raw2cooked
 inline uint8_t mcu_vdd_raw2cooked(uint16_t measurement);
 
+// raw -> Volts * 6400.  Releases from r2026-09 on keep a 16-bit voltage next
+// to the 8-bit one; older releases never call this.
+#define VOLTAGE_SLOPE   1024
+#define VOLTAGE_OFFSET  0
+#define VOLTAGE_CORRECTION_IS_OFFSET
+#define voltage_raw2cooked16  mcu_vdd_raw2cooked16
+uint16_t mcu_vdd_raw2cooked16(uint16_t measurement);
+
 // raw -> Kelvin << 6.  The simulated sensor reports in those units already,
 // so the host can dial in an exact temperature and an exact calibration error.
 #define temp_raw2cooked  mcu_temp_raw2cooked

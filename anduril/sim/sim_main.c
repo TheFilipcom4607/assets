@@ -61,8 +61,14 @@ void sim_sync_state(void) {
     sim_io.fw_ticks_since_last_event = ticks_since_last_event;
 
     #ifdef USE_LVP
+    #ifdef USE_VOLTAGE16
+    // r2026-09 and later also keep the voltage in 1/6400 V steps
+    sim_io.fw_voltage = voltage16;
+    sim_io.fw_voltage_scale = 6400;
+    #else
     sim_io.fw_voltage = voltage;
     sim_io.fw_voltage_scale = SIM_VOLT_SCALE;
+    #endif
     #endif
     #ifdef USE_THERMAL_REGULATION
     sim_io.fw_temperature = (uint32_t)(int32_t)temperature;
@@ -99,6 +105,8 @@ void sim_sync_state(void) {
 #define SIM_CAP_LOCKOUT   (1u << 18)
 #define SIM_CAP_SUNSET    (1u << 19)
 #define SIM_CAP_MANUAL_MEM (1u << 20)
+#define SIM_CAP_POWERBANK (1u << 21)
+#define SIM_CAP_RGB_PWM   (1u << 22)
 
 __attribute__((export_name("sim_capabilities")))
 uint32_t sim_capabilities(void) {
@@ -165,6 +173,12 @@ uint32_t sim_capabilities(void) {
     #endif
     #ifdef USE_MANUAL_MEMORY
     c |= SIM_CAP_MANUAL_MEM;
+    #endif
+    #ifdef USE_POWERBANK_HOST_MODE
+    c |= SIM_CAP_POWERBANK;
+    #endif
+    #ifdef USE_SMOOTH_POVD
+    c |= SIM_CAP_RGB_PWM;
     #endif
     return c;
 }

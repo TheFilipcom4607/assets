@@ -50,7 +50,7 @@ typedef struct SimIO {
     uint32_t fw_current_event;
     uint32_t fw_ticks_since_last_event;
     uint32_t fw_voltage;        // firmware's own reading, in fw_voltage_scale units per volt
-    uint32_t fw_voltage_scale;  // 50 on current releases, 40 before r2024
+    uint32_t fw_voltage_scale;  // 6400 from r2026-09, 50 before, 40 before r2024, 10 in Anduril 1
     uint32_t fw_temperature;    // firmware's own reading, degrees C
     uint32_t fw_channel_mode;
     uint32_t fw_num_channel_modes;
@@ -66,6 +66,15 @@ typedef struct SimIO {
     uint32_t budget_cycles;     // virtual cycles the host has granted
     uint32_t reboot_requested;  // firmware called reboot(); host must reinstantiate
     uint32_t booted;            // main() reached its loop at least once
+
+    // --- PWM-dimmable RGB aux (lights whose RGB pins sit on a timer) ---
+    uint32_t has_rgb_pwm;       // this build can dim its RGB group smoothly
+    uint32_t rgb_pwm_on;        // the timer is driving the pins right now
+    uint32_t rgb_pwm[3];        // R, G, B compare values, 0..255
+
+    // --- USB-C powerbank ---
+    uint32_t has_powerbank;     // firmware controls a "host enable" pin
+    uint32_t powerbank_host;    // 1 = sending power out, 0 = accepting a charge
 } SimIO;
 
 #define SIM_MAGIC 0x414e4453

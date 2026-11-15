@@ -31,10 +31,12 @@ Anduril in `.upstream/`:
     git clone --filter=blob:none https://github.com/ToyKeeper/anduril .upstream
     npm --prefix .tools install binaryen
     node sim/tools/build.mjs                     # everything
-    node sim/tools/build.mjs --versions=r2026-08-12 --quick
+    node sim/tools/build.mjs --versions=r2026-10-26 --quick
 
 Each artifact is booted and clicked before it is written to the manifest, so a
-build that does not run never reaches the site. To add a release, add a tag to
+build that does not run never reaches the site. A partial build (`--versions` or `--quick`) keeps the rest of the
+manifest. A version's `extras` (`rgb-pwm`, `powerbank`) adds builds with
+smooth RGB dimming and the powerbank host-enable pin. To add a release, add a tag to
 `sim/build-config.json` (`layout: "legacy"` for anything before the 2023 source
 reorganisation) and rebuild.
 

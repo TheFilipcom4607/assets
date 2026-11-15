@@ -203,7 +203,7 @@ main {
   .source { grid-column: auto; }
   .bar { padding: 12px 14px; }
   .config { margin-left: 0; width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
-  .config .field:first-child { grid-column: 1 / -1; }
+  .config .field.wide { grid-column: 1 / -1; }
   .brand-sub { display: none; }
   .status { padding: 10px 14px; }
 }
@@ -275,6 +275,41 @@ main {
 .output-num { font-size: 26px; color: var(--text); letter-spacing: -0.02em; }
 .output-unit { font-size: 13px; color: var(--dim); }
 .output-sub { font-size: 12.5px; color: var(--dimmer); margin-left: 10px; }
+
+.preset-note { margin: 6px 0 14px; text-align: center; }
+
+/* ============ USB-C ============ */
+
+.usb {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.usb-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+.usb-label {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+}
+
+.seg { display: inline-flex; }
+.seg .btn { border-radius: 0; margin-left: -1px; }
+.seg .btn:first-child { border-radius: var(--r-ctrl) 0 0 var(--r-ctrl); margin-left: 0; }
+.seg .btn:last-child { border-radius: 0 var(--r-ctrl) var(--r-ctrl) 0; }
+.seg .btn.on { color: var(--text); background: #1f2633; border-color: #3a4a66; position: relative; }
+
+.usb-status {
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+}
+.usb-status:empty { display: none; }
+.usb .hint { margin-top: 6px; }
 
 /* ============ e-switch ============ */
 

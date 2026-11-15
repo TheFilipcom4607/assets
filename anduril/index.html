@@ -21,7 +21,11 @@
   </div>
 
   <div class="config">
-    <div class="field">
+    <div class="field wide">
+      <label for="preset">Light</label>
+      <select id="preset"></select>
+    </div>
+    <div class="field wide">
       <label for="version">Firmware</label>
       <select id="version"></select>
     </div>
@@ -39,6 +43,22 @@
         <option value="none">None</option>
         <option value="single">Single colour</option>
         <option value="rgb">RGB</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="rgbpwm">RGB dimming</label>
+      <select id="rgbpwm">
+        <option value="0">Off / low / high</option>
+        <option value="1">Smooth (PWM)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="usb">USB-C</label>
+      <select id="usb">
+        <option value="none">None</option>
+        <option value="charge">Charging only</option>
+        <option value="auto">Powerbank</option>
+        <option value="host">Powerbank, host mode</option>
       </select>
     </div>
     <div class="field">
@@ -64,6 +84,8 @@
       </div>
     </div>
 
+    <p class="hint preset-note" id="presetNote" hidden></p>
+
     <p class="output">
       <span class="output-num" id="lumens">0</span><span class="output-unit">lm</span>
       <span class="output-sub" id="levelReadout">off</span>
@@ -74,6 +96,19 @@
         <span class="eswitch-led" id="eswitchLed" aria-hidden="true"></span>
         <span>PRESS &amp; HOLD</span>
       </button>
+    </div>
+
+    <div class="usb" id="usbPanel" hidden>
+      <div class="usb-row">
+        <span class="usb-label">USB-C</span>
+        <div class="seg" role="group" aria-label="What is plugged into the USB-C port">
+          <button class="btn" data-plug="none">Nothing</button>
+          <button class="btn" data-plug="charger">Charger</button>
+          <button class="btn" data-plug="device">Phone</button>
+        </div>
+      </div>
+      <p class="usb-status" id="usbStatus"></p>
+      <p class="hint" id="usbHint"></p>
     </div>
 
     <div class="tools">
@@ -101,6 +136,7 @@
       <dt>PWM</dt><dd id="rPwm">-</dd>
       <dt>aux LEDs</dt><dd id="rAux">-</dd>
       <dt>battery</dt><dd id="rBattery">-</dd>
+      <dt>USB-C</dt><dd id="rUsb">-</dd>
       <dt>heat</dt><dd id="rHeat">-</dd>
       <dt>MCU</dt><dd id="rMcu">-</dd>
       <dt>uptime</dt><dd id="rUptime">-</dd>
