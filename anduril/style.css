@@ -218,6 +218,8 @@ main {
     "guide log"
     "guide env"
     "fw    source";
+  /* the tall guide's extra height goes under the sliders, not between cards */
+  grid-template-rows: auto auto 1fr auto;
 }
 .hero { grid-area: hero; }
 .guide { grid-area: guide; }
@@ -281,7 +283,7 @@ main {
 }
 
 .scene { grid-area: scene; position: relative; }
-.side { grid-area: side; display: grid; gap: 18px; }
+.side { grid-area: side; display: grid; gap: 18px; position: relative; z-index: 1; }
 .hero-extra { grid-area: extra; }
 .about { grid-area: about; }
 
@@ -303,6 +305,7 @@ main {
 
 .light {
   --beam: 0;
+  overflow: visible;   /* the beam fades out past the drawing */
   display: block;
   width: 100%;
   height: auto;
@@ -730,7 +733,7 @@ footer {
 
   .hero { padding: 0 14px 16px; border-radius: 18px; }
   /* crop the long beam so the light itself is bigger */
-  .light { width: 125%; max-width: none; margin-left: -2%; }
+  .light { width: 118%; max-width: none; margin-left: 0; }
   .output-num { font-size: 36px; }
   .side { gap: 0; }
   .hero-extra { margin-top: 14px; }

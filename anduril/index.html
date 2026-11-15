@@ -116,9 +116,10 @@
             <rect width="1" height="5" fill="#000" fill-opacity="0.45"/>
           </pattern>
           <linearGradient id="gBeam" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#fff6e6" stop-opacity="0.9"/>
-            <stop offset="0.4" stop-color="#ffe9c6" stop-opacity="0.35"/>
-            <stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/>
+            <stop offset="0" stop-color="#fff8ee" stop-opacity="1"/>
+            <stop offset="0.2" stop-color="#fff0d8" stop-opacity="0.6"/>
+            <stop offset="0.5" stop-color="#ffe2b4" stop-opacity="0.16"/>
+            <stop offset="0.75" stop-color="#ffd9a0" stop-opacity="0"/>
           </linearGradient>
           <filter id="fSoft" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="5"/>
@@ -127,7 +128,7 @@
 
         <!-- beam -->
         <g class="beam">
-          <polygon points="312,64 312,116 520,10 520,170" fill="url(#gBeam)"/>
+          <polygon points="312,60 640,-30 640,210 312,120" fill="url(#gBeam)"/>
           <ellipse cx="322" cy="90" rx="20" ry="30" fill="#fff8ec" filter="url(#fSoft)"/>
         </g>
 
