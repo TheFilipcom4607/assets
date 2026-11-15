@@ -21,14 +21,17 @@
   </div>
 
   <div class="config">
-    <div class="field wide">
+   <div class="config-main">
+    <div class="field">
       <label for="preset">Light</label>
       <select id="preset"></select>
     </div>
-    <div class="field wide">
+    <div class="field">
       <label for="version">Firmware</label>
       <select id="version"></select>
     </div>
+   </div>
+   <div class="config-parts">
     <div class="field">
       <label for="aux">Aux LEDs</label>
       <select id="aux">
@@ -48,17 +51,17 @@
     <div class="field">
       <label for="rgbpwm">RGB dimming</label>
       <select id="rgbpwm">
-        <option value="0">Off / low / high</option>
-        <option value="1">Smooth (PWM)</option>
+        <option value="0">Stepped</option>
+        <option value="1">Smooth</option>
       </select>
     </div>
     <div class="field">
       <label for="usb">USB-C</label>
       <select id="usb">
         <option value="none">None</option>
-        <option value="charge">Charging only</option>
+        <option value="charge">Charging</option>
         <option value="auto">Powerbank</option>
-        <option value="host">Powerbank, host mode</option>
+        <option value="host">Powerbank (host)</option>
       </select>
     </div>
     <div class="field">
@@ -68,6 +71,7 @@
         <option value="0">Not fitted</option>
       </select>
     </div>
+   </div>
   </div>
 </header>
 
@@ -79,12 +83,10 @@
     <div class="lamp">
       <div class="lamp-glow" id="lampGlow" aria-hidden="true"></div>
       <div class="head">
-        <div class="auxring" id="auxring" hidden></div>
-        <div class="emitter" id="emitter"></div>
+        <div class="aux" id="auxring" hidden><i></i><i></i><i></i><i></i></div>
+        <div class="emitter" id="emitter"><i></i><i></i><i></i><i></i></div>
       </div>
     </div>
-
-    <p class="hint preset-note" id="presetNote" hidden></p>
 
     <p class="output">
       <span class="output-num" id="lumens">0</span><span class="output-unit">lm</span>
@@ -92,9 +94,9 @@
     </p>
 
     <div class="eswitch-slot">
-      <button id="eswitch" class="eswitch" aria-label="E-switch">
-        <span class="eswitch-led" id="eswitchLed" aria-hidden="true"></span>
-        <span>PRESS &amp; HOLD</span>
+      <button id="eswitch" class="eswitch" aria-label="E-switch: press and hold">
+        <span class="cap" aria-hidden="true"><span class="eswitch-led" id="eswitchLed"></span></span>
+        <span class="eswitch-text">Press &amp; hold<small>or hold Space</small></span>
       </button>
     </div>
 
@@ -110,6 +112,11 @@
       <p class="usb-status" id="usbStatus"></p>
       <p class="hint" id="usbHint"></p>
     </div>
+
+    <details class="about" id="presetAbout" hidden>
+      <summary>About this light</summary>
+      <p id="presetNote"></p>
+    </details>
 
     <div class="tools">
       <button id="reconnect" class="btn" title="Unscrew and refit the tailcap">Reconnect battery</button>

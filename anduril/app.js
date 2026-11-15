@@ -4,7 +4,7 @@ import { AndurilSim, World, defaultEnvironment, describeEvent } from './sim.js';
 const $ = (id) => document.getElementById(id);
 const asset = (path) => new URL(path, import.meta.url).href;
 const els = {
-  status: $('status'), preset: $('preset'), presetNote: $('presetNote'),
+  status: $('status'), preset: $('preset'), presetNote: $('presetNote'), presetAbout: $('presetAbout'),
   version: $('version'), aux: $('aux'), btn: $('btn'),
   therm: $('therm'), rgbpwm: $('rgbpwm'), usb: $('usb'), speed: $('speed'),
   eswitch: $('eswitch'),
@@ -45,15 +45,16 @@ const PICKERS = ['version', 'aux', 'btn', 'therm', 'rgbpwm', 'usb'];
 // is 'latest' unless the light ships something older.
 const PRESETS = [
   { id: 'emisar-d4kc', label: 'Emisar D4KC (40 W boost, smooth RGB aux, powerbank)',
+    emitters: 4,
     hw: { aux: 'rgb', btn: 'single', rgbpwm: '1', usb: 'auto' },
     env: { maxLumens: 3200, ch2Amps: 11, capacityMah: 4500, batteryV: 4.0, maxRiseC: 85, timeConstantS: 40 },
-    note: 'Hank\'s 21700 light on the Lume X1-C boost driver. The RGB aux dim smoothly (smooth '
-      + 'voltage colour after turning off, Batt Color mode, an "any colour" channel). The '
-      + 'switch backlight is set to cool white; pick Button LED → RGB if you ordered the '
-      + 'RGB one. USB-C charges at 5 V 2 A and powers a phone at 5 V 1.5 A, with the '
-      + 'direction picked by the charge chip. The chip\'s own red/green charge LEDs and the '
-      + 'driver\'s aux brightness setting (8H) and breathing patterns are not simulated.' },
+    note: 'Quad-emitter 21700 light on the Lume X1-C boost driver. The RGB aux dim smoothly: '
+      + 'a blended voltage colour after turning off, Batt Color mode, and an "any colour" '
+      + 'channel. Cool white switch backlight (set Button LED to RGB if you ordered that). '
+      + 'USB-C charges at 5 V 2 A and powers a phone at 5 V 1.5 A. Not simulated: the '
+      + 'charge chip\'s red/green LEDs, aux brightness (8H) and the breathing patterns.' },
   { id: 'emisar-d4v2', label: 'Emisar D4V2 (RGB aux, button LED)',
+    emitters: 4,
     hw: { aux: 'rgb', btn: 'single', rgbpwm: '0', usb: 'none' },
     env: { maxLumens: 4500, ch2Amps: 12, capacityMah: 3000, batteryV: 4.0, maxRiseC: 85, timeConstantS: 35 },
     note: 'The classic hot-rod: FET turbo, RGB aux, a single-colour button LED, no charging port.' },
@@ -289,7 +290,7 @@ function applyPreset(id) {
 function showPresetNote() {
   const p = PRESETS.find((x) => x.id === els.preset.value);
   els.presetNote.textContent = p ? p.note : '';
-  els.presetNote.hidden = !p;
+  els.presetAbout.hidden = !p;
 }
 
 // ---- loading a build --------------------------------------------------------
@@ -357,8 +358,10 @@ async function loadBuild() {
   const buttonLed = (hw.aux1 && hw.aux1btn) || (hw.auxrgb && hw.rgbbtn) || state.mirrorButton;
   els.auxring.hidden = !frontAux;
   els.eswitchLed.classList.toggle('absent', !buttonLed);
-  els.eswitchLed.style.background = '';
-  els.eswitchLed.style.boxShadow = '';
+  paintLed(els.eswitchLed, null);
+  paintLed(els.auxring, null);
+  const preset = PRESETS.find((x) => x.id === els.preset.value);
+  els.emitter.classList.toggle('quad', (preset?.emitters || 1) === 4);
 
   refreshUsbPanel();
 
@@ -493,8 +496,14 @@ function ledColor(sim) {
   return out;
 }
 
-function css([r, g, b], gain = 255) {
-  return `rgb(${Math.round(r * gain)}, ${Math.round(g * gain)}, ${Math.round(b * gain)})`;
+// An LED is drawn as its colour at full saturation, made more or less
+// opaque by how bright it is, so a "low" aux LED still reads as its colour.
+function paintLed(el, c) {
+  const m = c ? Math.max(c[0], c[1], c[2]) : 0;
+  if (m < 0.01) { el.style.setProperty('--a', '0'); return; }
+  const ch = (x) => Math.round((x / m) * 255);
+  el.style.setProperty('--led', `${ch(c[0])} ${ch(c[1])} ${ch(c[2])}`);
+  el.style.setProperty('--a', (0.35 + 0.65 * m).toFixed(3));
 }
 
 function render(physics) {
@@ -506,25 +515,20 @@ function render(physics) {
   // even a couple of lumens is a visibly lit emitter, so lift the bottom end
   const lit = lm > 0 ? 0.16 + 0.84 * v : 0;
   const mix = (a, b) => Math.round(a + (b - a) * lit);
-  els.emitter.style.background = lm > 0
-    ? `rgb(${mix(0x28, 0xff)}, ${mix(0x2b, 0xf6)}, ${mix(0x33, 0xe4)})` : '#232730';
-  els.emitter.style.boxShadow = lm > 0
-    ? `0 0 ${10 + 110 * v}px ${2 + 34 * v}px rgba(255, 216, 160, ${0.12 + 0.55 * v})`
-    : 'none';
+  const em = els.emitter.style;
+  if (lm > 0) {
+    em.setProperty('--die', `rgb(${mix(0x30, 0xff)}, ${mix(0x33, 0xf6)}, ${mix(0x3b, 0xe4)})`);
+    em.setProperty('--lit', lit.toFixed(3));
+    em.boxShadow = `0 0 ${10 + 110 * v}px ${2 + 34 * v}px rgba(255, 216, 160, ${0.12 + 0.55 * v})`;
+  } else {
+    em.removeProperty('--die');
+    em.setProperty('--lit', '0');
+    em.boxShadow = '';
+  }
 
   const leds = ledColor(sim);
-  if (!els.auxring.hidden) {
-    const c = leds.front || [0, 0, 0];
-    const on = c[0] + c[1] + c[2] > 0.01;
-    els.auxring.style.borderColor = on ? css(c) : 'rgba(255,255,255,0.05)';
-    els.auxring.style.boxShadow = on ? `0 0 18px 1px ${css(c, 190)}` : 'none';
-  }
-  const bc = leds.button;
-  if (bc) {
-    const on = bc[0] + bc[1] + bc[2] > 0.01;
-    els.eswitchLed.style.background = on ? css(bc) : '#23262c';
-    els.eswitchLed.style.boxShadow = on ? `0 0 12px 1px ${css(bc, 200)}` : 'none';
-  }
+  if (!els.auxring.hidden) paintLed(els.auxring, leds.front);
+  if (leds.button) paintLed(els.eswitchLed, leds.button);
 
   els.lampGlow.style.opacity = (lm > 0 ? 0.10 + 0.5 * v : 0).toFixed(3);
   els.lumens.textContent = lm >= 1 ? Math.round(lm).toLocaleString() : (lm > 0 ? '<1' : '0');
