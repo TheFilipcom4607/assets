@@ -1,6 +1,6 @@
 {
  "source": "Flashlight Emitter Reference — Lumens, CRI, Candela & Throw.md",
- "reviewed": "15 Nov 2026",
+ "reviewed": "20 Nov 2026",
  "emitters": [
   {
    "id": 0,
@@ -139,6 +139,53 @@
   },
   {
    "id": 2,
+   "name": "219C",
+   "alts": [
+    "219C"
+   ],
+   "maker": "Nichia",
+   "code": "",
+   "section": "1. Nichia (Color Accuracy & Tint Favorites)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": null,
+   "lm_hi": null,
+   "cri_min": 90,
+   "cri_max": 90,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "typical",
+   "footprint_html": "<code>3535</code> · 3V",
+   "lm_html": "—",
+   "cri_html": "90 (option)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "The brighter but less-talented successor to the 219B; itself largely superseded by the SST-20 and LH351D (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 3,
    "name": "219F",
    "alts": [
     "219F"
@@ -187,7 +234,7 @@
    "throw_hi": null
   },
   {
-   "id": 3,
+   "id": 4,
    "name": "B35AM",
    "alts": [
     "B35AM"
@@ -234,7 +281,7 @@
    "throw_hi": null
   },
   {
-   "id": 4,
+   "id": 5,
    "name": "719A",
    "alts": [
     "719A"
@@ -281,7 +328,7 @@
    "throw_hi": null
   },
   {
-   "id": 5,
+   "id": 6,
    "name": "144A",
    "alts": [
     "144A"
@@ -328,7 +375,7 @@
    "throw_hi": null
   },
   {
-   "id": 6,
+   "id": 7,
    "name": "E21A / E17A",
    "alts": [
     "E21A",
@@ -386,7 +433,7 @@
    "throw_hi": null
   },
   {
-   "id": 7,
+   "id": 8,
    "name": "SFT-25R",
    "alts": [
     "SFT-25R"
@@ -454,7 +501,7 @@
    "throw_hi": 650.0
   },
   {
-   "id": 8,
+   "id": 9,
    "name": "SFT-40",
    "alts": [
     "SFT-40"
@@ -536,7 +583,7 @@
    "throw_hi": 565.0
   },
   {
-   "id": 9,
+   "id": 10,
    "name": "SFT-70",
    "alts": [
     "SFT-70"
@@ -605,7 +652,7 @@
    "throw_hi": 490.0
   },
   {
-   "id": 10,
+   "id": 11,
    "name": "SFT-60",
    "alts": [
     "SFT-60"
@@ -667,7 +714,7 @@
    "throw_hi": 550.0
   },
   {
-   "id": 11,
+   "id": 12,
    "name": "SFT-42R",
    "alts": [
     "SFT-42R"
@@ -725,7 +772,7 @@
    "throw_hi": 550.0
   },
   {
-   "id": 12,
+   "id": 13,
    "name": "SFT-90",
    "alts": [
     "SFT-90"
@@ -789,7 +836,7 @@
    "throw_hi": 600.0
   },
   {
-   "id": 13,
+   "id": 14,
    "name": "SBT90.2",
    "alts": [
     "SBT90.2"
@@ -859,7 +906,7 @@
    "throw_hi": 600.0
   },
   {
-   "id": 14,
+   "id": 15,
    "name": "SFT-12",
    "alts": [
     "SFT-12"
@@ -908,7 +955,7 @@
    "throw_hi": null
   },
   {
-   "id": 15,
+   "id": 16,
    "name": "SST-20",
    "alts": [
     "SST-20"
@@ -963,7 +1010,7 @@
    "throw_hi": null
   },
   {
-   "id": 16,
+   "id": 17,
    "name": "SST-40 / SST-70",
    "alts": [
     "SST-40",
@@ -1017,7 +1064,7 @@
    "throw_hi": null
   },
   {
-   "id": 17,
+   "id": 18,
    "name": "XHP70.3 HI",
    "alts": [
     "XHP70.3 HI"
@@ -1081,7 +1128,7 @@
    "throw_hi": 375.0
   },
   {
-   "id": 18,
+   "id": 19,
    "name": "XHP50.3 HI",
    "alts": [
     "XHP50.3 HI"
@@ -1141,7 +1188,7 @@
    "throw_hi": 400.0
   },
   {
-   "id": 19,
+   "id": 20,
    "name": "XHP35.2 HI",
    "alts": [
     "XHP35.2 HI"
@@ -1192,7 +1239,7 @@
    "throw_hi": null
   },
   {
-   "id": 20,
+   "id": 21,
    "name": "XP-L HI",
    "alts": [
     "XP-L HI"
@@ -1239,7 +1286,7 @@
    "throw_hi": null
   },
   {
-   "id": 21,
+   "id": 22,
    "name": "XP-G4 / XP-L2",
    "alts": [
     "XP-G4",
@@ -1287,7 +1334,7 @@
    "throw_hi": null
   },
   {
-   "id": 22,
+   "id": 23,
    "name": "XP-GR / XP-LR / XM-MR / XFLMNR",
    "alts": [
     "XP-GR",
@@ -1333,7 +1380,105 @@
    "throw_hi": null
   },
   {
-   "id": 23,
+   "id": 24,
+   "name": "XP-G2",
+   "alts": [
+    "XP-G2"
+   ],
+   "maker": "Cree",
+   "code": "",
+   "section": "3. Cree (Efficiency & Brute-Force Output)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": null,
+   "lm_hi": null,
+   "cri_min": null,
+   "cri_max": null,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "datasheet",
+   "footprint_html": "<code>3535</code> · 3V",
+   "lm_html": "—",
+   "cri_html": "—",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "The tiny-die classic for micro quads and triples, now largely displaced by the XP-G3/G4. Smaller dome and die than the XP-L, with correspondingly less output (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 25,
+   "name": "XM-L2",
+   "alts": [
+    "XM-L2"
+   ],
+   "maker": "Cree",
+   "code": "",
+   "section": "3. Cree (Efficiency & Brute-Force Output)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "5050"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 1369.0,
+   "lm_hi": 3833.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "datasheet",
+   "footprint_html": "<code>5050</code> · 3V",
+   "lm_html": "1,369 lm @ 3 A · 3,833 lm @ 16.8 A (koef3)",
+   "cri_html": "70",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "The classic budget flooder, redesigned in 2021 as a flip chip (&quot;the XM-L3 that never was&quot;): much more efficient, lower Vf, and it survives ~17 A in overdrive tests. Same XM footprint, so existing boards and centering rings still fit. Luminance is only XP-L HD class and dedoming gains &lt;10%, so it&#x27;s a flood LED, not a thrower (<a href=\"https://budgetlightforum.com/t/led-test-review-new-cree-xlamp-xm-l2-u3-color-kit-51-6200-k-design-change-after-pcn-issued/71898\" target=\"_blank\" rel=\"noopener\">koef3 test</a>, <a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "koef3 test",
+     "url": "https://budgetlightforum.com/t/led-test-review-new-cree-xlamp-xm-l2-u3-color-kit-51-6200-k-design-change-after-pcn-issued/71898"
+    },
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 26,
    "name": "XHP50.2 / XHP70.2",
    "alts": [
     "XHP50.2",
@@ -1382,7 +1527,7 @@
    "throw_hi": null
   },
   {
-   "id": 24,
+   "id": 27,
    "name": "XFL series",
    "alts": [
     "XFL series"
@@ -1431,7 +1576,7 @@
    "throw_hi": null
   },
   {
-   "id": 25,
+   "id": 28,
    "name": "W1",
    "alts": [
     "W1"
@@ -1501,7 +1646,7 @@
    "throw_hi": 660.0
   },
   {
-   "id": 26,
+   "id": 29,
    "name": "W2",
    "alts": [
     "W2"
@@ -1561,7 +1706,7 @@
    "throw_hi": 615.0
   },
   {
-   "id": 27,
+   "id": 30,
    "name": "Boost HX",
    "alts": [
     "Boost HX"
@@ -1608,7 +1753,7 @@
    "throw_hi": null
   },
   {
-   "id": 28,
+   "id": 31,
    "name": "P9",
    "alts": [
     "P9"
@@ -1655,7 +1800,7 @@
    "throw_hi": null
   },
   {
-   "id": 29,
+   "id": 32,
    "name": "F45R",
    "alts": [
     "F45R"
@@ -1706,7 +1851,7 @@
    "throw_hi": null
   },
   {
-   "id": 30,
+   "id": 33,
    "name": "F150R",
    "alts": [
     "F150R"
@@ -1773,7 +1918,7 @@
    "throw_hi": 600.0
   },
   {
-   "id": 31,
+   "id": 34,
    "name": "NV1010",
    "alts": [
     "NV1010"
@@ -1839,7 +1984,7 @@
    "throw_hi": 270.0
   },
   {
-   "id": 32,
+   "id": 35,
    "name": "SFN60",
    "alts": [
     "SFN60"
@@ -1905,22 +2050,24 @@
    "throw_hi": 425.0
   },
   {
-   "id": 33,
-   "name": "Other SF-series",
+   "id": 36,
+   "name": "SFQ-55",
    "alts": [
-    "Other SF-series"
+    "SFQ-55"
    ],
    "maker": "San'an",
    "code": "",
    "section": "5. San'an Chips (incl. Convoy's Custom LEDs)",
    "kind": "White",
    "type_label": "",
-   "footprints": [],
+   "footprints": [
+    "5050"
+   ],
    "voltages": [
     "3V"
    ],
-   "lm_lo": null,
-   "lm_hi": null,
+   "lm_lo": 3000.0,
+   "lm_hi": 3000.0,
    "cri_min": 70,
    "cri_max": 70,
    "ccts": [],
@@ -1930,12 +2077,12 @@
    "unavailable": false,
    "colours": [],
    "basis": "typical",
-   "footprint_html": "various · 3V",
-   "lm_html": "—",
+   "footprint_html": "<code>5050</code> · 3V",
+   "lm_html": "~3,000 lm",
    "cri_html": "mostly 70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "<b>SFQ-55 / SFQ-60</b> (5050, ~3,000 lm, clean cool tint). <b>SFN-43</b> (5050, ~4,000 lm). <b>SFN-55.2</b> (7070, ~8,000 lm, greenish). <b>SFH-43 / SFH-55</b> (11 × 10 SBT90.2 footprint, 7,000–10,000+ lm). <b>SFP-55 / SFY-55</b> (11 × 11 / 16 × 16, 20,000+ lm) (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "San&#x27;an&#x27;s 3V XHP50.3 HI competitor; high CCT with a clean cool tint. Now on its 4th generation (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
     {
      "label": "BLF Guide",
@@ -1950,7 +2097,342 @@
    "throw_hi": null
   },
   {
-   "id": 34,
+   "id": 37,
+   "name": "SFQ-60",
+   "alts": [
+    "SFQ-60"
+   ],
+   "maker": "San'an",
+   "code": "",
+   "section": "5. San'an Chips (incl. Convoy's Custom LEDs)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "5050"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 3000.0,
+   "lm_hi": 3000.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "typical",
+   "footprint_html": "<code>5050</code> · 3V",
+   "lm_html": "~3,000 lm",
+   "cri_html": "mostly 70",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Competes with the XHP50 at a lower Vf; very high CCT with a clean tint (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 38,
+   "name": "SFN-43",
+   "alts": [
+    "SFN-43"
+   ],
+   "maker": "San'an",
+   "code": "",
+   "section": "5. San'an Chips (incl. Convoy's Custom LEDs)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "5050"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 4000.0,
+   "lm_hi": 4000.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "typical",
+   "footprint_html": "<code>5050</code> · 3V",
+   "lm_html": "~4,000 lm",
+   "cri_html": "mostly 70",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Extremely bright 5050 that competes with the XHP50.2; very high CCT (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 39,
+   "name": "SFN-55.2",
+   "alts": [
+    "SFN-55.2"
+   ],
+   "maker": "San'an",
+   "code": "",
+   "section": "5. San'an Chips (incl. Convoy's Custom LEDs)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "7070"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 8000.0,
+   "lm_hi": 8000.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "typical",
+   "footprint_html": "<code>7070</code> · 3V",
+   "lm_html": "~8,000 lm",
+   "cri_html": "70 (greenish)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Nine-die 7070 that sits between the XHP70.2 and the SBT90.2 in size and output; large colour variation with power level and generally greenish tint (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 40,
+   "name": "SFH-43",
+   "alts": [
+    "SFH-43"
+   ],
+   "maker": "San'an",
+   "code": "",
+   "section": "5. San'an Chips (incl. Convoy's Custom LEDs)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "11×10"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 7000.0,
+   "lm_hi": 7000.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [
+    6700
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "typical",
+   "footprint_html": "<code>11 × 10 mm</code> · 3V",
+   "lm_html": "7,000+ lm",
+   "cri_html": "~70 (near-6700K)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Very bright with more throw than the SFH-55; dead neutral tint (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 41,
+   "name": "SFH-55",
+   "alts": [
+    "SFH-55"
+   ],
+   "maker": "San'an",
+   "code": "",
+   "section": "5. San'an Chips (incl. Convoy's Custom LEDs)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "11×10"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 10000.0,
+   "lm_hi": 10000.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": true,
+   "unavailable": false,
+   "colours": [],
+   "basis": "typical",
+   "footprint_html": "<code>11 × 10 mm</code> · 3V",
+   "lm_html": "10,000+ lm",
+   "cri_html": "~70",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Huge domeless 16-die LED, easily swapped with the SBT90.2; brighter but less throwy (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 42,
+   "name": "SFP-55",
+   "alts": [
+    "SFP-55"
+   ],
+   "maker": "San'an",
+   "code": "",
+   "section": "5. San'an Chips (incl. Convoy's Custom LEDs)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "11×11"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 15000.0,
+   "lm_hi": 22000.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "estimate",
+   "footprint_html": "<code>11 × 11 mm</code> · 3V",
+   "lm_html": "22,000 lm claimed · ~15,000 lm measured in a light",
+   "cri_html": "~70 (cool white)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Massive 25-die surface (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 43,
+   "name": "SFY-55",
+   "alts": [
+    "SFY-55"
+   ],
+   "maker": "San'an",
+   "code": "",
+   "section": "5. San'an Chips (incl. Convoy's Custom LEDs)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "16×16"
+   ],
+   "voltages": [
+    "3V",
+    "6V",
+    "12V"
+   ],
+   "lm_lo": 20000.0,
+   "lm_hi": 25000.0,
+   "cri_min": null,
+   "cri_max": null,
+   "ccts": [
+    3000
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "typical",
+   "footprint_html": "<code>16 × 16 mm</code> · 3V / 6V / 12V",
+   "lm_html": "20,000–25,000 lm",
+   "cri_html": "3000K high-CRI option",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "64-die monster emitter; gigantic footprint makes it very niche (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "sources": [
+    {
+     "label": "BLF Guide",
+     "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 44,
    "name": "FFL351A",
    "alts": [
     "FFL351A"
@@ -2023,7 +2505,7 @@
    "throw_hi": 345.0
   },
   {
-   "id": 35,
+   "id": 45,
    "name": "FFL505A",
    "alts": [
     "FFL505A"
@@ -2096,7 +2578,7 @@
    "throw_hi": 510.0
   },
   {
-   "id": 36,
+   "id": 46,
    "name": "FFL707A",
    "alts": [
     "FFL707A"
@@ -2158,7 +2640,7 @@
    "throw_hi": 375.0
   },
   {
-   "id": 37,
+   "id": 47,
    "name": "FFL909A",
    "alts": [
     "FFL909A"
@@ -2215,7 +2697,7 @@
    "throw_hi": null
   },
   {
-   "id": 38,
+   "id": 48,
    "name": "NTG35",
    "alts": [
     "NTG35"
@@ -2281,7 +2763,7 @@
    "throw_hi": null
   },
   {
-   "id": 39,
+   "id": 49,
    "name": "NTG50",
    "alts": [
     "NTG50"
@@ -2345,7 +2827,7 @@
    "throw_hi": 400.0
   },
   {
-   "id": 40,
+   "id": 50,
    "name": "FFL5009R",
    "alts": [
     "FFL5009R"
@@ -2410,7 +2892,7 @@
    "throw_hi": null
   },
   {
-   "id": 41,
+   "id": 51,
    "name": "FFL5009D",
    "alts": [
     "FFL5009D"
@@ -2459,7 +2941,7 @@
    "throw_hi": null
   },
   {
-   "id": 42,
+   "id": 52,
    "name": "FFL350RD",
    "alts": [
     "FFL350RD"
@@ -2513,7 +2995,7 @@
    "throw_hi": null
   },
   {
-   "id": 43,
+   "id": 53,
    "name": "FFL350DD",
    "alts": [
     "FFL350DD"
@@ -2561,7 +3043,7 @@
    "throw_hi": null
   },
   {
-   "id": 44,
+   "id": 54,
    "name": "FFL505HB",
    "alts": [
     "FFL505HB"
@@ -2609,7 +3091,7 @@
    "throw_hi": null
   },
   {
-   "id": 45,
+   "id": 55,
    "name": "FFL707MD",
    "alts": [
     "FFL707MD"
@@ -2658,7 +3140,7 @@
    "throw_hi": null
   },
   {
-   "id": 46,
+   "id": 56,
    "name": "FFL707MX",
    "alts": [
     "FFL707MX"
@@ -2705,7 +3187,7 @@
    "throw_hi": null
   },
   {
-   "id": 47,
+   "id": 57,
    "name": "LHP531",
    "alts": [
     "LHP531"
@@ -2761,7 +3243,7 @@
    "throw_hi": null
   },
   {
-   "id": 48,
+   "id": 58,
    "name": "LHP73B",
    "alts": [
     "LHP73B"
@@ -2829,7 +3311,7 @@
    "throw_hi": 295.0
   },
   {
-   "id": 49,
+   "id": 59,
    "name": "W5050SQ3",
    "alts": [
     "W5050SQ3"
@@ -2889,7 +3371,7 @@
    "throw_hi": null
   },
   {
-   "id": 50,
+   "id": 60,
    "name": "W5050SQ5",
    "alts": [
     "W5050SQ5"
@@ -2939,12 +3421,12 @@
    "throw_hi": null
   },
   {
-   "id": 51,
-   "name": "LML2AW.DC",
+   "id": 61,
+   "name": "LML2AW",
    "alts": [
-    "LML2AW.DC"
+    "LML2AW"
    ],
-   "maker": "LMP",
+   "maker": "",
    "code": "",
    "section": "6. Boutique & House-Brand Emitters (FireflyLite FFL, Noctigon NTG, LMP, Getian) — Other boutique / budget emitters",
    "kind": "White",
@@ -2989,7 +3471,62 @@
    "throw_hi": null
   },
   {
-   "id": 52,
+   "id": 62,
+   "name": "YinDing 5050 Glass (95 CRI)",
+   "alts": [
+    "YinDing 5050 Glass"
+   ],
+   "maker": "",
+   "code": "",
+   "section": "6. Boutique & House-Brand Emitters (FireflyLite FFL, Noctigon NTG, LMP, Getian) — Other boutique / budget emitters",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "5050"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 1518.0,
+   "lm_hi": 1518.0,
+   "cri_min": 94,
+   "cri_max": 95,
+   "ccts": [
+    5500,
+    6000,
+    6700
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "typical",
+   "footprint_html": "<code>5050</code> · 3V (~5 A sensible)",
+   "lm_html": "1,518 lm @ 8.4 A (koef3)",
+   "cri_html": "95 (Ra 94 / R9 87, ~6700K sample)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Round die under an AR glass cap with a near-on-BBL tint and a clean beam in reflectors and TIRs — essentially no direct competitor in cold-white high-CRI. Same chip family as the W5050SQ3/FFL505A round-die parts and likely San&#x27;an-made. Batch lottery: an earlier ~5500–6000K 70-CRI glass sample measured very green with high Vf, and AliExpress supply is unreliable (<a href=\"https://budgetlightforum.com/t/led-test-review-yinding-5050-glass-6500-k-95-cri-round-die-led-with-very-good-light-quality-and-high-luminance/221269\" target=\"_blank\" rel=\"noopener\">koef3 test</a>, <a href=\"https://www.reddit.com/r/flashlight/comments/1i0s5z6/emitter_and_driver_guide_basics/\" target=\"_blank\" rel=\"noopener\">r/flashlight guide</a>).",
+   "sources": [
+    {
+     "label": "koef3 test",
+     "url": "https://budgetlightforum.com/t/led-test-review-yinding-5050-glass-6500-k-95-cri-round-die-led-with-very-good-light-quality-and-high-luminance/221269"
+    },
+    {
+     "label": "r/flashlight guide",
+     "url": "https://www.reddit.com/r/flashlight/comments/1i0s5z6/emitter_and_driver_guide_basics/"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 63,
    "name": "GT-FC40",
    "alts": [
     "GT-FC40"
@@ -3042,7 +3579,7 @@
    "throw_hi": null
   },
   {
-   "id": 53,
+   "id": 64,
    "name": "NVSU233B(T)",
    "alts": [
     "NVSU233B"
@@ -3089,7 +3626,7 @@
    "throw_hi": null
   },
   {
-   "id": 54,
+   "id": 65,
    "name": "SST-10-UV",
    "alts": [
     "SST-10-UV"
@@ -3136,7 +3673,7 @@
    "throw_hi": null
   },
   {
-   "id": 55,
+   "id": 66,
    "name": "SBT-10X-UV",
    "alts": [
     "SBT-10X-UV"
@@ -3181,7 +3718,7 @@
    "throw_hi": null
   },
   {
-   "id": 56,
+   "id": 67,
    "name": "UVC 255 nm / UVB 310 nm",
    "alts": [
     "UVC 255 nm",
@@ -3227,7 +3764,7 @@
    "throw_hi": null
   },
   {
-   "id": 57,
+   "id": 68,
    "name": "SST-10-IR",
    "alts": [
     "SST-10-IR"
@@ -3274,7 +3811,7 @@
    "throw_hi": null
   },
   {
-   "id": 58,
+   "id": 69,
    "name": "Green",
    "alts": [
     "Green"
@@ -3321,7 +3858,7 @@
    "throw_hi": null
   },
   {
-   "id": 59,
+   "id": 70,
    "name": "Verdure",
    "alts": [
     "Verdure"
@@ -3369,7 +3906,7 @@
    "throw_hi": null
   },
   {
-   "id": 60,
+   "id": 71,
    "name": "Red",
    "alts": [
     "Red"
@@ -3417,7 +3954,7 @@
    "throw_hi": null
   },
   {
-   "id": 61,
+   "id": 72,
    "name": "Blue",
    "alts": [
     "Blue"
@@ -3464,7 +4001,7 @@
    "throw_hi": null
   },
   {
-   "id": 62,
+   "id": 73,
    "name": "Orange",
    "alts": [
     "Orange"
@@ -3512,7 +4049,7 @@
    "throw_hi": null
   },
   {
-   "id": 63,
+   "id": 74,
    "name": "GT RGB",
    "alts": [
     "GT RGB"
@@ -3562,7 +4099,7 @@
    "throw_hi": null
   },
   {
-   "id": 64,
+   "id": 75,
    "name": "XP-E2 (colour)",
    "alts": [
     "XP-E2"
@@ -3607,7 +4144,7 @@
    "throw_hi": null
   },
   {
-   "id": 65,
+   "id": 76,
    "name": "LH351D",
    "alts": [
     "LH351D"
@@ -3654,7 +4191,7 @@
    "throw_hi": null
   },
   {
-   "id": 66,
+   "id": 77,
    "name": "TN3535",
    "alts": [
     "TN3535"
@@ -3704,7 +4241,7 @@
    "throw_hi": null
   },
   {
-   "id": 67,
+   "id": 78,
    "name": "CSP2323",
    "alts": [
     "CSP2323"
@@ -3757,7 +4294,7 @@
    "throw_hi": null
   },
   {
-   "id": 68,
+   "id": 79,
    "name": "HL2X",
    "alts": [
     "HL2X"
@@ -3806,7 +4343,7 @@
    "throw_hi": null
   },
   {
-   "id": 69,
+   "id": 80,
    "name": "UHi 20 / UHi 40",
    "alts": [
     "UHi 20",
