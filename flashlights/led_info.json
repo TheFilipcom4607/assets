@@ -167,7 +167,7 @@
    "colour": "\"3500K\" sample: 3845K, Ra 92, R9 75, Duv −0.0135",
    "notes": "Small round die (2.35 mm²) under glass, ringed by brittle white silicone. Same chip as the LMP W5050SQ3, so it's a Lumenpioneer part. Relatively high luminance for a warm high-CRI LED, but very inefficient: 31 lm/W at max, \"probably the most inefficient modern 5050\" the tester has measured. An SFT-40 3000K matches its throw at ~6 A. A 6500K / 97 CRI version also exists."
   },
-  "XHP50": {
+  "XHP50.3 HI": {
    "title": "XHP50.3 HI",
    "candela": [
     {
@@ -248,7 +248,7 @@
    "colour": "\"3700K\" sample: 3955K, Ra 96, R9 97, Duv −0.0064",
    "notes": "Domeless flip-chip, ~2 × 2 mm chip, 4.3 mm² glowing area. Beam looks like a dedomed 519A with a slightly larger corona. Efficiency gains flatten above ~5 A. A newer run is reportedly less rosy than early batches. CCTs range from 1800K to 5000K. In a 7-emitter light it beat a domed 519A by only ~3% in lumens, with negligible extra throw."
   },
-  "XHP70": {
+  "XHP70.3 HI": {
    "title": "XHP70.3 HI",
    "candela": [
     {
@@ -396,7 +396,7 @@
    "colour": "<70 / 80",
    "notes": "Domeless 3535 multi-die. The older 12V XHP35 HI (discontinued) is still sought after for its 4000K tint."
   },
-  "XP-L": {
+  "XP-L HI": {
    "title": "XP-L HI",
    "candela": [],
    "footprint": "3535 · 3V",
@@ -656,41 +656,6 @@
    "kind": "850 / 940 nm IR",
    "footprint": "3535",
    "notes": "Night-vision/covert IR. 850 nm shows a faint red glow; 940 nm is effectively invisible but works less well with most cameras."
-  },
-  "Osram Green": {
-   "title": "Osram Green (CSLNM1.F1, CSLPM1.F1)",
-   "candela": [],
-   "kind": "~520 nm green",
-   "footprint": "3030",
-   "notes": "Saturated true green; high perceived brightness, popular for hunting and signalling."
-  },
-  "Osram Verdure": {
-   "title": "Osram Verdure (CSLNM1.13, CULPM1.13)",
-   "candela": [],
-   "kind": "lime/mint (phosphor-converted)",
-   "footprint": "3030 / Boost",
-   "notes": "Spectrum centred near the eye's 555 nm sensitivity peak, so very high lumens per watt and a distinct \"money green\" tint."
-  },
-  "Osram Red": {
-   "title": "Osram Red (CSLNM1.23, CULPM1.23)",
-   "candela": [],
-   "kind": "620 nm red",
-   "footprint": "3030 / Boost",
-   "notes": "Red-orange; protects dark adaptation far better than white. For maximum night-vision preservation, deep red (660 nm, e.g. SST-20-DR) is better."
-  },
-  "Osram Blue": {
-   "title": "Osram Blue (CSLNM1.14)",
-   "candela": [],
-   "kind": "~445 nm blue",
-   "footprint": "3030",
-   "notes": "Short-wavelength blue throw emitter."
-  },
-  "Osram Orange": {
-   "title": "Osram Orange (CSLNM1.FY)",
-   "candela": [],
-   "kind": "amber/orange",
-   "footprint": "3030",
-   "notes": "Warm monochrome option, used for wildlife watching and to cut glare in fog and rain."
   },
   "XP-E": {
    "title": "Cree XP-E2 (colour)",

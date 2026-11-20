@@ -62,6 +62,10 @@ h1 { font: 800 clamp(26px, 3.4vw, 36px)/1 var(--f-display); letter-spacing: -0.0
 h1 svg { width: 0.9em; height: 0.9em; color: var(--accent); flex: none; }
 .sub { margin: 0; color: var(--muted); max-width: 64ch; }
 .kpis { display: flex; gap: 26px; }
+.idxnav { display: inline-flex; gap: 3px; padding: 3px; margin-bottom: 14px; background: var(--sunken); border: 1px solid var(--line); border-radius: 10px; font-size: 13px; font-weight: 600; }
+.idxnav a { padding: 6px 14px; border-radius: 7px; color: var(--muted); text-decoration: none; }
+.idxnav a:hover { color: var(--ink); }
+.idxnav a[aria-current] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow-sm), 0 0 0 1px var(--line-2); }
 .kpi b { display: block; font: 700 22px/1.1 var(--f-display); color: var(--ink); }
 .kpi span { font-size: 12px; color: var(--muted); }
 
@@ -352,8 +356,6 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
 
 /* ---------- emitter-specific overrides ---------- */
 .cols { --cols: 34px minmax(190px, 2fr) minmax(140px, 1.3fr) 96px minmax(120px, 1fr) 92px 112px 70px; }
-.top .back { font-size: 13px; text-decoration: none; display: inline-flex; gap: 4px; margin-bottom: 10px; }
-.top .back:hover { text-decoration: underline; }
 .badge.r9 { color: var(--ok); background: color-mix(in srgb, var(--ok) 13%, transparent); }
 .badge.rosy { color: #b4366b; background: color-mix(in srgb, #e93d82 13%, transparent); }
 :root[data-theme="dark"] .badge.rosy { color: #f59bc0; }
@@ -440,7 +442,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
 <header class="top">
   <div class="in">
     <div>
-      <a class="back" href="flashlight-index.html">← Flashlight Index</a>
+      <nav class="idxnav" aria-label="Indexes"><a href="../flashlights/">Flashlights</a><a href="../leds/" aria-current="page">LEDs</a></nav>
       <h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>Emitter Index</h1>
       <p class="sub" id="sub">Flashlight LEDs from the emitter reference, with output, colour rendering, tint, package and typical throw.</p>
     </div>
@@ -572,6 +574,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
   const NUMS = [["lmin", "Lumens ≥"], ["lmax", "Lumens ≤"], ["cdmin", "Candela ≥"], ["crimin", "CRI ≥"]];
   const SETS = Object.keys(FACETS).concat("feats");
   const blank = () => ({ q: "", ...Object.fromEntries(SETS.map(k => [k, new Set()])), ...Object.fromEntries(NUMS.map(([k]) => [k, ""])) });
+  let famsOf = {}, idOf = () => null;
   let F = blank(), sortK = null, sortDir = 1, picks = [], data = [], byId = new Map(), view = [], openSecs = null, openPanels = null, showAll = {};
   const VALS = {};
 
@@ -810,6 +813,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
       </div>
       <div class="df">
         <button class="btn" type="button" data-pick="${e.id}" ${!picked && picks.length >= MAXPICK ? "disabled" : ""}>${picked ? "✓ In compare" : "Add to compare"}</button>
+        ${famsOf[e.id] ? `<a class="btn" href="../flashlights/?${famsOf[e.id].map(f => "led=" + encodeURIComponent(f)).join("&")}">Flashlights with this LED</a>` : ""}
         ${e.sources[0] ? `<a class="btn primary" href="${esc(e.sources[0].url)}" target="_blank" rel="noopener">Open ${esc(e.sources[0].label)} ${ICON.ext}</a>` : ""}
       </div>`;
     $("#drawer").dataset.id = id;
@@ -933,7 +937,8 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
   });
 
   /* ---------- load ---------- */
-  fetch("emitters.json").then(r => r.json()).then(doc => {
+  // led_info.json (Flashlight Index) maps store LED names to reference rows; its titles match emitter names once (…) and maker are dropped.
+  Promise.all([fetch("emitters.json").then(r => r.json()), fetch("../flashlights/led_info.json").then(r => r.ok ? r.json() : {}).catch(() => ({}))]).then(([doc, info]) => {
     const byCount = arr => { const c = {}; arr.forEach(v => c[v] = (c[v] || 0) + 1); return Object.keys(c).sort((a, b) => c[b] - c[a] || a.localeCompare(b)); };
     data = doc.emitters.map(e => {
       const lights = new Set(e.ccts.map(tone));
@@ -947,6 +952,9 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
           (e.notes_html + " " + e.lm_html + " " + e.cri_html).replace(/<[^>]+>/g, " ")].join(" ").toLowerCase() };
     });
     byId = new Map(data.map(e => [e.id, e]));
+    const norm = s => s.replace(/\s*\(.*?\)/g, "").trim().toLowerCase();
+    idOf = t => data.find(e => norm(e.name) === norm(t) || norm(`${e.maker} ${e.name}`) === norm(t))?.id ?? null;
+    Object.entries(info.leds || {}).forEach(([fam, inf]) => { const id = idOf(inf.title); if (id != null) (famsOf[id] ||= []).push(fam); });
     picks = picks.filter(id => byId.has(id));
     VALS.uses = doc.uses ? doc.uses.map(u => u.goal) : byCount(data.flatMap(e => e._uses)); VALS.makers = byCount(data.map(e => e.maker).filter(Boolean));
     VALS.fps = byCount(data.flatMap(e => e.footprints)); VALS.volts = ["3V", "6V", "9V", "12V"].filter(v => data.some(e => e.voltages.includes(v)));
@@ -958,6 +966,8 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
     if (openPanels) document.querySelectorAll(".panel").forEach(d => d.open = openPanels.includes(d.dataset.panel));
     $("#q").value = F.q;
     render();
+    const want = new URLSearchParams(location.search).get("led");
+    if (want) { history.replaceState(null, "", location.pathname); const id = idOf(want); if (id != null) openDrawer(id); }
   }).catch(err => {
     console.error(err);
     $("#rows").innerHTML = `<div class="empty"><b>The emitter list didn't load</b><span>Open this page through a local web server (run <code>python3 -m http.server</code> in this folder), then reload.</span></div>`;

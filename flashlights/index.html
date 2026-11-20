@@ -64,6 +64,10 @@ h1 { font: 800 clamp(26px, 3.4vw, 36px)/1 var(--f-display); letter-spacing: -0.0
 h1 svg { width: 0.9em; height: 0.9em; color: var(--accent); flex: none; }
 .sub { margin: 0; color: var(--muted); max-width: 64ch; }
 .kpis { display: flex; gap: 26px; }
+.idxnav { display: inline-flex; gap: 3px; padding: 3px; margin-bottom: 14px; background: var(--sunken); border: 1px solid var(--line); border-radius: 10px; font-size: 13px; font-weight: 600; }
+.idxnav a { padding: 6px 14px; border-radius: 7px; color: var(--muted); text-decoration: none; }
+.idxnav a:hover { color: var(--ink); }
+.idxnav a[aria-current] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow-sm), 0 0 0 1px var(--line-2); }
 .kpi b { display: block; font: 700 22px/1.1 var(--f-display); color: var(--ink); }
 .kpi span { font-size: 12px; color: var(--muted); }
 
@@ -286,6 +290,8 @@ dialog::backdrop { background: rgba(8, 8, 10, 0.45); }
 .facts dd { margin: 0; }
 .linfo p { margin: 0; line-height: 1.5; }
 .linfo p.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.linfo .tolink { color: var(--accent); font-size: 12px; font-weight: 600; justify-self: start; text-decoration: none; }
+.linfo .tolink:hover { text-decoration: underline; }
 .linfo .morebtn { all: unset; cursor: pointer; color: var(--accent); font-size: 12px; justify-self: start; }
 
 .opts { display: grid; gap: 12px; }
@@ -374,6 +380,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
 <header class="top">
   <div class="in">
     <div>
+      <nav class="idxnav" aria-label="Indexes"><a href="../flashlights/" aria-current="page">Flashlights</a><a href="../leds/">LEDs</a></nav>
       <h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6l1 6H8z"/><path d="M8 8h8v4a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3z"/><path d="M11 15v7h2v-7"/></svg>Flashlight Index</h1>
       <p class="sub">Every light on the official Emisar, Noctigon, Convoy, FireflyLite, Wurkkos, Sofirn and Lumintop stores, snapshot 20 Nov 2026. Prices in USD.</p>
     </div>
@@ -504,6 +511,9 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
     const s = JSON.parse(localStorage.getItem("fi-state-3") || "null");
     if (s) { Object.assign(F, s.F || {}); SETS.forEach(k => F[k] = new Set((s.F || {})[k] || [])); sortK = s.sortK || null; sortDir = s.sortDir || 1; picks = s.picks || []; openSecs = s.openSecs || null; F.tints.delete("colour"); }
   } catch (e) {}
+  // Arriving from the Emitter Index (?led=W1&led=W2): show just the lights with those LEDs.
+  const wantLeds = new URLSearchParams(location.search).getAll("led");
+  if (wantLeds.length) { F = blank(); wantLeds.forEach(v => F.leds.add(v)); history.replaceState(null, "", location.pathname); }
   const save = () => { try { localStorage.setItem("fi-state-3", JSON.stringify({ F: { ...F, ...Object.fromEntries(SETS.map(k => [k, [...F[k]]])) }, sortK, sortDir, picks, openSecs })); } catch (e) {} };
 
   const numF = k => { const v = parseFloat(F[k]); return isNaN(v) ? null : v; };
@@ -695,7 +705,8 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
     return `<div class="linfo"><div class="lt"><b>${esc(inf.title)}</b><small>from your emitter reference${LED_INFO.reviewed ? `, ${esc(LED_INFO.reviewed)}` : ""}</small></div>
       <dl class="facts">${facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
       ${inf.notes ? `<p class="${long ? "clamp" : ""}">${esc(inf.notes)}</p>${long ? `<button type="button" class="morebtn" data-more>Read more</button>` : ""}` : ""}
-      ${inf.candela?.length ? `<p class="nolist" style="font-size:11.5px">Candela is for a typical 35–40 mm reflector; the real light's reflector changes it a lot.</p>` : ""}</div>`;
+      ${inf.candela?.length ? `<p class="nolist" style="font-size:11.5px">Candela is for a typical 35–40 mm reflector; the real light's reflector changes it a lot.</p>` : ""}
+      <a class="tolink" href="../leds/?led=${encodeURIComponent(inf.title)}">Open in Emitter Index →</a></div>`;
   }
   const priceTag = p => !p ? "" : p.kind === "incl" ? `<span class="pr incl">Included</span>` : p.kind === "add" ? `<span class="pr">+${usd(p.amount)}</span>` : `<span class="pr">from ${usd(p.amount)}</span>`;
   function emittersHtml(r) {
