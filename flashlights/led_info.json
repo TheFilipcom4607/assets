@@ -1,0 +1,551 @@
+{
+ "source": "Flashlight Emitter Reference — Lumens, CRI, Candela & Throw.md",
+ "reviewed": "15 Nov 2026",
+ "leds": {
+  "W1": {
+   "title": "W1 (CSLNM1.TG)",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~90,000 – 110,000 cd",
+     "throw": "~600–660 m",
+     "beam": "Razor-thin pencil beam; highest luminance"
+    }
+   ],
+   "footprint": "3030 · 3V",
+   "output": "~700–900 lm",
+   "colour": "~70",
+   "notes": "1 mm² die, cool white (~6000K). Unmatched pencil-beam throw for its size. The same package also comes in red, green, verdure, orange and blue (see §7)."
+  },
+  "SFT-25R": {
+   "title": "SFT-25R",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~85,000 – 105,000 cd",
+     "throw": "~580–650 m",
+     "beam": "Tiny intense hotspot; ~2× W1's lumens, slightly less intensity"
+    }
+   ],
+   "footprint": "3535 · 3V",
+   "output": "~1,700 lm (@ 8 A)",
+   "colour": "70",
+   "notes": "Small round die (about half the SFT-40's area) = extreme throw; out-throws the SFT-40 in the same host. Standard 3535 footprint fits most EDC/thrower boards."
+  },
+  "W2": {
+   "title": "W2 (CSLPM1.TG)",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~75,000 – 95,000 cd",
+     "throw": "~550–615 m",
+     "beam": "Slightly wider, brighter pencil throw"
+    }
+   ],
+   "footprint": "3030 · 3V",
+   "output": "~1,200–1,500 lm",
+   "colour": "~70",
+   "notes": "2 mm² die, 5700K only. Handles more current than W1 for a wider, brighter hotspot."
+  },
+  "SFT-40": {
+   "title": "SFT-40",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~60,000 – 80,000 cd",
+     "throw": "~490–565 m",
+     "beam": "Best all-round thrower hotspot (more usable spill than SFT-25R)"
+    }
+   ],
+   "footprint": "5050 · 3V",
+   "output": "~2,000+ lm (70 CRI) · ~1,300–1,500 lm (95 CRI)",
+   "colour": "70 (5000K/6500K) · 95 (3000K)",
+   "notes": "Domeless all-round thrower king: punchy hotspot with usable spill. 6500K leans green, 5000K is decent, and 3000K is the high-CRI version."
+  },
+  "SFT-42R": {
+   "title": "SFT-42R",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~50,000 – 75,000 cd",
+     "throw": "~445–550 m",
+     "beam": "Fatter, higher-lumen hotspot; comes into its own in large reflectors"
+    }
+   ],
+   "footprint": "5050 · 3V",
+   "output": "~3,000–3,400 lm (@ ~12 A FET, user-measured)",
+   "colour": "~70",
+   "notes": "Round-die thrower with a bigger hotspot than SFT-40 and ~2 A more draw. Best in large reflectors (Convoy L21B); in TIR or small hosts it throws less than the SFT-40. Phosphor is more brittle than other SFT parts, so don't let a TIR press on it."
+  },
+  "SFT-60": {
+   "title": "SFT-60",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~50,000 – 75,000 cd",
+     "throw": "~445–550 m",
+     "beam": "Fatter, higher-lumen hotspot; comes into its own in large reflectors"
+    }
+   ],
+   "footprint": "5050 flat-top · 3V",
+   "output": "~4,000+ lm (@ 15 A)",
+   "colour": "70",
+   "notes": "5000K/5700K/6500K, 6.0 mm² die, 15 A max. High Vf (~3.3 V @ 10 A, ~3.5 V @ 15 A per one user), so a single-cell buck driver may not reach full current. Sits between SFT-40 and SFT-90."
+  },
+  "SBT90.2": {
+   "title": "SBT90.2",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~65,000 – 90,000 cd (indicative)",
+     "throw": "~510–600 m",
+     "beam": "Wall of light and long throw. These big dies are a poor match for 35–40 mm reflectors and need 60 mm+ to peak"
+    }
+   ],
+   "footprint": "11 × 10 mm · 3V",
+   "output": "~5,000–6,400 lm",
+   "colour": "70",
+   "notes": "Monster throw + lumens (~5700K). Expensive and power-hungry (~20 A+), greenish on low modes."
+  },
+  "SFT-90": {
+   "title": "SFT-90 (bin code SFT-90X…)",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~65,000 – 90,000 cd (indicative)",
+     "throw": "~510–600 m",
+     "beam": "Wall of light and long throw. These big dies are a poor match for 35–40 mm reflectors and need 60 mm+ to peak"
+    }
+   ],
+   "footprint": "7070 · 3V",
+   "output": "~5,000 lm (@ ~12 A FET, user-measured)",
+   "colour": "70",
+   "notes": "Much cheaper alternative to the SBT90.2 with slightly lower performance. High Vf at high current makes FET/direct-drive and 1-cell buck drivers a poor match."
+  },
+  "F150R": {
+   "title": "F150R (Convoy)",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~65,000 – 90,000 cd (indicative)",
+     "throw": "~510–600 m",
+     "beam": "Wall of light and long throw. These big dies are a poor match for 35–40 mm reflectors and need 60 mm+ to peak"
+    }
+   ],
+   "footprint": "150 mil die · 3V",
+   "output": "~5,000–7,000 lm (est.)",
+   "colour": "~70",
+   "notes": "Rated to 30 A. Convoy says it sits on or below the Planckian locus (no green push). Users report the 4000K as nicely negative-Duv but the 3000K as slightly green. Fits 21700 hosts such as the M21H."
+  },
+  "SFT-70": {
+   "title": "SFT-70",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~45,000 – 60,000 cd",
+     "throw": "~425–490 m",
+     "beam": "Domeless 6V; efficient, balanced throw"
+    }
+   ],
+   "footprint": "5050 · 6V (8 A max)",
+   "output": "~2,200–3,000 lm",
+   "colour": "70 (6500K) · 73 (5000K) · 90 (4000K) · 95 (3000K)",
+   "notes": "Domeless SST-70; efficient boost/buck-driven thrower. Convoy lists four bins with CRI from 70 to 95. Users rate the 3000K 95 CRI version's tint very highly."
+  },
+  "FFL505A": {
+   "title": "FFL505A (FireflyLite)",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~45,000 – 65,000 cd",
+     "throw": "~425–510 m",
+     "beam": "High-CRI rosy pocket thrower"
+    }
+   ],
+   "footprint": "5050 · 3V",
+   "output": "~984 lm @ 8.8 A (max) · ~800–850 lm practical",
+   "colour": "\"3500K\" sample: 3845K, Ra 92, R9 75, Duv −0.0135",
+   "notes": "Small round die (2.35 mm²) under glass, ringed by brittle white silicone. Same chip as the LMP W5050SQ3, so it's a Lumenpioneer part. Relatively high luminance for a warm high-CRI LED, but very inefficient: 31 lm/W at max, \"probably the most inefficient modern 5050\" the tester has measured. An SFT-40 3000K matches its throw at ~6 A. A 6500K / 97 CRI version also exists."
+  },
+  "XHP50": {
+   "title": "XHP50.3 HI",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~25,000 – 40,000 cd",
+     "throw": "~315–400 m",
+     "beam": "Balanced mid-range beam"
+    }
+   ],
+   "footprint": "5050 · 3V / 6V",
+   "output": "1,929 lm max · 4,312 lm OD",
+   "colour": "70 / 80 / 90 / 95 (6V) · <70 (3V)",
+   "notes": "Compact quad-die workhorse; very efficient with decent throw, though tint can be a lottery."
+  },
+  "NTG50": {
+   "title": "NTG50 (Noctigon / Hank)",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~25,000 – 40,000 cd",
+     "throw": "~315–400 m",
+     "beam": "Balanced mid-range beam"
+    }
+   ],
+   "footprint": "5050 · 6V (XHP50 footprint and voltage, so a drop-in for 6V XHP50.3 HI). 12V needs a different MCPCB",
+   "output": "~2,100–3,300 lm (no lab test yet). Max ~8 A (listing)",
+   "colour": "1800K / 2700K / 4200K / 5000K, ~95 CRI. Hank's charts show Duv ~−0.006 to −0.010",
+   "notes": "Hank's high-CRI XHP50.3 HI alternative: similar cd/lm, slightly fewer lumens. Hank says a neutral version isn't planned because \"we need to guarantee that the tint is on the rosy side\". Maker undisclosed."
+  },
+  "SFN60": {
+   "title": "SFN60",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~30,000 – 45,000 cd",
+     "throw": "~345–425 m",
+     "beam": "Huge high-lumen hotspot + flood"
+    }
+   ],
+   "footprint": "7070 · 3V",
+   "output": "~6,000 lm",
+   "colour": "70 (5500K/6500K) · high-CRI (3000K)",
+   "notes": "Common Emisar / Noctigon hotrod emitter. Decent tint at 6500K, slightly green at 5500K. Competes with the SBT90 on lumens but throws less. May be discontinued; check stock."
+  },
+  "519A": {
+   "title": "519A",
+   "candela": [
+    {
+     "note": "dedomed",
+     "cd": "~20,000 – 30,000 cd",
+     "throw": "~280–345 m",
+     "beam": "Pleasant EDC throw/flood mix"
+    },
+    {
+     "note": "domed",
+     "cd": "~12,000 – 22,000 cd",
+     "throw": "~220–295 m",
+     "beam": "Wide, even general-purpose flood"
+    }
+   ],
+   "footprint": "3535 · 3V",
+   "output": "~1,000–1,250 lm",
+   "colour": "90–95+ (R9080)",
+   "notes": "The all-round gold standard. Wide range of CCTs (roughly 2700K–5700K), neutral to rosy tint. Floody with the dome on. Easily dedomed for more throw, a lower CCT and a rosier tint. \"V1\" is the newer, preferred revision."
+  },
+  "FFL351A": {
+   "title": "FFL351A (FireflyLite)",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~20,000 – 30,000 cd",
+     "throw": "~280–345 m",
+     "beam": "Pleasant EDC throw/flood mix"
+    }
+   ],
+   "footprint": "3535 · 3V",
+   "output": "802 lm @ 3 A (rated max) · 1,385 lm @ 8.4 A (max)",
+   "colour": "\"3700K\" sample: 3955K, Ra 96, R9 97, Duv −0.0064",
+   "notes": "Domeless flip-chip, ~2 × 2 mm chip, 4.3 mm² glowing area. Beam looks like a dedomed 519A with a slightly larger corona. Efficiency gains flatten above ~5 A. A newer run is reportedly less rosy than early batches. CCTs range from 1800K to 5000K. In a 7-emitter light it beat a domed 519A by only ~3% in lumens, with negligible extra throw."
+  },
+  "XHP70": {
+   "title": "XHP70.3 HI",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~20,000 – 35,000 cd",
+     "throw": "~280–375 m",
+     "beam": "Big, bright trail/flood beam"
+    }
+   ],
+   "footprint": "7070 · 6V (3V = <70 CRI only)",
+   "output": "4,523 lm max · 5,558 lm OD",
+   "colour": "70 / 80 / 90 / 95 (6V)",
+   "notes": "The go-to for high sustained output. Domeless HI (3.9 mm source) roughly doubles intensity and cleans up the beam vs domed HD (5.3 mm source; 4,857 / 6,405 lm)."
+  },
+  "FFL707A": {
+   "title": "FFL707A (FireflyLite)",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~20,000 – 35,000 cd",
+     "throw": "~280–375 m",
+     "beam": "Big, bright trail/flood beam"
+    }
+   ],
+   "footprint": "7070 · 6V or 12V only (no 3V)",
+   "output": "3,764 lm @ 7.2 A, 6V (rated max) · 5,254 lm @ 15.2 A (max)",
+   "colour": "\"4000K\" sample: 4277K, Ra 89, R9 49, Duv −0.016 (claimed −0.001). Another sample: Ra 97–98 (Opple meter)",
+   "notes": "Four dies in the XHP70.3 HI footprint, but wired differently, so it needs its own board. Less flux and luminance than XHP70.3 HI. The gaps between dies can show a \"donut hole\" in smooth reflectors. ~9 A is the sensible limit. Samples vary a lot."
+  },
+  "LHP73B": {
+   "title": "LMP LHP73B",
+   "candela": [
+    {
+     "note": null,
+     "cd": "~12,000 – 22,000 cd",
+     "throw": "~220–295 m",
+     "beam": "Wide, even general-purpose flood"
+    }
+   ],
+   "footprint": "7070 · 3V",
+   "output": "~3,700 lm (high) · ~5,900 lm (turbo)",
+   "colour": "~70",
+   "notes": "High-power 3V flood/general-purpose competitor to XHP70.3 HI, with higher sustained output in Convoy lights."
+  },
+  "219": {
+   "title": "219B",
+   "candela": [],
+   "footprint": "3535 · 3V",
+   "output": "~400–600 lm",
+   "colour": "90+ (R9080)",
+   "notes": "Legendary rosy tint (especially the sw45k 4500K bin). Low output and dislikes high current; largely replaced by 519A / NTG35."
+  },
+  "B35AM": {
+   "title": "B35AM",
+   "candela": [],
+   "footprint": "3.65 × 3.65 mm · 6V",
+   "output": "~1,300 lm (varies by CCT)",
+   "colour": "95+ (R9080)",
+   "notes": "Four tiny dies with a natural, sunlight-like tint. Its odd footprint needs a dedicated MCPCB, which limits overdrive."
+  },
+  "719A": {
+   "title": "719A",
+   "candela": [],
+   "footprint": "3535 · 6V",
+   "output": "~1,000–1,200 lm",
+   "colour": "90+ (R9050)",
+   "notes": "Flat (domeless) emitter with two stacked dies. Colour like a dedomed 519A with more output but a floodier beam; generally considered underwhelming."
+  },
+  "E21A": {
+   "title": "E21A / E17A",
+   "candela": [],
+   "footprint": "2121 / 1717 · 3V",
+   "output": "~200–350 lm each",
+   "colour": "95+ (R9080)",
+   "notes": "Ultra-high CRI, usually used in quads or larger arrays. 1850K–6500K, plus specialty colours such as E17A Azure."
+  },
+  "E17A": {
+   "title": "E21A / E17A",
+   "candela": [],
+   "footprint": "2121 / 1717 · 3V",
+   "output": "~200–350 lm each",
+   "colour": "95+ (R9080)",
+   "notes": "Ultra-high CRI, usually used in quads or larger arrays. 1850K–6500K, plus specialty colours such as E17A Azure."
+  },
+  "SFT-12": {
+   "title": "SFT-12",
+   "candela": [],
+   "footprint": "3535 · 3V",
+   "output": "~600–800 lm",
+   "colour": "~70",
+   "notes": "About half the SFT-25R's emitting area (6500K). Tight pencil beam, but at the same current the SFT-25R is much brighter and throws further."
+  },
+  "SST-20": {
+   "title": "SST-20",
+   "candela": [],
+   "footprint": "3535 · 3V",
+   "output": "~700–1,100 lm",
+   "colour": "70 (5000K+) · 95 (≤4000K)",
+   "notes": "Budget domed emitter. The ≤4000K high-CRI version is R9080; 5000K–6500K is bright but notoriously green on low. Also sold as SST-20-DR 660 nm deep red."
+  },
+  "SST-40": {
+   "title": "SST-40 / SST-70",
+   "candela": [],
+   "footprint": "5050 · 3V (40) / 6–12V (70)",
+   "output": "~2,000+ lm (40, overdrivable to ~9 A) · ~4,500 lm (70)",
+   "colour": "70",
+   "notes": "Domed, cheap, high-output flood/hybrid LEDs common in budget lights; very green at low power."
+  },
+  "SST-70": {
+   "title": "SST-40 / SST-70",
+   "candela": [],
+   "footprint": "5050 · 3V (40) / 6–12V (70)",
+   "output": "~2,000+ lm (40, overdrivable to ~9 A) · ~4,500 lm (70)",
+   "colour": "70",
+   "notes": "Domed, cheap, high-output flood/hybrid LEDs common in budget lights; very green at low power."
+  },
+  "XHP35": {
+   "title": "XHP35.2 HI",
+   "candela": [],
+   "footprint": "3535 · 3V / 6V",
+   "output": "1,691 lm max · 2,530 lm OD",
+   "colour": "<70 / 80",
+   "notes": "Domeless 3535 multi-die. The older 12V XHP35 HI (discontinued) is still sought after for its 4000K tint."
+  },
+  "XP-L": {
+   "title": "XP-L HI",
+   "candela": [],
+   "footprint": "3535 · 3V",
+   "output": "992 lm max · 1,892 lm OD",
+   "colour": "70 / 80 / 90",
+   "notes": "Classic domeless EDC emitter; mostly superseded by 519A, SFT-40 and NTG35."
+  },
+  "XP-G3": {
+   "title": "XP-G4 / XP-L2",
+   "candela": [],
+   "footprint": "3535 · 3V",
+   "output": "G4: 1,045 / 1,488 lm · L2: 1,172 / 2,496 lm",
+   "colour": "70 / 80 / 90 (L2 also 95)",
+   "notes": "Efficient and very common in mainstream brands (Fenix, Olight, etc.). Domed, with poor colour and noticeable tint shift; enthusiasts generally avoid them."
+  },
+  "F45R": {
+   "title": "F45R (Convoy)",
+   "candela": [],
+   "footprint": "95 mil die · 3V",
+   "output": "~2,500–3,500 lm (est.)",
+   "colour": "~70",
+   "notes": "10 A max. 3000K/4000K/5000K. A user described it as \"a cross between an SFT40 and an SFT60\"."
+  },
+  "FFL909A": {
+   "title": "FFL909A (FireflyLite)",
+   "candela": [],
+   "footprint": "9090 · listed as 3V (36 A max), but a near-identical part tests as ~9V",
+   "output": "Look-alike: 6,035 lm @ 8 A, 10,319 lm @ 20 A (~9.6 V)",
+   "colour": "Look-alike: 4299K, Ra 90, R9 54, Duv −0.0155",
+   "notes": "36 chips (the tested part was 3S × 12P). Listing claims 100 W, with 5000K Ra70 / 4000K Ra95 / 1800K Ra90 options. Very large emitting area (~71 mm²) means flood only, no throw. Possibly made by Hopthink. The FFL909MX variant (T9R, E90) is reported as brighter but greener."
+  },
+  "NTG35": {
+   "title": "NTG35 (Noctigon / Hank)",
+   "candela": [],
+   "footprint": "3535 · 3V (~4 A)",
+   "output": "In a Noctigon D4V2 quad: ~2,900 lm OTF (4200K/5000K), 2,500 (2700K), 2,000 (1800K), Hank's figures. Measured ~2,900 lm turbo in a KR3 triple",
+   "colour": "Listed: 1800K Ra 92; 2700K / 4200K / 5000K Ra 95. Measured in lights: 2700K Ra 97, Duv −0.004; 4200K Ra 98, Duv −0.006 to −0.010",
+   "notes": "Hank's house high-CRI 3535, \"free of greenish tint\". Maker and construction undisclosed. Users find it rosier than a 219B (sometimes too rosy). Floody beam (~3.8 cd/lm in a KR3 triple). Main rivals: FFL351A, 519A."
+  },
+  "FFL5009R": {
+   "title": "FFL5009R (FireflyLite)",
+   "candela": [],
+   "footprint": "5050 · 3V (12 A max) or 6V (6 A max)",
+   "output": "~1,700–2,300 lm (claimed, single-emitter 18650/21700 lights)",
+   "colour": "95 (listing headline says Ra 98)",
+   "notes": "Domeless quad-die \"HI\" part sold loose in 1800K / 2700K / 4000K / 5000K, plus a rosy 3500K in some lights. The listing gives Duv ±0.0005 for the original 4800–5300K bin. One reviewer reports Ra 95 / R9 97 for the 3500K L50 Sol, with no method stated. It's probably related to the Hopthink FL5009R that koef3 tested (3V, 11.8 mm² glowing area, 3,564 lm @ 20 A at 25 °C, Ra 94, R9 99, Duv −0.002, measured ~5900K). That test found a throwy all-rounder beam, but with a yellowish spot in smooth reflectors."
+  },
+  "FFL5009D": {
+   "title": "FFL5009D (FireflyLite)",
+   "candela": [],
+   "footprint": "5050 · voltage not stated",
+   "output": "~2,100–2,300 lm (claimed, L50 Sol)",
+   "colour": "95",
+   "notes": "Domed version of the FFL5009R, with a wider, smoother beam and less throw (170–190 m vs 175–220 m in the same light). 3000K (rosy) / 4000K / 5000K. Only sold in lights."
+  },
+  "FFL350RD": {
+   "title": "FFL350RD (FireflyLite)",
+   "candela": [],
+   "footprint": "3535 · 3V (Vf 2.7–2.9 V)",
+   "output": "500–600 lm (listed, \"10 W\") · 1,139 lm @ 8.2 A (lab, 25 °C)",
+   "colour": ">96 listed · lab Ra 96, R9 94",
+   "notes": "Sold as a 3500K \"round die\", but the test found an ordinary rectangular flip chip masked to look round. Measured 4024K with Duv +0.001, not the listed 3500K on-BBL tint. The tester advises staying below 5–6 A: after a few minutes at 8.2 A the part changed (flux up >60%, tint much cooler) and later measured below 90 CRI. Out of stock."
+  },
+  "FFL350DD": {
+   "title": "FFL350DD (FireflyLite)",
+   "candela": [],
+   "footprint": "3535 · voltage not stated",
+   "output": "~710–790 lm each (claimed 8,500–9,500 lm from 12 in the E12 Eclipse)",
+   "colour": "95",
+   "notes": "FireflyLite calls it \"a big upgrade\" on the FFL350RD: a round die with high CRI and better throw. 5700K and 3700K (slightly rosy). Only sold in lights; no test yet."
+  },
+  "FFL505HB": {
+   "title": "FFL505HB (FireflyLite)",
+   "candela": [],
+   "footprint": "5050 · voltage not stated",
+   "output": "~1,300 lm each (claimed 5,200 lm from four in the E04 Surge)",
+   "colour": "70",
+   "notes": "Cool white 6000–6500K. Claimed to throw further than the quad FFL505A in the same light (650 m vs 480 m). Only sold in lights."
+  },
+  "FFL707MD": {
+   "title": "FFL707MD (FireflyLite)",
+   "candela": [],
+   "footprint": "7070 · 6V",
+   "output": "~3,200 lm (claimed, X1S Pharos / X1Q Core)",
+   "colour": ">95",
+   "notes": "Round-die high-CRI 7070, 4200K with a slightly rosy tint. Claimed ~480 m in the X1S Pharos reflector version."
+  },
+  "FFL707MX": {
+   "title": "FFL707MX (FireflyLite)",
+   "candela": [],
+   "footprint": "7070 · voltage not stated (\"100 W\")",
+   "output": "~7,500 lm (claimed, E90 Blaze)",
+   "colour": "not stated",
+   "notes": "5500K high-output thrower option, claimed at 1,080 m vs 915 m for the SBT90.2 option in the same light. The E90 page also introduces a 9090 round-die FFL909MX and a high-CRI round-die FFL707RD."
+  },
+  "LHP531": {
+   "title": "LMP LHP531",
+   "candela": [],
+   "footprint": "5050 · 3V",
+   "output": "~2,600–3,300 lm (@ 9 A) · (~4,500+ lm overdrive)",
+   "colour": "~70",
+   "notes": "1800K–6500K (1800K is PC-amber style). Very cheap with a clean multi-die beam and slightly rosy 3000K–5000K tint."
+  },
+  "W5050SQ3": {
+   "title": "LMP W5050SQ3",
+   "candela": [],
+   "footprint": "5050 · 3V (5 A)",
+   "output": "1,239 lm @ 5 A · 1,566 lm @ 8.6 A (lab)",
+   "colour": "70 (lab: Ra 71, R9 −20)",
+   "notes": "Lumenpioneer's own round-die 3000K thrower (2.3 mm² glowing area). Same chip as the FFL505A, but low-CRI and much more efficient. Higher luminance than the FFL505A and XP-L HI. Lab: 3208K, Duv +0.0015, turning redder as current rises. One Convoy buyer reported ~84 CRI, which the lab didn't reproduce. BLF rates it weaker than the 3000K SFT-40."
+  },
+  "W5050SQ5": {
+   "title": "LMP W5050SQ5",
+   "candela": [],
+   "footprint": "5050 · 3V (8 A)",
+   "output": "~1,800–2,200 lm",
+   "colour": "~70",
+   "notes": "Higher-current round-die thrower (4000K/5000K); tint close to the LHP531."
+  },
+  "LML2AW": {
+   "title": "LMP LML2AW.DC",
+   "candela": [],
+   "footprint": "5050 · 3V (6 A)",
+   "output": "~1,800–2,000 lm",
+   "colour": "~70",
+   "notes": "Budget 3000K/4000K drop-in replacement for the SST-40. Users report better tint than the SST-40, though batches vary."
+  },
+  "FC40": {
+   "title": "Getian GT-FC40",
+   "candela": [],
+   "footprint": "7070 · 12V",
+   "output": "~2,500–4,000+ lm",
+   "colour": "95+ (R9080)",
+   "notes": "16-die domeless \"waffle\" emitter (as warm as 1800K). Throws more than a domed XHP70 but has been outcompeted by XHP70.3 HI and FFL707A."
+  },
+  "SST-10 IR": {
+   "title": "Luminus SST-10-IR",
+   "candela": [],
+   "kind": "850 / 940 nm IR",
+   "footprint": "3535",
+   "notes": "Night-vision/covert IR. 850 nm shows a faint red glow; 940 nm is effectively invisible but works less well with most cameras."
+  },
+  "XP-E": {
+   "title": "Cree XP-E2 (colour)",
+   "candela": [],
+   "kind": "Red/Green/Blue/Amber etc.",
+   "footprint": "3535",
+   "notes": "Long-standing standard for coloured channels in multi-channel builds."
+  },
+  "LH351D": {
+   "title": "Samsung LH351D",
+   "candela": [],
+   "footprint": "3535 · 3V",
+   "output": "~1,000–1,200 lm",
+   "colour": "90",
+   "notes": "Cheap and floody with a big dome; available in cool-white high CRI. Tends green (nicknamed \"dogfarts\") and bins vary. Superseded by 519A but still a decent budget pick."
+  },
+  "TN-3535": {
+   "title": "LatticePower TN3535",
+   "candela": [],
+   "footprint": "3535 · 3V (3 A rated)",
+   "output": "1,050 lm @ 3 A (90 CRI, lab) · ~1,970 lm (90 CRI) / ~3,100 lm (70 CRI) at max overdrive (lab, 25 °C)",
+   "colour": "90 (5000K) · 70 (6500K)",
+   "notes": "Domed single-die flip chip, similar to the LH351D. The big 8.4 mm² source makes it a flood LED, not a thrower. The 90 CRI sample measured Ra 94 / R9 71 but had a green tint (Duv +0.0055), and the 70 CRI bins have R9 below −25. Vf goes past 4 V at max current, so avoid direct drive. Found in budget Sofirn and Wurkkos lights (e.g. Sofirn SR23 / ST10, early Wurkkos TS26)."
+  },
+  "CSP2323": {
+   "title": "LatticePower CSP2323",
+   "candela": [],
+   "footprint": "2323 · 3V",
+   "output": "~400–500 lm each",
+   "colour": "90+",
+   "notes": "Tiny CSP, brighter than the E21A with slightly worse colour. Popular in small triples such as the Wurkkos TS10."
+  }
+ }
+}
