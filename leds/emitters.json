@@ -59,20 +59,20 @@
    "hint": "flood cannons"
   },
   {
-   "goal": "Night vision, astronomy & map reading",
-   "hint": ""
+   "goal": "Night vision",
+   "hint": "astronomy, map reading"
   },
   {
    "goal": "Hunting & signalling",
    "hint": "coloured beams"
   },
   {
-   "goal": "UV: fluorescence, scorpions, resin curing",
-   "hint": ""
+   "goal": "UV",
+   "hint": "fluorescence, scorpions, resin curing"
   },
   {
-   "goal": "IR for night-vision cameras",
-   "hint": ""
+   "goal": "IR",
+   "hint": "night-vision cameras"
   }
  ],
  "emitters": [
@@ -2157,14 +2157,21 @@
    "rosy": false,
    "domeless": false,
    "unavailable": false,
-   "colours": [],
+   "colours": [
+    "Green",
+    "Lime",
+    "Red",
+    "Blue",
+    "Orange",
+    "Amber"
+   ],
    "basis": "typical",
    "footprint_html": "<code>3030</code> · 3V",
    "lm_html": "~700–900 lm",
    "cri_html": "~70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "1 mm² die, cool white (~6000K). <b>Unmatched pencil-beam throw</b> for its size. The same package also comes in red, green, verdure, orange and blue (see §7) (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
+   "notes_html": "1 mm² die, cool white (~6000K). <b>Unmatched pencil-beam throw</b> for its size. The same package also comes in red, green, verdure, orange and blue (see §7) (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).<br><br><b>Green</b> (~520 nm green): Saturated true green; high perceived brightness, popular for hunting and signalling (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).<br><br><b>Verdure</b> (lime/mint (phosphor-converted)): Spectrum centred near the eye&#x27;s 555 nm sensitivity peak, so very high lumens per watt and a distinct &quot;money green&quot; tint (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).<br><br><b>Red</b> (620 nm red): Red-orange; protects dark adaptation far better than white. For maximum night-vision preservation, deep red (660 nm, e.g. SST-20-DR) is better (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).<br><br><b>Blue</b> (~445 nm blue): Short-wavelength blue throw emitter. Emisar/Noctigon also sell a W2 Deep Blue (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).<br><br><b>Orange</b> (amber/orange): Warm monochrome option, used for wildlife watching and to cut glare in fog and rain (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
    "sources": [
     {
      "label": "BLF Guide",
@@ -2197,12 +2204,36 @@
      "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
     },
     {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 1,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
+    },
+    {
+     "goal": "Night vision",
+     "hint": "astronomy, map reading",
+     "tier": 1,
+     "pick_html": "Osram <b>Red</b>",
+     "also_html": "Cree <b>XP-E2</b> (colour)",
+     "why_html": "Red preserves dark adaptation far better than dim white. For the deepest red, use a 660 nm part such as the SST-20-DR"
+    },
+    {
      "goal": "Long-range thrower",
      "hint": "50 mm+ reflector: C8, L21B, K1-class",
      "tier": 2,
      "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
      "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
      "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    },
+    {
+     "goal": "Fog, rain & snow",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>SFT-40 3000K</b>; budget: LMP <b>W5050SQ3</b>",
+     "also_html": "Luminus <b>SFT-70</b> 3000K, Convoy <b>F45R</b> 3000K, LMP <b>LHP531</b> 1800K / 3000K, Osram <b>Orange</b>",
+     "why_html": "Warm CCT cuts back-scatter glare. A floodier beam held low helps more than raw throw"
     }
    ],
    "cd_lo": 90000.0,
@@ -2238,18 +2269,25 @@
    "rosy": false,
    "domeless": false,
    "unavailable": false,
-   "colours": [],
+   "colours": [
+    "Green",
+    "Blue"
+   ],
    "basis": "typical",
    "footprint_html": "<code>3030</code> · 3V",
    "lm_html": "~1,200–1,500 lm",
    "cri_html": "~70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "2 mm² die, 5700K only. Handles more current than W1 for a wider, brighter hotspot (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "2 mm² die; white is 5700K only, and the same package also comes in green and deep blue (see §7). Handles more current than W1 for a wider, brighter hotspot (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).<br><br><b>Green</b> (~520 nm green): Saturated true green; high perceived brightness, popular for hunting and signalling (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).<br><br><b>Blue</b> (~445 nm blue): Short-wavelength blue throw emitter. Emisar/Noctigon also sell a W2 Deep Blue (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
    "sources": [
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    },
+    {
+     "label": "Convoy Osram",
+     "url": "https://convoylight.com/collections/osram"
     }
    ],
    "candela": [
@@ -2272,6 +2310,14 @@
      "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
      "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
      "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    },
+    {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 1,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
     },
     {
      "goal": "Compact thrower",
@@ -2316,14 +2362,17 @@
    "rosy": false,
    "domeless": false,
    "unavailable": false,
-   "colours": [],
+   "colours": [
+    "Lime",
+    "Red"
+   ],
    "basis": "typical",
    "footprint_html": "larger &quot;Boost&quot; package · 3V",
    "lm_html": "~1,400–1,700 lm",
    "cri_html": "~70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Cool white: the datasheet&#x27;s typical colour point (x 0.32, y 0.33) is about 6000K, and Convoy sells it as 6500K (<a href=\"https://ams-osram.com/products/leds/white-leds/osram-oslon-boost-hx-kw-culpm1-tg\" target=\"_blank\" rel=\"noopener\">ams OSRAM</a>, <a href=\"https://convoylight.com/products/convoy-s16-21700-flashlight\" target=\"_blank\" rel=\"noopener\">Convoy S16</a>). 2 mm²-class die in the bigger Oslon Boost package, which runs cooler and takes more overdrive. Common in Convoy throwers (S21B, M21-series) (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
+   "notes_html": "Cool white: the datasheet&#x27;s typical colour point (x 0.32, y 0.33) is about 6000K, and Convoy sells it as 6500K (<a href=\"https://ams-osram.com/products/leds/white-leds/osram-oslon-boost-hx-kw-culpm1-tg\" target=\"_blank\" rel=\"noopener\">ams OSRAM</a>, <a href=\"https://convoylight.com/products/convoy-s16-21700-flashlight\" target=\"_blank\" rel=\"noopener\">Convoy S16</a>). 2 mm²-class die in the bigger Oslon Boost package, which runs cooler and takes more overdrive. Common in Convoy throwers (S21B, M21-series) (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).<br><br><b>Verdure</b> (lime/mint (phosphor-converted)): Spectrum centred near the eye&#x27;s 555 nm sensitivity peak, so very high lumens per watt and a distinct &quot;money green&quot; tint (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).<br><br><b>Red</b> (620 nm red): Red-orange; protects dark adaptation far better than white. For maximum night-vision preservation, deep red (660 nm, e.g. SST-20-DR) is better (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
    "sources": [
     {
      "label": "ams OSRAM",
@@ -2347,6 +2396,22 @@
      "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
      "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
      "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    },
+    {
+     "goal": "Night vision",
+     "hint": "astronomy, map reading",
+     "tier": 1,
+     "pick_html": "Osram <b>Red</b>",
+     "also_html": "Cree <b>XP-E2</b> (colour)",
+     "why_html": "Red preserves dark adaptation far better than dim white. For the deepest red, use a 660 nm part such as the SST-20-DR"
+    },
+    {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 2,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
     }
    ],
    "cd_lo": null,
@@ -4588,8 +4653,8 @@
    "candela": [],
    "best_for": [
     {
-     "goal": "UV: fluorescence, scorpions, resin curing",
-     "hint": "",
+     "goal": "UV",
+     "hint": "fluorescence, scorpions, resin curing",
      "tier": 1,
      "pick_html": "Nichia <b>NVSU233B(T)</b> (365 nm)",
      "also_html": "Luminus <b>SST-10-UV</b>, Luminus <b>SBT-10X-UV</b>",
@@ -4644,8 +4709,8 @@
    "candela": [],
    "best_for": [
     {
-     "goal": "UV: fluorescence, scorpions, resin curing",
-     "hint": "",
+     "goal": "UV",
+     "hint": "fluorescence, scorpions, resin curing",
      "tier": 2,
      "pick_html": "Nichia <b>NVSU233B(T)</b> (365 nm)",
      "also_html": "Luminus <b>SST-10-UV</b>, Luminus <b>SBT-10X-UV</b>",
@@ -4698,8 +4763,8 @@
    "candela": [],
    "best_for": [
     {
-     "goal": "UV: fluorescence, scorpions, resin curing",
-     "hint": "",
+     "goal": "UV",
+     "hint": "fluorescence, scorpions, resin curing",
      "tier": 2,
      "pick_html": "Nichia <b>NVSU233B(T)</b> (365 nm)",
      "also_html": "Luminus <b>SST-10-UV</b>, Luminus <b>SBT-10X-UV</b>",
@@ -4800,303 +4865,12 @@
    "candela": [],
    "best_for": [
     {
-     "goal": "IR for night-vision cameras",
-     "hint": "",
+     "goal": "IR",
+     "hint": "night-vision cameras",
      "tier": 1,
      "pick_html": "Luminus <b>SST-10-IR</b>",
      "also_html": "",
      "why_html": "850 nm for most cameras (faint red glow); 940 nm is invisible but weaker on many sensors"
-    }
-   ],
-   "cd_lo": null,
-   "cd_hi": null,
-   "throw_lo": null,
-   "throw_hi": null
-  },
-  {
-   "id": 69,
-   "name": "Green",
-   "alts": [
-    "Green"
-   ],
-   "maker": "Osram",
-   "code": "CSLNM1.F1, CSLPM1.F1",
-   "section": "7. Specialty Emitters: UV, IR & Monochromatic",
-   "kind": "Colour",
-   "type_label": "~520 nm green",
-   "footprints": [
-    "3030"
-   ],
-   "voltages": [],
-   "lm_lo": null,
-   "lm_hi": null,
-   "cri_min": null,
-   "cri_max": null,
-   "ccts": [],
-   "r9080": false,
-   "rosy": false,
-   "domeless": false,
-   "unavailable": false,
-   "colours": [
-    "Green"
-   ],
-   "basis": "typical",
-   "footprint_html": "<code>3030</code>",
-   "lm_html": "",
-   "cri_html": "",
-   "cri_label": "CRI",
-   "type_html": "~520 nm green",
-   "notes_html": "Saturated true green; high perceived brightness, popular for hunting and signalling (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
-   "sources": [
-    {
-     "label": "Convoy Osram",
-     "url": "https://convoylight.com/collections/osram"
-    }
-   ],
-   "candela": [],
-   "best_for": [
-    {
-     "goal": "Hunting & signalling",
-     "hint": "coloured beams",
-     "tier": 1,
-     "pick_html": "Osram <b>Green</b>",
-     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
-     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
-    }
-   ],
-   "cd_lo": null,
-   "cd_hi": null,
-   "throw_lo": null,
-   "throw_hi": null
-  },
-  {
-   "id": 70,
-   "name": "Verdure",
-   "alts": [
-    "Verdure"
-   ],
-   "maker": "Osram",
-   "code": "CSLNM1.13, CULPM1.13",
-   "section": "7. Specialty Emitters: UV, IR & Monochromatic",
-   "kind": "Colour",
-   "type_label": "lime/mint (phosphor-converted)",
-   "footprints": [
-    "3030",
-    "Oslon Boost"
-   ],
-   "voltages": [],
-   "lm_lo": null,
-   "lm_hi": null,
-   "cri_min": null,
-   "cri_max": null,
-   "ccts": [],
-   "r9080": false,
-   "rosy": false,
-   "domeless": false,
-   "unavailable": false,
-   "colours": [
-    "Lime"
-   ],
-   "basis": "typical",
-   "footprint_html": "<code>3030</code> / Boost",
-   "lm_html": "",
-   "cri_html": "",
-   "cri_label": "CRI",
-   "type_html": "lime/mint (phosphor-converted)",
-   "notes_html": "Spectrum centred near the eye&#x27;s 555 nm sensitivity peak, so very high lumens per watt and a distinct &quot;money green&quot; tint (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
-   "sources": [
-    {
-     "label": "Convoy Osram",
-     "url": "https://convoylight.com/collections/osram"
-    }
-   ],
-   "candela": [],
-   "best_for": [
-    {
-     "goal": "Hunting & signalling",
-     "hint": "coloured beams",
-     "tier": 2,
-     "pick_html": "Osram <b>Green</b>",
-     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
-     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
-    }
-   ],
-   "cd_lo": null,
-   "cd_hi": null,
-   "throw_lo": null,
-   "throw_hi": null
-  },
-  {
-   "id": 71,
-   "name": "Red",
-   "alts": [
-    "Red"
-   ],
-   "maker": "Osram",
-   "code": "CSLNM1.23, CULPM1.23",
-   "section": "7. Specialty Emitters: UV, IR & Monochromatic",
-   "kind": "Colour",
-   "type_label": "620 nm red",
-   "footprints": [
-    "3030",
-    "Oslon Boost"
-   ],
-   "voltages": [],
-   "lm_lo": null,
-   "lm_hi": null,
-   "cri_min": null,
-   "cri_max": null,
-   "ccts": [],
-   "r9080": false,
-   "rosy": false,
-   "domeless": false,
-   "unavailable": false,
-   "colours": [
-    "Red"
-   ],
-   "basis": "typical",
-   "footprint_html": "<code>3030</code> / Boost",
-   "lm_html": "",
-   "cri_html": "",
-   "cri_label": "CRI",
-   "type_html": "620 nm red",
-   "notes_html": "Red-orange; protects dark adaptation far better than white. For maximum night-vision preservation, deep red (660 nm, e.g. SST-20-DR) is better (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
-   "sources": [
-    {
-     "label": "Convoy Osram",
-     "url": "https://convoylight.com/collections/osram"
-    }
-   ],
-   "candela": [],
-   "best_for": [
-    {
-     "goal": "Night vision, astronomy & map reading",
-     "hint": "",
-     "tier": 1,
-     "pick_html": "Osram <b>Red</b>",
-     "also_html": "Cree <b>XP-E2</b> (colour)",
-     "why_html": "Red preserves dark adaptation far better than dim white. For the deepest red, use a 660 nm part such as the SST-20-DR"
-    },
-    {
-     "goal": "Hunting & signalling",
-     "hint": "coloured beams",
-     "tier": 2,
-     "pick_html": "Osram <b>Green</b>",
-     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
-     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
-    }
-   ],
-   "cd_lo": null,
-   "cd_hi": null,
-   "throw_lo": null,
-   "throw_hi": null
-  },
-  {
-   "id": 72,
-   "name": "Blue",
-   "alts": [
-    "Blue"
-   ],
-   "maker": "Osram",
-   "code": "CSLNM1.14",
-   "section": "7. Specialty Emitters: UV, IR & Monochromatic",
-   "kind": "Colour",
-   "type_label": "~445 nm blue",
-   "footprints": [
-    "3030"
-   ],
-   "voltages": [],
-   "lm_lo": null,
-   "lm_hi": null,
-   "cri_min": null,
-   "cri_max": null,
-   "ccts": [],
-   "r9080": false,
-   "rosy": false,
-   "domeless": false,
-   "unavailable": false,
-   "colours": [
-    "Blue"
-   ],
-   "basis": "typical",
-   "footprint_html": "<code>3030</code>",
-   "lm_html": "",
-   "cri_html": "",
-   "cri_label": "CRI",
-   "type_html": "~445 nm blue",
-   "notes_html": "Short-wavelength blue throw emitter (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
-   "sources": [
-    {
-     "label": "Convoy Osram",
-     "url": "https://convoylight.com/collections/osram"
-    }
-   ],
-   "candela": [],
-   "best_for": [
-    {
-     "goal": "Hunting & signalling",
-     "hint": "coloured beams",
-     "tier": 2,
-     "pick_html": "Osram <b>Green</b>",
-     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
-     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
-    }
-   ],
-   "cd_lo": null,
-   "cd_hi": null,
-   "throw_lo": null,
-   "throw_hi": null
-  },
-  {
-   "id": 73,
-   "name": "Orange",
-   "alts": [
-    "Orange"
-   ],
-   "maker": "Osram",
-   "code": "CSLNM1.FY",
-   "section": "7. Specialty Emitters: UV, IR & Monochromatic",
-   "kind": "Colour",
-   "type_label": "amber/orange",
-   "footprints": [
-    "3030"
-   ],
-   "voltages": [],
-   "lm_lo": null,
-   "lm_hi": null,
-   "cri_min": null,
-   "cri_max": null,
-   "ccts": [],
-   "r9080": false,
-   "rosy": false,
-   "domeless": false,
-   "unavailable": false,
-   "colours": [
-    "Orange",
-    "Amber"
-   ],
-   "basis": "typical",
-   "footprint_html": "<code>3030</code>",
-   "lm_html": "",
-   "cri_html": "",
-   "cri_label": "CRI",
-   "type_html": "amber/orange",
-   "notes_html": "Warm monochrome option, used for wildlife watching and to cut glare in fog and rain (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
-   "sources": [
-    {
-     "label": "Convoy Osram",
-     "url": "https://convoylight.com/collections/osram"
-    }
-   ],
-   "candela": [],
-   "best_for": [
-    {
-     "goal": "Fog, rain & snow",
-     "hint": "",
-     "tier": 2,
-     "pick_html": "<b>SFT-40 3000K</b>; budget: LMP <b>W5050SQ3</b>",
-     "also_html": "Luminus <b>SFT-70</b> 3000K, Convoy <b>F45R</b> 3000K, LMP <b>LHP531</b> 1800K / 3000K, Osram <b>Orange</b>",
-     "why_html": "Warm CCT cuts back-scatter glare. A floodier beam held low helps more than raw throw"
     }
    ],
    "cd_lo": null,
@@ -5204,8 +4978,8 @@
    "candela": [],
    "best_for": [
     {
-     "goal": "Night vision, astronomy & map reading",
-     "hint": "",
+     "goal": "Night vision",
+     "hint": "astronomy, map reading",
      "tier": 2,
      "pick_html": "Osram <b>Red</b>",
      "also_html": "Cree <b>XP-E2</b> (colour)",

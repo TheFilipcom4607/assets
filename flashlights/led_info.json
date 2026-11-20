@@ -45,7 +45,7 @@
    "footprint": "3030 · 3V",
    "output": "~1,200–1,500 lm",
    "colour": "~70",
-   "notes": "2 mm² die, 5700K only. Handles more current than W1 for a wider, brighter hotspot."
+   "notes": "2 mm² die; white is 5700K only, and the same package also comes in green and deep blue (see §7). Handles more current than W1 for a wider, brighter hotspot."
   },
   "SFT-40": {
    "title": "SFT-40",
