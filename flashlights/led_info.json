@@ -177,7 +177,7 @@
      "beam": "Balanced mid-range beam"
     }
    ],
-   "footprint": "5050 · 3V / 6V",
+   "footprint": "5050 · 3V / 6V / 12V",
    "output": "1,929 lm max · 4,312 lm OD",
    "colour": "70 / 80 / 90 / 95 (6V) · <70 (3V)",
    "notes": "Compact quad-die workhorse; very efficient with decent throw, though tint can be a lottery."
@@ -368,7 +368,7 @@
   "XHP35": {
    "title": "XHP35.2 HI",
    "candela": [],
-   "footprint": "3535 · 3V / 6V",
+   "footprint": "3535 · 3V / 6V / 12V",
    "output": "1,691 lm max · 2,530 lm OD",
    "colour": "<70 / 80",
    "notes": "Domeless 3535 multi-die. The older 12V XHP35 HI (discontinued) is still sought after for its 4000K tint."
@@ -506,8 +506,8 @@
    "candela": [],
    "footprint": "7070 · 12V",
    "output": "~2,500–4,000+ lm",
-   "colour": "95+ (R9080)",
-   "notes": "16-die domeless \"waffle\" emitter (as warm as 1800K). Throws more than a domed XHP70 but has been outcompeted by XHP70.3 HI and FFL707A."
+   "colour": "95 (R9050 max)",
+   "notes": "16-die domeless \"waffle\" emitter (as warm as 1800K). Throws more than a domed XHP70 but has been outcompeted by XHP70.3 HI and FFL707A. Extended-CRI tops at R9050, not R9080 — a correction on the BLF guide thread itself."
   },
   "SST-10 IR": {
    "title": "Luminus SST-10-IR",
