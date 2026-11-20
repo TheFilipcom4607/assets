@@ -596,6 +596,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
   }
   function results() {
     let out = data.filter(e => pass(e));
+    if (!sortK && F.uses.size) { const t = e => Math.min(...[...F.uses].map(g => e._tier[g] || 9)); out = out.slice().sort((a, b) => t(a) - t(b)); }
     if (sortK) out = out.slice().sort((a, b) => {
       const x = a[sortK], y = b[sortK];
       if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
@@ -644,7 +645,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
 
   function renderFacets() {
     const box = $("#fsecs"), st = box.scrollTop, fk = document.activeElement?.dataset?.fk;
-    let h = listSec("uses", "Best for", {}, 10);
+    let h = listSec("uses", "Best for (light type)", {}, 20);
 
     const lc = countBy("lights", LIGHTS.map(t => t[0]));
     h += sec("lights", "Light", `<div class="tints">${LIGHTS.map(([v, l, s, c]) =>
@@ -696,7 +697,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
     return `<div class="row cols${picked ? " picked" : ""}" data-id="${e.id}" tabindex="0" role="button" aria-label="${esc(name(e))}, open details">
       <div class="c-pick"><label class="pick" title="${picked ? "Remove from compare" : full ? `Compare holds ${MAXPICK}` : "Add to compare"}"><input type="checkbox" data-pick="${e.id}" ${picked ? "checked" : ""} ${!picked && full ? "disabled" : ""} aria-label="Compare ${esc(name(e))}"></label></div>
       <div class="c-light"><div class="eyebrow">${esc(e.maker)}</div><div class="name">${esc(e.name)}${badges(e)}</div>${meta ? `<div class="meta">${meta}</div>` : ""}</div>
-      <div class="c-emit"><div class="strip"><span class="dots">${tintDots(e)}</span><span class="range">${esc(tintText(e))}</span></div>${e._uses.length ? `<div class="fams">${esc(e._uses.slice(0, 2).join(" · "))}${e._uses.length > 2 ? ` <span class="more">+${e._uses.length - 2}</span>` : ""}</div>` : ""}</div>
+      <div class="c-emit"><div class="strip"><span class="dots">${tintDots(e)}</span><span class="range">${esc(tintText(e))}</span></div>${e._uses.length ? `<div class="fams">${e._uses.slice(0, 2).map(g => (e._tier[g] === 1 ? "★ " : "") + esc(g)).join(" · ")}${e._uses.length > 2 ? ` <span class="more">+${e._uses.length - 2}</span>` : ""}</div>` : ""}</div>
       <div class="c-cri" data-l="CRI">${e.cri_max != null ? `<div class="cri">${esc(criText(e))}</div>` : `<span class="na">—</span>`}</div>
       <div class="c-bat pkg"><div class="v">${esc(pkg(e)) || `<span class="na">—</span>`}</div></div>
       <div class="c-lm r" data-l="Output">${e.lm_hi ? `<div class="v">${fmt(e.lm_hi)}<small> lm</small></div>${e.lm_lo !== e.lm_hi ? `<div class="sub2">from ${fmt(e.lm_lo)}</div>` : meter(e.lm_hi, 150, LM_MAX)}` : `<span class="na">—</span>`}</div>
@@ -803,7 +804,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
         </div>
         <section class="sec"><h3>About</h3><p class="prose">${e.notes_html}</p></section>
         ${calcHtml(e)}
-        ${e.best_for.length ? `<section class="sec"><h3>Recommended for</h3><div class="picks2">${e.best_for.map(b => `<div><b>${esc(b.goal)}</b><div class="why">Picks: ${b.pick_html}. ${b.why_html}</div></div>`).join("")}</div></section>` : ""}
+        ${e.best_for.length ? `<section class="sec"><h3>Recommended for</h3><div class="picks2">${e.best_for.map(b => `<div><b>${esc(b.goal)}</b> <span class="badge ${b.tier === 1 ? "r9" : "mc"}">${b.tier === 1 ? "Top pick" : "Also good"}</span>${b.hint ? `<div class="why">${esc(b.hint)}</div>` : ""}<div class="why">${b.why_html}.</div><div class="why">Top picks: ${b.pick_html}${b.also_html ? `. Also good: ${b.also_html}` : ""}.</div></div>`).join("")}</div></section>` : ""}
         <section class="sec"><h3>Specs</h3><dl class="spec">${specs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join("")}</dl></section>
         ${e.sources.length ? `<section class="sec"><h3>Sources</h3><div class="srcs">${e.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)} ↗</a>`).join("")}</div></section>` : ""}
       </div>
@@ -839,7 +840,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
     ["CRI detail", e => e.cri_html],
     ["Bins", e => [e.r9080 && "R9080", e.rosy && "Rosy option"].filter(Boolean).join(" · ")],
     ["Beam", e => e.candela[0]?.beam_html || ""],
-    ["Recommended for", e => e.best_for.map(b => esc(b.goal)).join("<br>")],
+    ["Recommended for", e => e.best_for.map(b => (b.tier === 1 ? "★ " : "") + esc(b.goal)).join("<br>")],
     ["Package"],
     ["Footprint", e => esc(e.footprints.join(" / "))],
     ["Voltage", e => esc(e.voltages.join(" / "))],
@@ -938,7 +939,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
       const lights = new Set(e.ccts.map(tone));
       e.colours.forEach(c => lights.add(c === "UV" ? "uv" : c === "IR" ? "ir" : "colour"));
       const lm_mid = e.lm_hi ? (e.lm_lo + e.lm_hi) / 2 : null, cd_mid = e.cd_hi ? (e.cd_lo + e.cd_hi) / 2 : null;
-      return { ...e, _lights: [...lights], _uses: e.best_for.map(b => b.goal), lm_mid, cd_mid, cdlm: lm_mid && cd_mid ? cd_mid / lm_mid : null,
+      return { ...e, _lights: [...lights], _uses: e.best_for.map(b => b.goal), _tier: Object.fromEntries(e.best_for.map(b => [b.goal, b.tier])), lm_mid, cd_mid, cdlm: lm_mid && cd_mid ? cd_mid / lm_mid : null,
         _cri: e.cri_max == null ? "na" : e.cri_max >= 90 ? "90" : e.cri_max >= 80 ? "80" : "70",
         _name: name(e).toLowerCase(),
         _hay: [e.maker, e.name, e.code, e.kind, e.type_label, e.section, e.footprints.join(" "), e.voltages.join(" "), e.ccts.map(k => k + "k").join(" "), e.colours.join(" "),
@@ -947,7 +948,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
     });
     byId = new Map(data.map(e => [e.id, e]));
     picks = picks.filter(id => byId.has(id));
-    VALS.uses = byCount(data.flatMap(e => e._uses)); VALS.makers = byCount(data.map(e => e.maker).filter(Boolean));
+    VALS.uses = doc.uses ? doc.uses.map(u => u.goal) : byCount(data.flatMap(e => e._uses)); VALS.makers = byCount(data.map(e => e.maker).filter(Boolean));
     VALS.fps = byCount(data.flatMap(e => e.footprints)); VALS.volts = ["3V", "6V", "9V", "12V"].filter(v => data.some(e => e.voltages.includes(v)));
     VALS.basis = Object.keys(BASIS);
     LM_MAX = Math.max(...data.map(e => e.lm_hi || 0)); CD_MAX = Math.max(...data.map(e => e.cd_hi || 0));

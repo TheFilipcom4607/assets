@@ -1,6 +1,80 @@
 {
  "source": "Flashlight Emitter Reference — Lumens, CRI, Candela & Throw.md",
  "reviewed": "20 Nov 2026",
+ "uses": [
+  {
+   "goal": "EDC / all-rounder",
+   "hint": "single-emitter 18650 / 21700"
+  },
+  {
+   "goal": "Tiny EDC",
+   "hint": "AAA / 10440 / 14500 / keychain"
+  },
+  {
+   "goal": "Triples & quads",
+   "hint": "D4-, KR4-, FW3- and TS10-style lights"
+  },
+  {
+   "goal": "Compact thrower",
+   "hint": "18650 / 21700, ~30–40 mm reflector"
+  },
+  {
+   "goal": "Long-range thrower",
+   "hint": "50 mm+ reflector: C8, L21B, K1-class"
+  },
+  {
+   "goal": "Maximum throw from a small light",
+   "hint": ""
+  },
+  {
+   "goal": "Balanced thrower",
+   "hint": "hotspot + useful spill"
+  },
+  {
+   "goal": "High-CRI thrower",
+   "hint": ""
+  },
+  {
+   "goal": "Fog, rain & snow",
+   "hint": ""
+  },
+  {
+   "goal": "Trail / walking light",
+   "hint": "high sustained output"
+  },
+  {
+   "goal": "Headlamp, camping & close work",
+   "hint": "floody, good colour"
+  },
+  {
+   "goal": "Colour-critical work",
+   "hint": "photography, inspection, wiring, cooking"
+  },
+  {
+   "goal": "Mega-throw + lumens",
+   "hint": "searchlights"
+  },
+  {
+   "goal": "Lumen monster",
+   "hint": "flood cannons"
+  },
+  {
+   "goal": "Night vision, astronomy & map reading",
+   "hint": ""
+  },
+  {
+   "goal": "Hunting & signalling",
+   "hint": "coloured beams"
+  },
+  {
+   "goal": "UV: fluorescence, scorpions, resin curing",
+   "hint": ""
+  },
+  {
+   "goal": "IR for night-vision cameras",
+   "hint": ""
+  }
+ ],
  "emitters": [
   {
    "id": 0,
@@ -74,13 +148,43 @@
    "best_for": [
     {
      "goal": "EDC / all-rounder",
+     "hint": "single-emitter 18650 / 21700",
+     "tier": 1,
      "pick_html": "Nichia <b>519A</b> (neutral) or <b>FFL351A</b> / <b>NTG35</b> (rosy)",
-     "why_html": "High CRI, easy to drive, great tint"
+     "also_html": "Luminus <b>SST-20</b> (4000K 95 CRI), Samsung <b>LH351D</b>, Cree <b>XP-L HI</b>, Lumileds <b>HL2X</b>, LatticePower <b>TN3535</b> (budget)",
+     "why_html": "High CRI, easy to drive and a great tint, with enough throw for everyday use. The alternatives trade some colour quality or tint consistency for price"
     },
     {
      "goal": "Tiny EDC",
-     "pick_html": "Nichia <b>E21A</b>, <b>519A</b> or LatticePower <b>CSP2323</b> in a triple",
-     "why_html": "Small, efficient, high CRI at the low currents tiny cells can supply"
+     "hint": "AAA / 10440 / 14500 / keychain",
+     "tier": 1,
+     "pick_html": "Nichia <b>E21A</b> or <b>519A</b>",
+     "also_html": "Nichia <b>219B</b>, <b>219F</b>, Luminus <b>SST-20</b>",
+     "why_html": "Small cells supply little current, so colour and efficiency at low drive matter more than maximum output. The 219B/219F dislike high current, which is fine here"
+    },
+    {
+     "goal": "Triples & quads",
+     "hint": "D4-, KR4-, FW3- and TS10-style lights",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b>, <b>NTG35</b> or <b>E21A</b>",
+     "also_html": "<b>FFL351A</b>, Luminus <b>SST-20</b>, LatticePower <b>CSP2323</b>, Nichia <b>219B</b>, Cree <b>XP-G2</b>",
+     "why_html": "Several small high-CRI dies behind a multi-TIR give a smooth, floody beam; tiny dies (E21A, CSP2323, XP-G2) suit micro triples"
+    },
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
     }
    ],
    "cd_lo": 20000.0,
@@ -131,7 +235,32 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Tiny EDC",
+     "hint": "AAA / 10440 / 14500 / keychain",
+     "tier": 2,
+     "pick_html": "Nichia <b>E21A</b> or <b>519A</b>",
+     "also_html": "Nichia <b>219B</b>, <b>219F</b>, Luminus <b>SST-20</b>",
+     "why_html": "Small cells supply little current, so colour and efficiency at low drive matter more than maximum output. The 219B/219F dislike high current, which is fine here"
+    },
+    {
+     "goal": "Triples & quads",
+     "hint": "D4-, KR4-, FW3- and TS10-style lights",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>NTG35</b> or <b>E21A</b>",
+     "also_html": "<b>FFL351A</b>, Luminus <b>SST-20</b>, LatticePower <b>CSP2323</b>, Nichia <b>219B</b>, Cree <b>XP-G2</b>",
+     "why_html": "Several small high-CRI dies behind a multi-TIR give a smooth, floody beam; tiny dies (E21A, CSP2323, XP-G2) suit micro triples"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -158,7 +287,13 @@
    "lm_hi": null,
    "cri_min": 90,
    "cri_max": 90,
-   "ccts": [],
+   "ccts": [
+    3000,
+    3500,
+    4000,
+    5000,
+    5700
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -170,8 +305,12 @@
    "cri_html": "90 (option)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "The brighter but less-talented successor to the 219B; itself largely superseded by the SST-20 and LH351D (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Sold in 3000K, 3500K, 4000K, 5000K and 5700K (<a href=\"https://www.ledrise.eu/leduri-individuale/nichia-leds/nichia-x19-series-high-power-leds.html\" target=\"_blank\" rel=\"noopener\">Ledrise</a>). The brighter but less-talented successor to the 219B; itself largely superseded by the SST-20 and LH351D (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "Ledrise",
+     "url": "https://www.ledrise.eu/leduri-individuale/nichia-leds/nichia-x19-series-high-power-leds.html"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
@@ -227,7 +366,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Tiny EDC",
+     "hint": "AAA / 10440 / 14500 / keychain",
+     "tier": 2,
+     "pick_html": "Nichia <b>E21A</b> or <b>519A</b>",
+     "also_html": "Nichia <b>219B</b>, <b>219F</b>, Luminus <b>SST-20</b>",
+     "why_html": "Small cells supply little current, so colour and efficiency at low drive matter more than maximum output. The 219B/219F dislike high current, which is fine here"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -254,7 +402,10 @@
    "lm_hi": 1300.0,
    "cri_min": 95,
    "cri_max": 95,
-   "ccts": [],
+   "ccts": [
+    2700,
+    6500
+   ],
    "r9080": true,
    "rosy": false,
    "domeless": false,
@@ -266,15 +417,36 @@
    "cri_html": "95+ (R9080)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Four tiny dies with a natural, sunlight-like tint. Its odd footprint needs a dedicated MCPCB, which limits overdrive (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Four tiny dies with a natural, sunlight-like tint. R9080 bins span 2700K–6500K (<a href=\"https://budgetlightforum.com/t/led-test-review-nichia-nv4wb35amt-sm653-r9080-e900-very-high-light-quality-but-limited-performance/221112\" target=\"_blank\" rel=\"noopener\">BLF test</a>). Its odd footprint needs a dedicated MCPCB, which limits overdrive (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-nichia-nv4wb35amt-sm653-r9080-e900-very-high-light-quality-but-limited-performance/221112"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
+    },
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -301,7 +473,10 @@
    "lm_hi": 1200.0,
    "cri_min": 90,
    "cri_max": 90,
-   "ccts": [],
+   "ccts": [
+    4000,
+    5000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": true,
@@ -313,8 +488,16 @@
    "cri_html": "90+ (R9050)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Flat (domeless) emitter with two stacked dies. Colour like a dedomed 519A with more output but a <b>floodier</b> beam; generally considered underwhelming (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Flat (domeless) emitter with two stacked dies, usually sold in 4000K or 5000K (<a href=\"https://budgetlightforum.com/t/led-test-review-nichia-nvsw719ac-sm405-t550f26-r9050-4000-k-min-90-cri-r9-50-first-led-with-stacked-dies/219346\" target=\"_blank\" rel=\"noopener\">BLF 4000K test</a>, <a href=\"https://budgetlightforum.com/t/nichia-719a-5000k-r9050-tested/218061\" target=\"_blank\" rel=\"noopener\">BLF 5000K test</a>). Colour like a dedomed 519A with more output but a <b>floodier</b> beam; generally considered underwhelming (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF 4000K test",
+     "url": "https://budgetlightforum.com/t/led-test-review-nichia-nvsw719ac-sm405-t550f26-r9050-4000-k-min-90-cri-r9-50-first-led-with-stacked-dies/219346"
+    },
+    {
+     "label": "BLF 5000K test",
+     "url": "https://budgetlightforum.com/t/nichia-719a-5000k-r9050-tested/218061"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
@@ -348,7 +531,9 @@
    "lm_hi": 1500.0,
    "cri_min": 90,
    "cri_max": 90,
-   "ccts": [],
+   "ccts": [
+    4500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -360,15 +545,28 @@
    "cri_html": "90+",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Nichia&#x27;s answer to the XHP50 (different footprint, no thermal pad). High CRI but strong tint shift without diffusion; used in the Armytek Wizard C2 Pro Nichia (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Nichia&#x27;s answer to the XHP50 (different footprint, no thermal pad). High CRI but strong tint shift without diffusion; used in the Armytek Wizard C2 Pro Nichia, which is 4500K (<a href=\"https://www.armytek.com/flashlights/models/wizard/armytek-wizard-c2-pro-nichia\" target=\"_blank\" rel=\"noopener\">Armytek</a>, <a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "Armytek",
+     "url": "https://www.armytek.com/flashlights/models/wizard/armytek-wizard-c2-pro-nichia"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -423,8 +621,35 @@
    "best_for": [
     {
      "goal": "Tiny EDC",
-     "pick_html": "Nichia <b>E21A</b>, <b>519A</b> or LatticePower <b>CSP2323</b> in a triple",
-     "why_html": "Small, efficient, high CRI at the low currents tiny cells can supply"
+     "hint": "AAA / 10440 / 14500 / keychain",
+     "tier": 1,
+     "pick_html": "Nichia <b>E21A</b> or <b>519A</b>",
+     "also_html": "Nichia <b>219B</b>, <b>219F</b>, Luminus <b>SST-20</b>",
+     "why_html": "Small cells supply little current, so colour and efficiency at low drive matter more than maximum output. The 219B/219F dislike high current, which is fine here"
+    },
+    {
+     "goal": "Triples & quads",
+     "hint": "D4-, KR4-, FW3- and TS10-style lights",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b>, <b>NTG35</b> or <b>E21A</b>",
+     "also_html": "<b>FFL351A</b>, Luminus <b>SST-20</b>, LatticePower <b>CSP2323</b>, Nichia <b>219B</b>, Cree <b>XP-G2</b>",
+     "why_html": "Several small high-CRI dies behind a multi-TIR give a smooth, floody beam; tiny dies (E21A, CSP2323, XP-G2) suit micro triples"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
+    },
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
     }
    ],
    "cd_lo": null,
@@ -452,8 +677,12 @@
    "lm_lo": 1700.0,
    "lm_hi": 1700.0,
    "cri_min": 70,
-   "cri_max": 70,
-   "ccts": [],
+   "cri_max": 90,
+   "ccts": [
+    5000,
+    5700,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -462,11 +691,19 @@
    "basis": "typical",
    "footprint_html": "<code>3535</code> · 3V",
    "lm_html": "~1,700 lm (@ 8 A)",
-   "cri_html": "70",
+   "cri_html": "70<br>90 (5700K <code>WG</code>)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Small round die (about half the SFT-40&#x27;s area) = <b>extreme throw</b>; out-throws the SFT-40 in the same host. Standard 3535 footprint fits most EDC/thrower boards (<a href=\"https://budgetlightforum.com/t/led-test-review-luminus-sft-25r-6500-k-70-cri-good-thrower-led-in-3535-standard-footprint/225143?page=2\" target=\"_blank\" rel=\"noopener\">BLF test</a>, <a href=\"https://convoylight.com/collections/luminus\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
+   "notes_html": "5000K, 5700K or 6500K (samples run cooler than nominal), plus a 5700K 90 CRI <code>WG</code> version (<a href=\"https://download.luminus.com/datasheets/Luminus_SFT-25R-WES-A_3535_Datasheet.pdf\" target=\"_blank\" rel=\"noopener\">Luminus datasheet</a>, <a href=\"https://budgetlightforum.com/t/led-test-short-review-luminus-sft-25r-wg-5700-k-90-cri/232004\" target=\"_blank\" rel=\"noopener\">BLF WG test</a>). Small round die (about half the SFT-40&#x27;s area) = <b>extreme throw</b>; out-throws the SFT-40 in the same host. Standard 3535 footprint fits most EDC/thrower boards (<a href=\"https://budgetlightforum.com/t/led-test-review-luminus-sft-25r-6500-k-70-cri-good-thrower-led-in-3535-standard-footprint/225143?page=2\" target=\"_blank\" rel=\"noopener\">BLF test</a>, <a href=\"https://convoylight.com/collections/luminus\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
    "sources": [
+    {
+     "label": "Luminus datasheet",
+     "url": "https://download.luminus.com/datasheets/Luminus_SFT-25R-WES-A_3535_Datasheet.pdf"
+    },
+    {
+     "label": "BLF WG test",
+     "url": "https://budgetlightforum.com/t/led-test-short-review-luminus-sft-25r-wg-5700-k-90-cri/232004"
+    },
     {
      "label": "BLF test",
      "url": "https://budgetlightforum.com/t/led-test-review-luminus-sft-25r-6500-k-70-cri-good-thrower-led-in-3535-standard-footprint/225143?page=2"
@@ -491,8 +728,19 @@
    "best_for": [
     {
      "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 1,
      "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
-     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen"
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    },
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 1,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
     }
    ],
    "cd_lo": 85000.0,
@@ -563,18 +811,43 @@
    "best_for": [
     {
      "goal": "Balanced thrower",
+     "hint": "hotspot + useful spill",
+     "tier": 1,
      "pick_html": "Luminus <b>SFT-40</b> (or <b>SFT-70</b> for 6V boost lights)",
-     "why_html": "Best hotspot-to-spill balance"
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>NTG50</b>, <b>FFL5009R</b>, LMP <b>LHP531</b>, San&#x27;an <b>SFQ-55</b>, Convoy <b>F45R</b>",
+     "why_html": "Best hotspot-to-spill balance; the multi-die alternatives give a wider spot and more lumens for less throw"
     },
     {
-     "goal": "Pocket thrower with high CRI",
+     "goal": "High-CRI thrower",
+     "hint": "",
+     "tier": 1,
      "pick_html": "<b>FFL505A</b> or <b>SFT-40 3000K</b>",
-     "why_html": "Rosy (FFL) or warm 95 CRI (SFT-40) alternatives to cool-white throwers"
+     "also_html": "Luminus <b>SFT-70</b> (3000K 95 CRI), <b>YinDing 5050 Glass</b> (cool white 95 CRI), <b>FFL5009R</b>, <b>FFL707MD</b>",
+     "why_html": "Rosy (FFL) or warm 95 CRI (SFT-40/70) alternatives to cool-white throwers; the YinDing is the rare cool-white high-CRI round die"
     },
     {
-     "goal": "Warm-white thrower for fog/rain",
+     "goal": "Fog, rain & snow",
+     "hint": "",
+     "tier": 1,
      "pick_html": "<b>SFT-40 3000K</b>; budget: LMP <b>W5050SQ3</b>",
-     "why_html": "Warm CCT cuts back-scatter glare"
+     "also_html": "Luminus <b>SFT-70</b> 3000K, Convoy <b>F45R</b> 3000K, LMP <b>LHP531</b> 1800K / 3000K, Osram <b>Orange</b>",
+     "why_html": "Warm CCT cuts back-scatter glare. A floodier beam held low helps more than raw throw"
+    },
+    {
+     "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    },
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
     }
    ],
    "cd_lo": 60000.0,
@@ -642,8 +915,35 @@
    "best_for": [
     {
      "goal": "Balanced thrower",
+     "hint": "hotspot + useful spill",
+     "tier": 1,
      "pick_html": "Luminus <b>SFT-40</b> (or <b>SFT-70</b> for 6V boost lights)",
-     "why_html": "Best hotspot-to-spill balance"
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>NTG50</b>, <b>FFL5009R</b>, LMP <b>LHP531</b>, San&#x27;an <b>SFQ-55</b>, Convoy <b>F45R</b>",
+     "why_html": "Best hotspot-to-spill balance; the multi-die alternatives give a wider spot and more lumens for less throw"
+    },
+    {
+     "goal": "High-CRI thrower",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>FFL505A</b> or <b>SFT-40 3000K</b>",
+     "also_html": "Luminus <b>SFT-70</b> (3000K 95 CRI), <b>YinDing 5050 Glass</b> (cool white 95 CRI), <b>FFL5009R</b>, <b>FFL707MD</b>",
+     "why_html": "Rosy (FFL) or warm 95 CRI (SFT-40/70) alternatives to cool-white throwers; the YinDing is the rare cool-white high-CRI round die"
+    },
+    {
+     "goal": "Fog, rain & snow",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>SFT-40 3000K</b>; budget: LMP <b>W5050SQ3</b>",
+     "also_html": "Luminus <b>SFT-70</b> 3000K, Convoy <b>F45R</b> 3000K, LMP <b>LHP531</b> 1800K / 3000K, Osram <b>Orange</b>",
+     "why_html": "Warm CCT cuts back-scatter glare. A floodier beam held low helps more than raw throw"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
     }
    ],
    "cd_lo": 45000.0,
@@ -707,7 +1007,24 @@
      "beam_html": "Fatter, higher-lumen hotspot; comes into its own in large reflectors"
     }
    ],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    },
+    {
+     "goal": "Mega-throw + lumens",
+     "hint": "searchlights",
+     "tier": 2,
+     "pick_html": "Luminus <b>SBT90.2</b>, <b>SFT-90</b> or Convoy <b>F150R</b>",
+     "also_html": "San&#x27;an <b>SFH-43</b>, San&#x27;an <b>SFN60</b>, <b>FFL707MX</b>, Luminus <b>SFT-42R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "Enormous output and hotspot; needs a big reflector and a high-current driver"
+    }
+   ],
    "cd_lo": 50000.0,
    "cd_hi": 75000.0,
    "throw_lo": 445.0,
@@ -734,7 +1051,10 @@
    "lm_hi": 3400.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    5000,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -746,8 +1066,12 @@
    "cri_html": "~70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Round-die thrower with a bigger hotspot than SFT-40 and ~2 A more draw. Best in large reflectors (Convoy L21B); in TIR or small hosts it throws less than the SFT-40. <b>Phosphor is more brittle</b> than other SFT parts, so don&#x27;t let a TIR press on it (<a href=\"https://convoylight.com/products/luminus-sft-42r\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
+   "notes_html": "5000–6500K (<a href=\"https://www.luminus.com/products/white\" target=\"_blank\" rel=\"noopener\">Luminus</a>). Round-die thrower with a bigger hotspot than SFT-40 and ~2 A more draw. Best in large reflectors (Convoy L21B); in TIR or small hosts it throws less than the SFT-40. <b>Phosphor is more brittle</b> than other SFT parts, so don&#x27;t let a TIR press on it (<a href=\"https://convoylight.com/products/luminus-sft-42r\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
    "sources": [
+    {
+     "label": "Luminus",
+     "url": "https://www.luminus.com/products/white"
+    },
     {
      "label": "Convoy",
      "url": "https://convoylight.com/products/luminus-sft-42r"
@@ -765,7 +1089,24 @@
      "beam_html": "Fatter, higher-lumen hotspot; comes into its own in large reflectors"
     }
    ],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    },
+    {
+     "goal": "Mega-throw + lumens",
+     "hint": "searchlights",
+     "tier": 2,
+     "pick_html": "Luminus <b>SBT90.2</b>, <b>SFT-90</b> or Convoy <b>F150R</b>",
+     "also_html": "San&#x27;an <b>SFH-43</b>, San&#x27;an <b>SFN60</b>, <b>FFL707MX</b>, Luminus <b>SFT-42R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "Enormous output and hotspot; needs a big reflector and a high-current driver"
+    }
+   ],
    "cd_lo": 50000.0,
    "cd_hi": 75000.0,
    "throw_lo": 445.0,
@@ -792,7 +1133,9 @@
    "lm_hi": 5000.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -804,8 +1147,12 @@
    "cri_html": "70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Much cheaper alternative to the SBT90.2 with slightly lower performance. High Vf at high current makes FET/direct-drive and 1-cell buck drivers a poor match (<a href=\"https://convoylight.com/products/luminus-sft-90\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
+   "notes_html": "6500K only; a pre-production sample measured green (Duv +0.007) (<a href=\"https://budgetlightforum.com/t/led-test-review-luminus-sft-90-j7-ba-kd-sample-6500-k-70-cri/227882\" target=\"_blank\" rel=\"noopener\">BLF test</a>). Much cheaper alternative to the SBT90.2 with slightly lower performance. High Vf at high current makes FET/direct-drive and 1-cell buck drivers a poor match (<a href=\"https://convoylight.com/products/luminus-sft-90\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
    "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-luminus-sft-90-j7-ba-kd-sample-6500-k-70-cri/227882"
+    },
     {
      "label": "Convoy",
      "url": "https://convoylight.com/products/luminus-sft-90"
@@ -826,7 +1173,10 @@
    "best_for": [
     {
      "goal": "Mega-throw + lumens",
+     "hint": "searchlights",
+     "tier": 1,
      "pick_html": "Luminus <b>SBT90.2</b>, <b>SFT-90</b> or Convoy <b>F150R</b>",
+     "also_html": "San&#x27;an <b>SFH-43</b>, San&#x27;an <b>SFN60</b>, <b>FFL707MX</b>, Luminus <b>SFT-42R</b>, Luminus <b>SFT-60</b>",
      "why_html": "Enormous output and hotspot; needs a big reflector and a high-current driver"
     }
    ],
@@ -896,7 +1246,10 @@
    "best_for": [
     {
      "goal": "Mega-throw + lumens",
+     "hint": "searchlights",
+     "tier": 1,
      "pick_html": "Luminus <b>SBT90.2</b>, <b>SFT-90</b> or Convoy <b>F150R</b>",
+     "also_html": "San&#x27;an <b>SFH-43</b>, San&#x27;an <b>SFN60</b>, <b>FFL707MX</b>, Luminus <b>SFT-42R</b>, Luminus <b>SFT-60</b>",
      "why_html": "Enormous output and hotspot; needs a big reflector and a high-current driver"
     }
    ],
@@ -948,7 +1301,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -1003,7 +1365,40 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    },
+    {
+     "goal": "EDC / all-rounder",
+     "hint": "single-emitter 18650 / 21700",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (neutral) or <b>FFL351A</b> / <b>NTG35</b> (rosy)",
+     "also_html": "Luminus <b>SST-20</b> (4000K 95 CRI), Samsung <b>LH351D</b>, Cree <b>XP-L HI</b>, Lumileds <b>HL2X</b>, LatticePower <b>TN3535</b> (budget)",
+     "why_html": "High CRI, easy to drive and a great tint, with enough throw for everyday use. The alternatives trade some colour quality or tint consistency for price"
+    },
+    {
+     "goal": "Tiny EDC",
+     "hint": "AAA / 10440 / 14500 / keychain",
+     "tier": 2,
+     "pick_html": "Nichia <b>E21A</b> or <b>519A</b>",
+     "also_html": "Nichia <b>219B</b>, <b>219F</b>, Luminus <b>SST-20</b>",
+     "why_html": "Small cells supply little current, so colour and efficiency at low drive matter more than maximum output. The 219B/219F dislike high current, which is fine here"
+    },
+    {
+     "goal": "Triples & quads",
+     "hint": "D4-, KR4-, FW3- and TS10-style lights",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>NTG35</b> or <b>E21A</b>",
+     "also_html": "<b>FFL351A</b>, Luminus <b>SST-20</b>, LatticePower <b>CSP2323</b>, Nichia <b>219B</b>, Cree <b>XP-G2</b>",
+     "why_html": "Several small high-CRI dies behind a multi-TIR give a smooth, floody beam; tiny dies (E21A, CSP2323, XP-G2) suit micro triples"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -1033,7 +1428,11 @@
    "lm_hi": 4500.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    5000,
+    5700,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1045,8 +1444,16 @@
    "cri_html": "70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Domed, cheap, high-output flood/hybrid LEDs common in budget lights; very green at low power (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://convoylight.com/products/luminus-sst40-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
+   "notes_html": "SST-40: 5000K, 5700K or 6500K. SST-70: 5700K or 6500K (<a href=\"https://download.luminus.com/datasheets/Luminus_SST-40-WSxx_Gen2_Datasheet.pdf\" target=\"_blank\" rel=\"noopener\">Luminus SST-40 datasheet</a>, <a href=\"https://www.luminus.com/datasheets/Luminus_2024_Specialty_Lighting_Catalog.pdf\" target=\"_blank\" rel=\"noopener\">Luminus catalog</a>). Domed, cheap, high-output flood/hybrid LEDs common in budget lights; very green at low power (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://convoylight.com/products/luminus-sst40-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
    "sources": [
+    {
+     "label": "Luminus SST-40 datasheet",
+     "url": "https://download.luminus.com/datasheets/Luminus_SST-40-WSxx_Gen2_Datasheet.pdf"
+    },
+    {
+     "label": "Luminus catalog",
+     "url": "https://www.luminus.com/datasheets/Luminus_2024_Specialty_Lighting_Catalog.pdf"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
@@ -1084,7 +1491,12 @@
    "lm_hi": 5558.0,
    "cri_min": 70,
    "cri_max": 95,
-   "ccts": [],
+   "ccts": [
+    2700,
+    3000,
+    4000,
+    7000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": true,
@@ -1096,8 +1508,12 @@
    "cri_html": "70 / 80 / 90 / 95 (6V)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "<b>The go-to for high sustained output.</b> Domeless <code>HI</code> (3.9 mm source) roughly doubles intensity and cleans up the beam vs domed <code>HD</code> (5.3 mm source; 4,857 / 6,405 lm) (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "<b>The go-to for high sustained output.</b> ANSI bins 3000K–7000K plus EasyWhite 2700K–4000K (<a href=\"https://downloads.cree-led.com/files/ds/x/XLamp-XHP70.3.pdf\" target=\"_blank\" rel=\"noopener\">Cree datasheet</a>). Domeless <code>HI</code> (3.9 mm source) roughly doubles intensity and cleans up the beam vs domed <code>HD</code> (5.3 mm source; 4,857 / 6,405 lm) (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "Cree datasheet",
+     "url": "https://downloads.cree-led.com/files/ds/x/XLamp-XHP70.3.pdf"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
@@ -1117,8 +1533,11 @@
    ],
    "best_for": [
     {
-     "goal": "High sustained output / trail light",
+     "goal": "Trail / walking light",
+     "hint": "high sustained output",
+     "tier": 1,
      "pick_html": "Cree <b>XHP70.3 HI</b> or LMP <b>LHP73B</b>",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>FFL707A</b>, San&#x27;an <b>SFN60</b>, LMP <b>LHP531</b>, <b>NTG50</b>, Cree <b>XM-L2</b>",
      "why_html": "High efficiency at high drive means more lumens for the same heat. Sustained output is still set by the host&#x27;s size and cooling"
     }
    ],
@@ -1150,7 +1569,12 @@
    "lm_hi": 4312.0,
    "cri_min": 70,
    "cri_max": 95,
-   "ccts": [],
+   "ccts": [
+    2700,
+    3000,
+    4000,
+    7000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": true,
@@ -1162,8 +1586,12 @@
    "cri_html": "70 / 80 / 90 / 95 (6V)<br>&lt;70 (3V)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Compact quad-die workhorse; very efficient with decent throw, though tint can be a lottery (<a href=\"https://convoylight.com/collections/cree\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
+   "notes_html": "ANSI bins 3000K–7000K plus EasyWhite 2700K–4000K (<a href=\"https://downloads.cree-led.com/files/ds/x/XLamp-XHP50.3.pdf\" target=\"_blank\" rel=\"noopener\">Cree datasheet</a>). Compact quad-die workhorse; very efficient with decent throw, though tint can be a lottery (<a href=\"https://convoylight.com/collections/cree\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
    "sources": [
+    {
+     "label": "Cree datasheet",
+     "url": "https://downloads.cree-led.com/files/ds/x/XLamp-XHP50.3.pdf"
+    },
     {
      "label": "Convoy",
      "url": "https://convoylight.com/collections/cree"
@@ -1181,7 +1609,24 @@
      "beam_html": "Balanced mid-range beam"
     }
    ],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Balanced thrower",
+     "hint": "hotspot + useful spill",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-40</b> (or <b>SFT-70</b> for 6V boost lights)",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>NTG50</b>, <b>FFL5009R</b>, LMP <b>LHP531</b>, San&#x27;an <b>SFQ-55</b>, Convoy <b>F45R</b>",
+     "why_html": "Best hotspot-to-spill balance; the multi-die alternatives give a wider spot and more lumens for less throw"
+    },
+    {
+     "goal": "Trail / walking light",
+     "hint": "high sustained output",
+     "tier": 2,
+     "pick_html": "Cree <b>XHP70.3 HI</b> or LMP <b>LHP73B</b>",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>FFL707A</b>, San&#x27;an <b>SFN60</b>, LMP <b>LHP531</b>, <b>NTG50</b>, Cree <b>XM-L2</b>",
+     "why_html": "High efficiency at high drive means more lumens for the same heat. Sustained output is still set by the host&#x27;s size and cooling"
+    }
+   ],
    "cd_lo": 25000.0,
    "cd_hi": 40000.0,
    "throw_lo": 315.0,
@@ -1259,7 +1704,13 @@
    "lm_hi": 1892.0,
    "cri_min": 70,
    "cri_max": 90,
-   "ccts": [],
+   "ccts": [
+    2700,
+    3000,
+    4000,
+    5000,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": true,
@@ -1271,7 +1722,7 @@
    "cri_html": "70 / 80 / 90",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Classic domeless EDC emitter; mostly superseded by 519A, SFT-40 and NTG35 (<a href=\"https://convoylight.com/products/xpl-hi-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
+   "notes_html": "2700K–6500K by order code; Convoy sells 3000K, 4000K, 5000K and 6500K. Classic domeless EDC emitter; mostly superseded by 519A, SFT-40 and NTG35 (<a href=\"https://convoylight.com/products/xpl-hi-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
    "sources": [
     {
      "label": "Convoy",
@@ -1279,7 +1730,24 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "EDC / all-rounder",
+     "hint": "single-emitter 18650 / 21700",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (neutral) or <b>FFL351A</b> / <b>NTG35</b> (rosy)",
+     "also_html": "Luminus <b>SST-20</b> (4000K 95 CRI), Samsung <b>LH351D</b>, Cree <b>XP-L HI</b>, Lumileds <b>HL2X</b>, LatticePower <b>TN3535</b> (budget)",
+     "why_html": "High CRI, easy to drive and a great tint, with enough throw for everyday use. The alternatives trade some colour quality or tint consistency for price"
+    },
+    {
+     "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -1307,7 +1775,10 @@
    "lm_hi": 2496.0,
    "cri_min": 70,
    "cri_max": 95,
-   "ccts": [],
+   "ccts": [
+    2700,
+    7000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1319,8 +1790,12 @@
    "cri_html": "70 / 80 / 90 (L2 also 95)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Efficient and very common in mainstream brands (Fenix, Olight, etc.). Domed, with poor colour and noticeable tint shift; enthusiasts generally avoid them (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Both 2700K–7000K (<a href=\"https://www.tti.com/content/dam/tti-commons/supplier/cree-led/doc/cree-led-xlamp-white-leds-product-guide.pdf\" target=\"_blank\" rel=\"noopener\">Cree product guide</a>). Efficient and very common in mainstream brands (Fenix, Olight, etc.). Domed, with poor colour and noticeable tint shift; enthusiasts generally avoid them (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "Cree product guide",
+     "url": "https://www.tti.com/content/dam/tti-commons/supplier/cree-led/doc/cree-led-xlamp-white-leds-product-guide.pdf"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
@@ -1358,7 +1833,11 @@
    "lm_hi": 2849.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    5000,
+    5700,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1370,10 +1849,32 @@
    "cri_html": "70 / &lt;70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "<b>Cree&#x27;s newer round-die (round LES) throw parts</b>, with source sizes of 1.3–2.8 mm. Cree&#x27;s direct answer to the SFT-25R / SFT-40 class. Few enthusiast tests yet.",
-   "sources": [],
+   "notes_html": "5000K, 5700K or 6500K only (<a href=\"https://www.cree-led.com/news/xlamp-xplr-xpgr/\" target=\"_blank\" rel=\"noopener\">Cree</a>). <b>Cree&#x27;s newer round-die (round LES) throw parts</b>, with source sizes of 1.3–2.8 mm. Cree&#x27;s direct answer to the SFT-25R / SFT-40 class. Few enthusiast tests yet.",
+   "sources": [
+    {
+     "label": "Cree",
+     "url": "https://www.cree-led.com/news/xlamp-xplr-xpgr/"
+    }
+   ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    },
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -1400,7 +1901,10 @@
    "lm_hi": null,
    "cri_min": null,
    "cri_max": null,
-   "ccts": [],
+   "ccts": [
+    2700,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1412,15 +1916,28 @@
    "cri_html": "—",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "The tiny-die classic for micro quads and triples, now largely displaced by the XP-G3/G4. Smaller dome and die than the XP-L, with correspondingly less output (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "2700K–6500K (<a href=\"https://www.cree-led.com/products/applications/broadcast/\" target=\"_blank\" rel=\"noopener\">Cree</a>). The tiny-die classic for micro quads and triples, now largely displaced by the XP-G3/G4. Smaller dome and die than the XP-L, with correspondingly less output (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "Cree",
+     "url": "https://www.cree-led.com/products/applications/broadcast/"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Triples & quads",
+     "hint": "D4-, KR4-, FW3- and TS10-style lights",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>NTG35</b> or <b>E21A</b>",
+     "also_html": "<b>FFL351A</b>, Luminus <b>SST-20</b>, LatticePower <b>CSP2323</b>, Nichia <b>219B</b>, Cree <b>XP-G2</b>",
+     "why_html": "Several small high-CRI dies behind a multi-TIR give a smooth, floody beam; tiny dies (E21A, CSP2323, XP-G2) suit micro triples"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -1447,7 +1964,10 @@
    "lm_hi": 3833.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    2700,
+    7000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1459,8 +1979,12 @@
    "cri_html": "70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "The classic budget flooder, redesigned in 2021 as a flip chip (&quot;the XM-L3 that never was&quot;): much more efficient, lower Vf, and it survives ~17 A in overdrive tests. Same XM footprint, so existing boards and centering rings still fit. Luminance is only XP-L HD class and dedoming gains &lt;10%, so it&#x27;s a flood LED, not a thrower (<a href=\"https://budgetlightforum.com/t/led-test-review-new-cree-xlamp-xm-l2-u3-color-kit-51-6200-k-design-change-after-pcn-issued/71898\" target=\"_blank\" rel=\"noopener\">koef3 test</a>, <a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "2700K–7000K (<a href=\"https://www.cree-led.com/products/applications/portable-lighting/page/2/\" target=\"_blank\" rel=\"noopener\">Cree</a>). The classic budget flooder, redesigned in 2021 as a flip chip (&quot;the XM-L3 that never was&quot;): much more efficient, lower Vf, and it survives ~17 A in overdrive tests. Same XM footprint, so existing boards and centering rings still fit. Luminance is only XP-L HD class and dedoming gains &lt;10%, so it&#x27;s a flood LED, not a thrower (<a href=\"https://budgetlightforum.com/t/led-test-review-new-cree-xlamp-xm-l2-u3-color-kit-51-6200-k-design-change-after-pcn-issued/71898\" target=\"_blank\" rel=\"noopener\">koef3 test</a>, <a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "Cree",
+     "url": "https://www.cree-led.com/products/applications/portable-lighting/page/2/"
+    },
     {
      "label": "koef3 test",
      "url": "https://budgetlightforum.com/t/led-test-review-new-cree-xlamp-xm-l2-u3-color-kit-51-6200-k-design-change-after-pcn-issued/71898"
@@ -1471,7 +1995,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Trail / walking light",
+     "hint": "high sustained output",
+     "tier": 2,
+     "pick_html": "Cree <b>XHP70.3 HI</b> or LMP <b>LHP73B</b>",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>FFL707A</b>, San&#x27;an <b>SFN60</b>, LMP <b>LHP531</b>, <b>NTG50</b>, Cree <b>XM-L2</b>",
+     "why_html": "High efficiency at high drive means more lumens for the same heat. Sustained output is still set by the host&#x27;s size and cooling"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -1500,7 +2033,12 @@
    "lm_hi": 5500.0,
    "cri_min": 70,
    "cri_max": 90,
-   "ccts": [],
+   "ccts": [
+    2700,
+    3000,
+    5000,
+    7000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1512,8 +2050,12 @@
    "cri_html": "70–90",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Older <b>domed</b> XHP generation: very bright but floody, with visible rainbow tint shift. Still sold by Convoy (<a href=\"https://convoylight.com/collections/cree\" target=\"_blank\" rel=\"noopener\">Convoy Cree</a>).",
+   "notes_html": "ANSI bins 3000K–7000K, EasyWhite 2700K–5000K (<a href=\"https://www.mouser.co.uk/cree-xlamp-xhp70-2\" target=\"_blank\" rel=\"noopener\">Mouser</a>). Older <b>domed</b> XHP generation: very bright but floody, with visible rainbow tint shift. Still sold by Convoy (<a href=\"https://convoylight.com/collections/cree\" target=\"_blank\" rel=\"noopener\">Convoy Cree</a>).",
    "sources": [
+    {
+     "label": "Mouser",
+     "url": "https://www.mouser.co.uk/cree-xlamp-xhp70-2"
+    },
     {
      "label": "Convoy Cree",
      "url": "https://convoylight.com/collections/cree"
@@ -1548,7 +2090,11 @@
    "lm_hi": 19591.0,
    "cri_min": 70,
    "cri_max": 80,
-   "ccts": [],
+   "ccts": [
+    5000,
+    5700,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1560,14 +2106,22 @@
    "cri_html": "&lt;70 – 80",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Ultra-high-lumen domed multi-die parts for mega-flooders; mediocre colour.",
-   "sources": [],
+   "notes_html": "Cool and neutral only: ANSI bins at 5000K, 5700K and 6500K (<a href=\"https://downloads.cree-led.com/files/ds/x/XLamp-XFL.pdf\" target=\"_blank\" rel=\"noopener\">Cree datasheet</a>). Ultra-high-lumen domed multi-die parts for mega-flooders; mediocre colour.",
+   "sources": [
+    {
+     "label": "Cree datasheet",
+     "url": "https://downloads.cree-led.com/files/ds/x/XLamp-XFL.pdf"
+    }
+   ],
    "candela": [],
    "best_for": [
     {
      "goal": "Lumen monster",
+     "hint": "flood cannons",
+     "tier": 1,
      "pick_html": "Convoy <b>NV1010</b> or Cree <b>XFL08K–12K</b>",
-     "why_html": "10,000–20,000 lm class; NV1010 also offered in R9080 (availability varies)"
+     "also_html": "San&#x27;an <b>SFP-55</b>, <b>SFH-55</b>, <b>SFY-55</b>, <b>SFN-55.2</b>, <b>FFL909A</b>",
+     "why_html": "10,000–25,000 lm class with flood-only beams; NV1010 also offered in R9080 (availability varies)"
     }
    ],
    "cd_lo": null,
@@ -1636,8 +2190,19 @@
    "best_for": [
     {
      "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 1,
      "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
-     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen"
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    },
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
     }
    ],
    "cd_lo": 90000.0,
@@ -1699,7 +2264,24 @@
      "beam_html": "Slightly wider, brighter pencil throw"
     }
    ],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 1,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    },
+    {
+     "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    }
+   ],
    "cd_lo": 75000.0,
    "cd_hi": 95000.0,
    "throw_lo": 550.0,
@@ -1726,7 +2308,10 @@
    "lm_hi": 1700.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    6000,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1738,15 +2323,32 @@
    "cri_html": "~70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "2 mm²-class die in the bigger Oslon Boost package, which runs cooler and takes more overdrive. Common in Convoy throwers (S21B, M21-series) (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
+   "notes_html": "Cool white: the datasheet&#x27;s typical colour point (x 0.32, y 0.33) is about 6000K, and Convoy sells it as 6500K (<a href=\"https://ams-osram.com/products/leds/white-leds/osram-oslon-boost-hx-kw-culpm1-tg\" target=\"_blank\" rel=\"noopener\">ams OSRAM</a>, <a href=\"https://convoylight.com/products/convoy-s16-21700-flashlight\" target=\"_blank\" rel=\"noopener\">Convoy S16</a>). 2 mm²-class die in the bigger Oslon Boost package, which runs cooler and takes more overdrive. Common in Convoy throwers (S21B, M21-series) (<a href=\"https://convoylight.com/collections/osram\" target=\"_blank\" rel=\"noopener\">Convoy Osram</a>).",
    "sources": [
+    {
+     "label": "ams OSRAM",
+     "url": "https://ams-osram.com/products/leds/white-leds/osram-oslon-boost-hx-kw-culpm1-tg"
+    },
+    {
+     "label": "Convoy S16",
+     "url": "https://convoylight.com/products/convoy-s16-21700-flashlight"
+    },
     {
      "label": "Convoy Osram",
      "url": "https://convoylight.com/collections/osram"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 1,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -1773,7 +2375,11 @@
    "lm_hi": 1500.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    2200,
+    5700,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -1785,8 +2391,12 @@
    "cri_html": "~70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Domed, mainly cool white; competes with the XP-L HD in budget/mainstream lights. Poor colour rendering (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Flashlight versions are 5700K or 6500K (datasheet range 2200K–6500K) (<a href=\"https://ams-osram.com/products/leds/white-leds/osram-osconiq-p-3737-3w-gw-pusta1-pm\" target=\"_blank\" rel=\"noopener\">ams OSRAM</a>). Domed, mainly cool white; competes with the XP-L HD in budget/mainstream lights. Poor colour rendering (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "ams OSRAM",
+     "url": "https://ams-osram.com/products/leds/white-leds/osram-osconiq-p-3737-3w-gw-pusta1-pm"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
@@ -1844,7 +2454,32 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Long-range thrower",
+     "hint": "50 mm+ reflector: C8, L21B, K1-class",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b>, Osram <b>W2</b> or Osram <b>Boost HX</b>",
+     "also_html": "Osram <b>W1</b>, Luminus <b>SFT-40</b>, Luminus <b>SFT-42R</b>, Cree <b>XM-MR</b>, Convoy <b>F45R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "A big reflector multiplies luminance, so high-luminance dies that take more current win. The SFT-42R only comes into its own in large heads"
+    },
+    {
+     "goal": "Balanced thrower",
+     "hint": "hotspot + useful spill",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-40</b> (or <b>SFT-70</b> for 6V boost lights)",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>NTG50</b>, <b>FFL5009R</b>, LMP <b>LHP531</b>, San&#x27;an <b>SFQ-55</b>, Convoy <b>F45R</b>",
+     "why_html": "Best hotspot-to-spill balance; the multi-die alternatives give a wider spot and more lumens for less throw"
+    },
+    {
+     "goal": "Fog, rain & snow",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>SFT-40 3000K</b>; budget: LMP <b>W5050SQ3</b>",
+     "also_html": "Luminus <b>SFT-70</b> 3000K, Convoy <b>F45R</b> 3000K, LMP <b>LHP531</b> 1800K / 3000K, Osram <b>Orange</b>",
+     "why_html": "Warm CCT cuts back-scatter glare. A floodier beam held low helps more than raw throw"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -1908,7 +2543,10 @@
    "best_for": [
     {
      "goal": "Mega-throw + lumens",
+     "hint": "searchlights",
+     "tier": 1,
      "pick_html": "Luminus <b>SBT90.2</b>, <b>SFT-90</b> or Convoy <b>F150R</b>",
+     "also_html": "San&#x27;an <b>SFH-43</b>, San&#x27;an <b>SFN60</b>, <b>FFL707MX</b>, Luminus <b>SFT-42R</b>, Luminus <b>SFT-60</b>",
      "why_html": "Enormous output and hotspot; needs a big reflector and a high-current driver"
     }
    ],
@@ -1974,8 +2612,11 @@
    "best_for": [
     {
      "goal": "Lumen monster",
+     "hint": "flood cannons",
+     "tier": 1,
      "pick_html": "Convoy <b>NV1010</b> or Cree <b>XFL08K–12K</b>",
-     "why_html": "10,000–20,000 lm class; NV1010 also offered in R9080 (availability varies)"
+     "also_html": "San&#x27;an <b>SFP-55</b>, <b>SFH-55</b>, <b>SFY-55</b>, <b>SFN-55.2</b>, <b>FFL909A</b>",
+     "why_html": "10,000–25,000 lm class with flood-only beams; NV1010 also offered in R9080 (availability varies)"
     }
    ],
    "cd_lo": 10000.0,
@@ -2043,7 +2684,24 @@
      "beam_html": "Huge high-lumen hotspot + flood"
     }
    ],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Trail / walking light",
+     "hint": "high sustained output",
+     "tier": 2,
+     "pick_html": "Cree <b>XHP70.3 HI</b> or LMP <b>LHP73B</b>",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>FFL707A</b>, San&#x27;an <b>SFN60</b>, LMP <b>LHP531</b>, <b>NTG50</b>, Cree <b>XM-L2</b>",
+     "why_html": "High efficiency at high drive means more lumens for the same heat. Sustained output is still set by the host&#x27;s size and cooling"
+    },
+    {
+     "goal": "Mega-throw + lumens",
+     "hint": "searchlights",
+     "tier": 2,
+     "pick_html": "Luminus <b>SBT90.2</b>, <b>SFT-90</b> or Convoy <b>F150R</b>",
+     "also_html": "San&#x27;an <b>SFH-43</b>, San&#x27;an <b>SFN60</b>, <b>FFL707MX</b>, Luminus <b>SFT-42R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "Enormous output and hotspot; needs a big reflector and a high-current driver"
+    }
+   ],
    "cd_lo": 30000.0,
    "cd_hi": 45000.0,
    "throw_lo": 345.0,
@@ -2070,7 +2728,9 @@
    "lm_hi": 3000.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    5000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -2082,15 +2742,28 @@
    "cri_html": "mostly 70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "San&#x27;an&#x27;s 3V XHP50.3 HI competitor; high CCT with a clean cool tint. Now on its 4th generation (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Listed at 5000K (<a href=\"https://budgetlightforum.com/t/sfn55-2-sfq55-sfn60-sfq60-sfs80-and-sfh55-led-info/67698\" target=\"_blank\" rel=\"noopener\">BLF San&#x27;an thread</a>). San&#x27;an&#x27;s 3V XHP50.3 HI competitor; high CCT with a clean cool tint. Now on its 4th generation (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF San'an thread",
+     "url": "https://budgetlightforum.com/t/sfn55-2-sfq55-sfn60-sfq60-sfs80-and-sfh55-led-info/67698"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Balanced thrower",
+     "hint": "hotspot + useful spill",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-40</b> (or <b>SFT-70</b> for 6V boost lights)",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>NTG50</b>, <b>FFL5009R</b>, LMP <b>LHP531</b>, San&#x27;an <b>SFQ-55</b>, Convoy <b>F45R</b>",
+     "why_html": "Best hotspot-to-spill balance; the multi-die alternatives give a wider spot and more lumens for less throw"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2117,7 +2790,9 @@
    "lm_hi": 3000.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    5500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -2129,8 +2804,12 @@
    "cri_html": "mostly 70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Competes with the XHP50 at a lower Vf; very high CCT with a clean tint (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Nightwatch sells its SFQ-60 lights at 5500K (<a href=\"https://budgetlightforum.com/t/sfn55-2-sfq55-sfn60-sfq60-sfs80-and-sfh55-led-info/67698\" target=\"_blank\" rel=\"noopener\">BLF San&#x27;an thread</a>). Competes with the XHP50 at a lower Vf; very high CCT with a clean tint (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF San'an thread",
+     "url": "https://budgetlightforum.com/t/sfn55-2-sfq55-sfn60-sfq60-sfs80-and-sfh55-led-info/67698"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
@@ -2164,7 +2843,9 @@
    "lm_hi": 4000.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    6000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -2176,7 +2857,7 @@
    "cri_html": "mostly 70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Extremely bright 5050 that competes with the XHP50.2; very high CCT (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Extremely bright 5050 that competes with the XHP50.2; very high CCT (≈6000K) (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
     {
      "label": "BLF Guide",
@@ -2211,7 +2892,10 @@
    "lm_hi": 8000.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    6500,
+    7000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -2223,15 +2907,28 @@
    "cri_html": "70 (greenish)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Nine-die 7070 that sits between the XHP70.2 and the SBT90.2 in size and output; large colour variation with power level and generally greenish tint (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Sold as cool white only; San&#x27;an parts like this usually come in 6500–7000K (<a href=\"https://budgetlightforum.com/t/sfn55-2-sfq55-sfn60-sfq60-sfs80-and-sfh55-led-info/67698\" target=\"_blank\" rel=\"noopener\">BLF San&#x27;an thread</a>). Nine-die 7070 that sits between the XHP70.2 and the SBT90.2 in size and output; large colour variation with power level and generally greenish tint (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF San'an thread",
+     "url": "https://budgetlightforum.com/t/sfn55-2-sfq55-sfn60-sfq60-sfs80-and-sfh55-led-info/67698"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Lumen monster",
+     "hint": "flood cannons",
+     "tier": 2,
+     "pick_html": "Convoy <b>NV1010</b> or Cree <b>XFL08K–12K</b>",
+     "also_html": "San&#x27;an <b>SFP-55</b>, <b>SFH-55</b>, <b>SFY-55</b>, <b>SFN-55.2</b>, <b>FFL909A</b>",
+     "why_html": "10,000–25,000 lm class with flood-only beams; NV1010 also offered in R9080 (availability varies)"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2280,7 +2977,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Mega-throw + lumens",
+     "hint": "searchlights",
+     "tier": 2,
+     "pick_html": "Luminus <b>SBT90.2</b>, <b>SFT-90</b> or Convoy <b>F150R</b>",
+     "also_html": "San&#x27;an <b>SFH-43</b>, San&#x27;an <b>SFN60</b>, <b>FFL707MX</b>, Luminus <b>SFT-42R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "Enormous output and hotspot; needs a big reflector and a high-current driver"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2307,9 +3013,12 @@
    "lm_hi": 10000.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    6500,
+    7413
+   ],
    "r9080": false,
-   "rosy": false,
+   "rosy": true,
    "domeless": true,
    "unavailable": false,
    "colours": [],
@@ -2319,15 +3028,28 @@
    "cri_html": "~70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Huge domeless 16-die LED, easily swapped with the SBT90.2; brighter but less throwy (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Nominal 6500K; one lab sample measured 7413K, Duv −0.0004 (<a href=\"https://budgetlightforum.com/t/led-test-review-changda-sfh55-6500-k-70-cri-just-pure-insanity/225575\" target=\"_blank\" rel=\"noopener\">BLF test</a>). Huge domeless 16-die LED, easily swapped with the SBT90.2; brighter but less throwy (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-changda-sfh55-6500-k-70-cri-just-pure-insanity/225575"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Lumen monster",
+     "hint": "flood cannons",
+     "tier": 2,
+     "pick_html": "Convoy <b>NV1010</b> or Cree <b>XFL08K–12K</b>",
+     "also_html": "San&#x27;an <b>SFP-55</b>, <b>SFH-55</b>, <b>SFY-55</b>, <b>SFN-55.2</b>, <b>FFL909A</b>",
+     "why_html": "10,000–25,000 lm class with flood-only beams; NV1010 also offered in R9080 (availability varies)"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2354,7 +3076,9 @@
    "lm_hi": 22000.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -2366,15 +3090,28 @@
    "cri_html": "~70 (cool white)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Massive 25-die surface (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "6500K (<a href=\"https://budgetlightforum.com/t/led-test-short-review-changda-sfp55-6500-k-70-cri-hardly-any-extra-power-compared-to-the-sfh55/230623\" target=\"_blank\" rel=\"noopener\">BLF test</a>). Massive 25-die surface (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-short-review-changda-sfp55-6500-k-70-cri-hardly-any-extra-power-compared-to-the-sfh55/230623"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Lumen monster",
+     "hint": "flood cannons",
+     "tier": 2,
+     "pick_html": "Convoy <b>NV1010</b> or Cree <b>XFL08K–12K</b>",
+     "also_html": "San&#x27;an <b>SFP-55</b>, <b>SFH-55</b>, <b>SFY-55</b>, <b>SFN-55.2</b>, <b>FFL909A</b>",
+     "why_html": "10,000–25,000 lm class with flood-only beams; NV1010 also offered in R9080 (availability varies)"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2404,7 +3141,9 @@
    "cri_min": null,
    "cri_max": null,
    "ccts": [
-    3000
+    3000,
+    5954,
+    6500
    ],
    "r9080": false,
    "rosy": false,
@@ -2417,15 +3156,28 @@
    "cri_html": "3000K high-CRI option",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "64-die monster emitter; gigantic footprint makes it very niche (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Also 6500K 70 CRI (lab: 5954K, Ra 69, Duv +0.007) (<a href=\"https://budgetlightforum.com/t/led-test-short-review-changda-sfy55-6500-k-70-cri-just-pure-insanity-2-0/230885\" target=\"_blank\" rel=\"noopener\">BLF test</a>). 64-die monster emitter; gigantic footprint makes it very niche (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-short-review-changda-sfy55-6500-k-70-cri-just-pure-insanity-2-0/230885"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Lumen monster",
+     "hint": "flood cannons",
+     "tier": 2,
+     "pick_html": "Convoy <b>NV1010</b> or Cree <b>XFL08K–12K</b>",
+     "also_html": "San&#x27;an <b>SFP-55</b>, <b>SFH-55</b>, <b>SFY-55</b>, <b>SFN-55.2</b>, <b>FFL909A</b>",
+     "why_html": "10,000–25,000 lm class with flood-only beams; NV1010 also offered in R9080 (availability varies)"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2495,8 +3247,27 @@
    "best_for": [
     {
      "goal": "EDC / all-rounder",
+     "hint": "single-emitter 18650 / 21700",
+     "tier": 1,
      "pick_html": "Nichia <b>519A</b> (neutral) or <b>FFL351A</b> / <b>NTG35</b> (rosy)",
-     "why_html": "High CRI, easy to drive, great tint"
+     "also_html": "Luminus <b>SST-20</b> (4000K 95 CRI), Samsung <b>LH351D</b>, Cree <b>XP-L HI</b>, Lumileds <b>HL2X</b>, LatticePower <b>TN3535</b> (budget)",
+     "why_html": "High CRI, easy to drive and a great tint, with enough throw for everyday use. The alternatives trade some colour quality or tint consistency for price"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
+    },
+    {
+     "goal": "Triples & quads",
+     "hint": "D4-, KR4-, FW3- and TS10-style lights",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>NTG35</b> or <b>E21A</b>",
+     "also_html": "<b>FFL351A</b>, Luminus <b>SST-20</b>, LatticePower <b>CSP2323</b>, Nichia <b>219B</b>, Cree <b>XP-G2</b>",
+     "why_html": "Several small high-CRI dies behind a multi-TIR give a smooth, floody beam; tiny dies (E21A, CSP2323, XP-G2) suit micro triples"
     }
    ],
    "cd_lo": 20000.0,
@@ -2567,9 +3338,12 @@
    ],
    "best_for": [
     {
-     "goal": "Pocket thrower with high CRI",
+     "goal": "High-CRI thrower",
+     "hint": "",
+     "tier": 1,
      "pick_html": "<b>FFL505A</b> or <b>SFT-40 3000K</b>",
-     "why_html": "Rosy (FFL) or warm 95 CRI (SFT-40) alternatives to cool-white throwers"
+     "also_html": "Luminus <b>SFT-70</b> (3000K 95 CRI), <b>YinDing 5050 Glass</b> (cool white 95 CRI), <b>FFL5009R</b>, <b>FFL707MD</b>",
+     "why_html": "Rosy (FFL) or warm 95 CRI (SFT-40/70) alternatives to cool-white throwers; the YinDing is the rare cool-white high-CRI round die"
     }
    ],
    "cd_lo": 45000.0,
@@ -2633,7 +3407,16 @@
      "beam_html": "Big, bright trail/flood beam"
     }
    ],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Trail / walking light",
+     "hint": "high sustained output",
+     "tier": 2,
+     "pick_html": "Cree <b>XHP70.3 HI</b> or LMP <b>LHP73B</b>",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>FFL707A</b>, San&#x27;an <b>SFN60</b>, LMP <b>LHP531</b>, <b>NTG50</b>, Cree <b>XM-L2</b>",
+     "why_html": "High efficiency at high drive means more lumens for the same heat. Sustained output is still set by the host&#x27;s size and cooling"
+    }
+   ],
    "cd_lo": 20000.0,
    "cd_hi": 35000.0,
    "throw_lo": 280.0,
@@ -2690,7 +3473,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Lumen monster",
+     "hint": "flood cannons",
+     "tier": 2,
+     "pick_html": "Convoy <b>NV1010</b> or Cree <b>XFL08K–12K</b>",
+     "also_html": "San&#x27;an <b>SFP-55</b>, <b>SFH-55</b>, <b>SFY-55</b>, <b>SFN-55.2</b>, <b>FFL909A</b>",
+     "why_html": "10,000–25,000 lm class with flood-only beams; NV1010 also offered in R9080 (availability varies)"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2753,8 +3545,35 @@
    "best_for": [
     {
      "goal": "EDC / all-rounder",
+     "hint": "single-emitter 18650 / 21700",
+     "tier": 1,
      "pick_html": "Nichia <b>519A</b> (neutral) or <b>FFL351A</b> / <b>NTG35</b> (rosy)",
-     "why_html": "High CRI, easy to drive, great tint"
+     "also_html": "Luminus <b>SST-20</b> (4000K 95 CRI), Samsung <b>LH351D</b>, Cree <b>XP-L HI</b>, Lumileds <b>HL2X</b>, LatticePower <b>TN3535</b> (budget)",
+     "why_html": "High CRI, easy to drive and a great tint, with enough throw for everyday use. The alternatives trade some colour quality or tint consistency for price"
+    },
+    {
+     "goal": "Triples & quads",
+     "hint": "D4-, KR4-, FW3- and TS10-style lights",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b>, <b>NTG35</b> or <b>E21A</b>",
+     "also_html": "<b>FFL351A</b>, Luminus <b>SST-20</b>, LatticePower <b>CSP2323</b>, Nichia <b>219B</b>, Cree <b>XP-G2</b>",
+     "why_html": "Several small high-CRI dies behind a multi-TIR give a smooth, floody beam; tiny dies (E21A, CSP2323, XP-G2) suit micro triples"
+    },
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
     }
    ],
    "cd_lo": null,
@@ -2820,7 +3639,32 @@
      "beam_html": "Balanced mid-range beam"
     }
    ],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Balanced thrower",
+     "hint": "hotspot + useful spill",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-40</b> (or <b>SFT-70</b> for 6V boost lights)",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>NTG50</b>, <b>FFL5009R</b>, LMP <b>LHP531</b>, San&#x27;an <b>SFQ-55</b>, Convoy <b>F45R</b>",
+     "why_html": "Best hotspot-to-spill balance; the multi-die alternatives give a wider spot and more lumens for less throw"
+    },
+    {
+     "goal": "Trail / walking light",
+     "hint": "high sustained output",
+     "tier": 2,
+     "pick_html": "Cree <b>XHP70.3 HI</b> or LMP <b>LHP73B</b>",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>FFL707A</b>, San&#x27;an <b>SFN60</b>, LMP <b>LHP531</b>, <b>NTG50</b>, Cree <b>XM-L2</b>",
+     "why_html": "High efficiency at high drive means more lumens for the same heat. Sustained output is still set by the host&#x27;s size and cooling"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
+    }
+   ],
    "cd_lo": 25000.0,
    "cd_hi": 40000.0,
    "throw_lo": 315.0,
@@ -2885,7 +3729,32 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Balanced thrower",
+     "hint": "hotspot + useful spill",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-40</b> (or <b>SFT-70</b> for 6V boost lights)",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>NTG50</b>, <b>FFL5009R</b>, LMP <b>LHP531</b>, San&#x27;an <b>SFQ-55</b>, Convoy <b>F45R</b>",
+     "why_html": "Best hotspot-to-spill balance; the multi-die alternatives give a wider spot and more lumens for less throw"
+    },
+    {
+     "goal": "High-CRI thrower",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>FFL505A</b> or <b>SFT-40 3000K</b>",
+     "also_html": "Luminus <b>SFT-70</b> (3000K 95 CRI), <b>YinDing 5050 Glass</b> (cool white 95 CRI), <b>FFL5009R</b>, <b>FFL707MD</b>",
+     "why_html": "Rosy (FFL) or warm 95 CRI (SFT-40/70) alternatives to cool-white throwers; the YinDing is the rare cool-white high-CRI round die"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2934,7 +3803,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3133,7 +4011,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "High-CRI thrower",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>FFL505A</b> or <b>SFT-40 3000K</b>",
+     "also_html": "Luminus <b>SFT-70</b> (3000K 95 CRI), <b>YinDing 5050 Glass</b> (cool white 95 CRI), <b>FFL5009R</b>, <b>FFL707MD</b>",
+     "why_html": "Rosy (FFL) or warm 95 CRI (SFT-40/70) alternatives to cool-white throwers; the YinDing is the rare cool-white high-CRI round die"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3180,7 +4067,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Mega-throw + lumens",
+     "hint": "searchlights",
+     "tier": 2,
+     "pick_html": "Luminus <b>SBT90.2</b>, <b>SFT-90</b> or Convoy <b>F150R</b>",
+     "also_html": "San&#x27;an <b>SFH-43</b>, San&#x27;an <b>SFN60</b>, <b>FFL707MX</b>, Luminus <b>SFT-42R</b>, Luminus <b>SFT-60</b>",
+     "why_html": "Enormous output and hotspot; needs a big reflector and a high-current driver"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3236,7 +4132,32 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Balanced thrower",
+     "hint": "hotspot + useful spill",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-40</b> (or <b>SFT-70</b> for 6V boost lights)",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>NTG50</b>, <b>FFL5009R</b>, LMP <b>LHP531</b>, San&#x27;an <b>SFQ-55</b>, Convoy <b>F45R</b>",
+     "why_html": "Best hotspot-to-spill balance; the multi-die alternatives give a wider spot and more lumens for less throw"
+    },
+    {
+     "goal": "Fog, rain & snow",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>SFT-40 3000K</b>; budget: LMP <b>W5050SQ3</b>",
+     "also_html": "Luminus <b>SFT-70</b> 3000K, Convoy <b>F45R</b> 3000K, LMP <b>LHP531</b> 1800K / 3000K, Osram <b>Orange</b>",
+     "why_html": "Warm CCT cuts back-scatter glare. A floodier beam held low helps more than raw throw"
+    },
+    {
+     "goal": "Trail / walking light",
+     "hint": "high sustained output",
+     "tier": 2,
+     "pick_html": "Cree <b>XHP70.3 HI</b> or LMP <b>LHP73B</b>",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>FFL707A</b>, San&#x27;an <b>SFN60</b>, LMP <b>LHP531</b>, <b>NTG50</b>, Cree <b>XM-L2</b>",
+     "why_html": "High efficiency at high drive means more lumens for the same heat. Sustained output is still set by the host&#x27;s size and cooling"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3263,7 +4184,13 @@
    "lm_hi": 5900.0,
    "cri_min": 70,
    "cri_max": 70,
-   "ccts": [],
+   "ccts": [
+    1800,
+    3000,
+    4000,
+    5000,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -3275,7 +4202,7 @@
    "cri_html": "~70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "High-power 3V flood/general-purpose competitor to XHP70.3 HI, with higher sustained output in Convoy lights (<a href=\"https://convoylight.com/products/lmp-lhp73b\" target=\"_blank\" rel=\"noopener\">Convoy</a>, <a href=\"https://grzybekreviews.pl/comparisons/m21e-led-en/\" target=\"_blank\" rel=\"noopener\">Grzybek</a>).",
+   "notes_html": "1800K, 3000K, 4000K, 5000K or 6500K. High-power 3V flood/general-purpose competitor to XHP70.3 HI, with higher sustained output in Convoy lights (<a href=\"https://convoylight.com/products/lmp-lhp73b\" target=\"_blank\" rel=\"noopener\">Convoy</a>, <a href=\"https://grzybekreviews.pl/comparisons/m21e-led-en/\" target=\"_blank\" rel=\"noopener\">Grzybek</a>).",
    "sources": [
     {
      "label": "Convoy",
@@ -3300,8 +4227,11 @@
    ],
    "best_for": [
     {
-     "goal": "High sustained output / trail light",
+     "goal": "Trail / walking light",
+     "hint": "high sustained output",
+     "tier": 1,
      "pick_html": "Cree <b>XHP70.3 HI</b> or LMP <b>LHP73B</b>",
+     "also_html": "Cree <b>XHP50.3 HI</b>, <b>FFL707A</b>, San&#x27;an <b>SFN60</b>, LMP <b>LHP531</b>, <b>NTG50</b>, Cree <b>XM-L2</b>",
      "why_html": "High efficiency at high drive means more lumens for the same heat. Sustained output is still set by the host&#x27;s size and cooling"
     }
    ],
@@ -3360,9 +4290,12 @@
    "candela": [],
    "best_for": [
     {
-     "goal": "Warm-white thrower for fog/rain",
+     "goal": "Fog, rain & snow",
+     "hint": "",
+     "tier": 1,
      "pick_html": "<b>SFT-40 3000K</b>; budget: LMP <b>W5050SQ3</b>",
-     "why_html": "Warm CCT cuts back-scatter glare"
+     "also_html": "Luminus <b>SFT-70</b> 3000K, Convoy <b>F45R</b> 3000K, LMP <b>LHP531</b> 1800K / 3000K, Osram <b>Orange</b>",
+     "why_html": "Warm CCT cuts back-scatter glare. A floodier beam held low helps more than raw throw"
     }
    ],
    "cd_lo": null,
@@ -3414,7 +4347,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3519,7 +4461,32 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Compact thrower",
+     "hint": "18650 / 21700, ~30–40 mm reflector",
+     "tier": 2,
+     "pick_html": "Luminus <b>SFT-25R</b> or Osram <b>W1</b>",
+     "also_html": "Luminus <b>SFT-40</b>, Osram <b>W2</b>, Cree <b>XP-L HI</b>, Cree <b>XP-LR</b>, LMP <b>W5050SQ5</b>, <b>YinDing 5050 Glass</b>, Luminus <b>SFT-12</b>",
+     "why_html": "Tiny domeless die = highest luminance of any LED = most candela per lumen. SFT-40 keeps more usable spill"
+    },
+    {
+     "goal": "High-CRI thrower",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>FFL505A</b> or <b>SFT-40 3000K</b>",
+     "also_html": "Luminus <b>SFT-70</b> (3000K 95 CRI), <b>YinDing 5050 Glass</b> (cool white 95 CRI), <b>FFL5009R</b>, <b>FFL707MD</b>",
+     "why_html": "Rosy (FFL) or warm 95 CRI (SFT-40/70) alternatives to cool-white throwers; the YinDing is the rare cool-white high-CRI round die"
+    },
+    {
+     "goal": "Colour-critical work",
+     "hint": "photography, inspection, wiring, cooking",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>FFL351A</b>, Nichia <b>B35AM</b> or Nichia <b>E21A</b>",
+     "also_html": "<b>NTG35</b>, Nichia <b>219B</b>, Luminus <b>SFT-70</b> 3000K, <b>YinDing 5050 Glass</b>, <b>NTG50</b>, <b>FFL5009R</b>",
+     "why_html": "R9080-class colour (Ra 95+, high R9) renders reds, skin and wood correctly. Check Duv too: very rosy parts tint everything pink"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3619,7 +4586,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "UV: fluorescence, scorpions, resin curing",
+     "hint": "",
+     "tier": 1,
+     "pick_html": "Nichia <b>NVSU233B(T)</b> (365 nm)",
+     "also_html": "Luminus <b>SST-10-UV</b>, Luminus <b>SBT-10X-UV</b>",
+     "why_html": "Clean 365 nm with minimal visible purple; pair with a ZWB2 filter and a UV-rated driver"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3666,7 +4642,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "UV: fluorescence, scorpions, resin curing",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "Nichia <b>NVSU233B(T)</b> (365 nm)",
+     "also_html": "Luminus <b>SST-10-UV</b>, Luminus <b>SBT-10X-UV</b>",
+     "why_html": "Clean 365 nm with minimal visible purple; pair with a ZWB2 filter and a UV-rated driver"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3711,7 +4696,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "UV: fluorescence, scorpions, resin curing",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "Nichia <b>NVSU233B(T)</b> (365 nm)",
+     "also_html": "Luminus <b>SST-10-UV</b>, Luminus <b>SBT-10X-UV</b>",
+     "why_html": "Clean 365 nm with minimal visible purple; pair with a ZWB2 filter and a UV-rated driver"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3804,7 +4798,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "IR for night-vision cameras",
+     "hint": "",
+     "tier": 1,
+     "pick_html": "Luminus <b>SST-10-IR</b>",
+     "also_html": "",
+     "why_html": "850 nm for most cameras (faint red glow); 940 nm is invisible but weaker on many sensors"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3851,7 +4854,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 1,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3899,7 +4911,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 2,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3947,7 +4968,24 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Night vision, astronomy & map reading",
+     "hint": "",
+     "tier": 1,
+     "pick_html": "Osram <b>Red</b>",
+     "also_html": "Cree <b>XP-E2</b> (colour)",
+     "why_html": "Red preserves dark adaptation far better than dim white. For the deepest red, use a 660 nm part such as the SST-20-DR"
+    },
+    {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 2,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -3994,7 +5032,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 2,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -4042,7 +5089,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Fog, rain & snow",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "<b>SFT-40 3000K</b>; budget: LMP <b>W5050SQ3</b>",
+     "also_html": "Luminus <b>SFT-70</b> 3000K, Convoy <b>F45R</b> 3000K, LMP <b>LHP531</b> 1800K / 3000K, Osram <b>Orange</b>",
+     "why_html": "Warm CCT cuts back-scatter glare. A floodier beam held low helps more than raw throw"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -4092,7 +5148,16 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 2,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -4137,7 +5202,24 @@
    "notes_html": "Long-standing standard for coloured channels in multi-channel builds.",
    "sources": [],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Night vision, astronomy & map reading",
+     "hint": "",
+     "tier": 2,
+     "pick_html": "Osram <b>Red</b>",
+     "also_html": "Cree <b>XP-E2</b> (colour)",
+     "why_html": "Red preserves dark adaptation far better than dim white. For the deepest red, use a 660 nm part such as the SST-20-DR"
+    },
+    {
+     "goal": "Hunting & signalling",
+     "hint": "coloured beams",
+     "tier": 2,
+     "pick_html": "Osram <b>Green</b>",
+     "also_html": "Osram <b>Red</b>, Osram <b>Verdure</b>, Osram <b>Blue</b>, Getian <b>GT RGB</b>, Cree <b>XP-E2</b> (colour)",
+     "why_html": "Saturated green looks brightest to the eye and spooks less game; red and RGB give a choice of channels"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -4164,7 +5246,10 @@
    "lm_hi": 1200.0,
    "cri_min": 90,
    "cri_max": 90,
-   "ccts": [],
+   "ccts": [
+    2700,
+    6500
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -4176,15 +5261,36 @@
    "cri_html": "90",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Cheap and floody with a big dome; available in cool-white high CRI. Tends green (nicknamed &quot;dogfarts&quot;) and bins vary. Superseded by 519A but still a decent budget pick (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Samsung bins run 2700K–6500K (<a href=\"https://download.led.samsung.com/led/file/resource/2022/05/Data_Sheet_LH351H-D_Rev.9.5.pdf\" target=\"_blank\" rel=\"noopener\">Samsung datasheet</a>). Cheap and floody with a big dome; available in cool-white high CRI. Tends green (nicknamed &quot;dogfarts&quot;) and bins vary. Superseded by 519A but still a decent budget pick (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "Samsung datasheet",
+     "url": "https://download.led.samsung.com/led/file/resource/2022/05/Data_Sheet_LH351H-D_Rev.9.5.pdf"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 1,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    },
+    {
+     "goal": "EDC / all-rounder",
+     "hint": "single-emitter 18650 / 21700",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (neutral) or <b>FFL351A</b> / <b>NTG35</b> (rosy)",
+     "also_html": "Luminus <b>SST-20</b> (4000K 95 CRI), Samsung <b>LH351D</b>, Cree <b>XP-L HI</b>, Lumileds <b>HL2X</b>, LatticePower <b>TN3535</b> (budget)",
+     "why_html": "High CRI, easy to drive and a great tint, with enough throw for everyday use. The alternatives trade some colour quality or tint consistency for price"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -4234,7 +5340,24 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "EDC / all-rounder",
+     "hint": "single-emitter 18650 / 21700",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (neutral) or <b>FFL351A</b> / <b>NTG35</b> (rosy)",
+     "also_html": "Luminus <b>SST-20</b> (4000K 95 CRI), Samsung <b>LH351D</b>, Cree <b>XP-L HI</b>, Lumileds <b>HL2X</b>, LatticePower <b>TN3535</b> (budget)",
+     "why_html": "High CRI, easy to drive and a great tint, with enough throw for everyday use. The alternatives trade some colour quality or tint consistency for price"
+    },
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -4261,7 +5384,10 @@
    "lm_hi": 500.0,
    "cri_min": 90,
    "cri_max": 90,
-   "ccts": [],
+   "ccts": [
+    4000,
+    6000
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -4273,8 +5399,12 @@
    "cri_html": "90+",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Tiny CSP, brighter than the E21A with slightly worse colour. Popular in small triples such as the Wurkkos TS10 (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "4000K or 6000K in Wurkkos lights (<a href=\"https://budgetlightforum.com/t/led-test-review-latticepower-csp2323-6000-k-90-cri-led-used-in-wurkkos-ts10-mini/222391\" target=\"_blank\" rel=\"noopener\">BLF 6000K test</a>). Tiny CSP, brighter than the E21A with slightly worse colour. Popular in small triples such as the Wurkkos TS10 (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "BLF 6000K test",
+     "url": "https://budgetlightforum.com/t/led-test-review-latticepower-csp2323-6000-k-90-cri-led-used-in-wurkkos-ts10-mini/222391"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
@@ -4283,9 +5413,12 @@
    "candela": [],
    "best_for": [
     {
-     "goal": "Tiny EDC",
-     "pick_html": "Nichia <b>E21A</b>, <b>519A</b> or LatticePower <b>CSP2323</b> in a triple",
-     "why_html": "Small, efficient, high CRI at the low currents tiny cells can supply"
+     "goal": "Triples & quads",
+     "hint": "D4-, KR4-, FW3- and TS10-style lights",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b>, <b>NTG35</b> or <b>E21A</b>",
+     "also_html": "<b>FFL351A</b>, Luminus <b>SST-20</b>, LatticePower <b>CSP2323</b>, Nichia <b>219B</b>, Cree <b>XP-G2</b>",
+     "why_html": "Several small high-CRI dies behind a multi-TIR give a smooth, floody beam; tiny dies (E21A, CSP2323, XP-G2) suit micro triples"
     }
    ],
    "cd_lo": null,
@@ -4336,7 +5469,24 @@
     }
    ],
    "candela": [],
-   "best_for": [],
+   "best_for": [
+    {
+     "goal": "EDC / all-rounder",
+     "hint": "single-emitter 18650 / 21700",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (neutral) or <b>FFL351A</b> / <b>NTG35</b> (rosy)",
+     "also_html": "Luminus <b>SST-20</b> (4000K 95 CRI), Samsung <b>LH351D</b>, Cree <b>XP-L HI</b>, Lumileds <b>HL2X</b>, LatticePower <b>TN3535</b> (budget)",
+     "why_html": "High CRI, easy to drive and a great tint, with enough throw for everyday use. The alternatives trade some colour quality or tint consistency for price"
+    },
+    {
+     "goal": "Headlamp, camping & close work",
+     "hint": "floody, good colour",
+     "tier": 2,
+     "pick_html": "Nichia <b>519A</b> (domed), Samsung <b>LH351D</b> or Luminus <b>SST-20</b> (4000K 95 CRI)",
+     "also_html": "<b>NTG35</b>, Nichia <b>B35AM</b>, Nichia <b>E21A</b>, Nichia <b>144A</b>, <b>FFL5009D</b>, LatticePower <b>TN3535</b> (90 CRI), Lumileds <b>HL2X</b>",
+     "why_html": "Wide, even beam with good colour at modest output. Domed parts behind a TIR or mule give the smoothest flood"
+    }
+   ],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -4363,7 +5513,10 @@
    "lm_hi": null,
    "cri_min": 60,
    "cri_max": 60,
-   "ccts": [],
+   "ccts": [
+    5600,
+    6600
+   ],
    "r9080": false,
    "rosy": false,
    "domeless": false,
@@ -4375,8 +5528,12 @@
    "cri_html": "&lt;60",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Nitecore&#x27;s in-house emitters (Sysmax). Very high output but very low CRI; found in many current Nitecore lights (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
+   "notes_html": "Cool white only: 5600–6600K measured in an EDC27 UHi, with a green (positive-Duv) tint (<a href=\"https://zeroair.org/2024/08/30/nitecore-edc27-uhi-ultra-slim-flashlight-review/\" target=\"_blank\" rel=\"noopener\">ZeroAir</a>). Nitecore&#x27;s in-house emitters (Sysmax). Very high output but very low CRI; found in many current Nitecore lights (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>).",
    "sources": [
+    {
+     "label": "ZeroAir",
+     "url": "https://zeroair.org/2024/08/30/nitecore-edc27-uhi-ultra-slim-flashlight-review/"
+    },
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
