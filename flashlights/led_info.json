@@ -791,6 +791,68 @@
    "output": "~2,500–5,500+ lm",
    "colour": "70–90",
    "notes": "ANSI bins 3000K–7000K, EasyWhite 2700K–5000K. Older domed XHP generation: very bright but floody, with visible rainbow tint shift. Still sold by Convoy."
+  },
+  "GT-FC40": {
+   "title": "Getian GT-FC40",
+   "candela": [],
+   "footprint": "7070 · 12V",
+   "output": "~2,500–4,000+ lm",
+   "colour": "95 (R9050 max)",
+   "notes": "16-die domeless \"waffle\" emitter (as warm as 1800K). Throws more than a domed XHP70 but has been outcompeted by XHP70.3 HI and FFL707A. Extended-CRI tops at R9050, not R9080 — a correction on the BLF guide thread itself."
+  },
+  "SST-10-IR": {
+   "title": "Luminus SST-10-IR",
+   "candela": [],
+   "kind": "850 / 940 nm IR",
+   "footprint": "3535",
+   "notes": "Night-vision/covert IR. 850 nm shows a faint red glow; 940 nm is effectively invisible but works less well with most cameras."
+  },
+  "XP-E2": {
+   "title": "Cree XP-E2 (colour)",
+   "candela": [],
+   "kind": "Red/Green/Blue/Amber etc.",
+   "footprint": "3535",
+   "notes": "Long-standing standard for coloured channels in multi-channel builds."
+  },
+  "SBT-10X-UV": {
+   "title": "SBT-10X-UV",
+   "candela": [],
+   "footprint": "large-die package",
+   "output": null,
+   "colour": null,
+   "notes": "~1.3–1.4 W radiant @ 1 A (Vf ~3.8–3.9 V), pushed to ~3 A in high-power builds."
+  },
+  "NV1010": {
+   "title": "NV1010",
+   "candela": [],
+   "footprint": "10 × 10 mm · 3V",
+   "output": "~10,000+ lm (user est., @ 25 A)",
+   "colour": "70 or R9080 (5000K)",
+   "notes": "16 × 75 mil San'an chips; 60–80 A only with excellent cooling. Wide, clean beam; the 5000K R9080 version is praised for neutral tint. Back in stock at Convoy (Nov 2026): 6000K / 5500K R70 and 5000K / 4000K / 3000K R9080, bare or on 20 / 25 mm MCPCB."
+  },
+  "NVSU233B(T)": {
+   "title": "NVSU233B(T)",
+   "candela": [],
+   "footprint": "3535",
+   "output": null,
+   "colour": null,
+   "notes": "Convoy's premium UV option; clean 365 nm output with minimal visible purple."
+  },
+  "CUN66A1B": {
+   "title": "CUN66A1B",
+   "candela": [],
+   "footprint": "3535",
+   "output": null,
+   "colour": null,
+   "notes": "Seoul Viosys UV Z5, 365–367 nm, about 1 W radiant at up to 500 mA. The UV in the Skilhunt EC200S Mini UV; sold bare at Convoy."
+  },
+  "CUN66A1G": {
+   "title": "CUN66A1G",
+   "candela": [],
+   "footprint": "3535",
+   "output": null,
+   "colour": null,
+   "notes": "High-power UV Z5 version: about 1.8 W radiant at 365–367 nm. Sold bare at Convoy."
   }
  }
 }
