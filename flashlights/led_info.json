@@ -210,7 +210,7 @@
    "footprint": "7070 · 3V",
    "output": "~6,000 lm",
    "colour": "70 (5500K/6500K) · high-CRI (3000K)",
-   "notes": "Common Emisar / Noctigon hotrod emitter. Decent tint at 6500K, slightly green at 5500K. Competes with the SBT90 on lumens but throws less. May be discontinued; check stock."
+   "notes": "Common Emisar / Noctigon hotrod emitter. Decent tint at 6500K, slightly green at 5500K. Competes with the SBT90 on lumens but throws less. Not sold bare by Convoy, but still offered in the Noctigon KR1 and Lumintop D3 (Nov 2026)."
   },
   "519A": {
    "title": "519A",
@@ -703,6 +703,62 @@
    "output": "high",
    "colour": "<60",
    "notes": "Cool white only: 5600–6600K measured in an EDC27 UHi, with a green (positive-Duv) tint. Nitecore's in-house emitters (Sysmax). Very high output but very low CRI; found in many current Nitecore lights."
+  },
+  "SST-25": {
+   "title": "SST-25",
+   "candela": [],
+   "footprint": "not stated · 3V",
+   "output": "~1,500 lm (@ 3.75 A, 85 °C)",
+   "colour": "~70 (cool white)",
+   "notes": "Domed cool-white flood emitter. Mostly seen in Fenix lights: four in the C7 PRO, eight in the LR35R PRO, twelve in the LR36R and two in the HM75R PRO."
+  },
+  "XHP50.3 HD": {
+   "title": "XHP50.3 HD",
+   "candela": [],
+   "footprint": "5050 · 3V / 6V",
+   "output": "~2,070 lm (6 A) · ~4,800 lm (20 A overdrive)",
+   "colour": "70",
+   "notes": "The high-density sibling of the XHP50.3 HI: Cree rates it for lumens rather than throw, so expect a wider, less intense hotspot. Found in the Fenix TK17."
+  },
+  "SL-F50S": {
+   "title": "Skilhunt SL-F50S",
+   "candela": [],
+   "footprint": "5050 · 3V / 6V",
+   "output": "~1,650–2,200 lm (in Skilhunt H300 / M300 V4)",
+   "colour": "90–95 (5000K)",
+   "notes": "Skilhunt's own quad-die flip-chip LED, 5000K high CRI. Efficacy is close to the FFL5009R and XHP50.3 HI, but the larger die throws less in the same optic. No datasheet and not sold bare; only in Skilhunt lights such as the H300 and M300 V4."
+  },
+  "HL4X": {
+   "title": "Lumileds HL4X",
+   "candela": [],
+   "footprint": "not stated",
+   "output": null,
+   "colour": null,
+   "notes": "LUXEON HL4X, the bigger sibling of the HL2X. Eight of them give the Acebeam X20-R its 10,000 lm / 440 m (vs 8,000 lm / 645 m with SFT-25R). No public datasheet found."
+  },
+  "XP-G4": {
+   "title": "XP-G4 / XP-L2",
+   "candela": [],
+   "footprint": "3535 · 3V",
+   "output": "G4: 1,045 / 1,488 lm · L2: 1,172 / 2,496 lm",
+   "colour": "70 / 80 / 90 (L2 also 95)",
+   "notes": "Both 2700K–7000K. Efficient and very common in mainstream brands (Fenix, Olight, etc.). Domed, with poor colour and noticeable tint shift; enthusiasts generally avoid them."
+  },
+  "XP-L2": {
+   "title": "XP-G4 / XP-L2",
+   "candela": [],
+   "footprint": "3535 · 3V",
+   "output": "G4: 1,045 / 1,488 lm · L2: 1,172 / 2,496 lm",
+   "colour": "70 / 80 / 90 (L2 also 95)",
+   "notes": "Both 2700K–7000K. Efficient and very common in mainstream brands (Fenix, Olight, etc.). Domed, with poor colour and noticeable tint shift; enthusiasts generally avoid them."
+  },
+  "XP-LR": {
+   "title": "XP-GR / XP-LR / XM-MR / XFLMNR",
+   "candela": [],
+   "footprint": "3535 (GR, LR) · 5050 (MR, MNR) · 3V (MNR also 6V)",
+   "output": "XP-GR 1,202 · XP-LR 1,629 · XM-MR 2,849 · XFLMNR 2,027 lm",
+   "colour": "70 / <70",
+   "notes": "5000K, 5700K or 6500K only (Cree). Cree's newer round-die (round LES) throw parts, with source sizes of 1.3–2.8 mm. Cree's direct answer to the SFT-25R / SFT-40 class. Few enthusiast tests yet."
   }
  }
 }

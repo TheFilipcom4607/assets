@@ -382,7 +382,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
     <div>
       <nav class="idxnav" aria-label="Indexes"><a href="../flashlights/" aria-current="page">Flashlights</a><a href="../leds/">LEDs</a></nav>
       <h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6l1 6H8z"/><path d="M8 8h8v4a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3z"/><path d="M11 15v7h2v-7"/></svg>Flashlight Index</h1>
-      <p class="sub">Every light on the official Emisar, Noctigon, Convoy, FireflyLite, Wurkkos, Sofirn and Lumintop stores, snapshot 20 Nov 2026. Prices in USD.</p>
+      <p class="sub">Every light on the official Emisar, Noctigon, Convoy, FireflyLite, Wurkkos, Sofirn and Lumintop stores (snapshot 20 Nov 2026), plus Fenix's current range and everything on <a href="https://zakreviews.com/arbitrary-list.html" target="_blank" rel="noopener">Zak's Arbitrary List</a> (Fall 2026), checked 21 Nov 2026. Prices in USD.</p>
     </div>
     <div class="kpis" id="kpis"></div>
   </div>
@@ -427,7 +427,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
       </div>
       <div id="rows"><div class="empty">Loading lights…</div></div>
     </div>
-    <footer>Specs come from each maker's store text and are normalised by <code>build_clean.py</code>; a dash means the store didn't state it. Hank (Emisar/Noctigon) and Convoy prices exclude batteries; Wurkkos, Sofirn and Lumintop usually include one. Hank throw is computed from published candela (2 × √cd). Always confirm options on the store page before ordering.</footer>
+    <footer>Specs come from each maker's store text and are normalised by <code>build_clean.py</code>; a dash means the store didn't state it. Hank (Emisar/Noctigon) and Convoy prices exclude batteries; Wurkkos, Sofirn and Lumintop usually include one. Hank throw is computed from published candela (2 × √cd). Skilhunt, Acebeam, Armytek and Reylight prices are Killzone's (their own stores block automated checks); Zebralight, Nitecore and Eagletac prices come from Zak's list and their stock wasn't checked. Always confirm options on the store page before ordering.</footer>
   </main>
 </div>
 
@@ -498,7 +498,7 @@ table.cmp .big small { font: 500 12px var(--f-body); color: var(--muted); margin
   const FACETS = { brands: r => [r.brand], styles: r => r.styles, tints: r => r._tones, bats: r => r._bats, mats: r => r.materials,
     leds: r => F.colours.size ? r._pairs.filter(p => F.colours.has(p.c)).map(p => p.led) : r.led_families,
     colours: r => F.leds.size ? r._pairs.filter(p => F.leds.has(p.led)).map(p => p.c) : r._colours };
-  const BRANDS = ["Emisar", "Noctigon", "Convoy", "FireflyLite", "Wurkkos", "Sofirn", "Lumintop"];
+  const BRANDS = ["Emisar", "Noctigon", "Convoy", "FireflyLite", "Wurkkos", "Sofirn", "Lumintop", "Fenix", "Skilhunt", "Acebeam", "Zebralight", "Nitecore", "Armytek", "Reylight", "Eagletac", "Loop Gear", "Rovyvon", "Wuben"];
   const STYLES = ["EDC", "Thrower", "Flood", "Headlamp", "Keychain", "Big & bright", "UV", "Dive", "Tactical", "Bike"];
   const CELLS = ["AAA", "AA", "10280", "10300", "10440", "14100", "14500", "16340", "18350", "18500", "18650", "21700", "22430", "26650", "26800", "32140", "32650", "33140", "46950", "Built-in"];
   const NUMS = [["pmin", "Price from $"], ["pmax", "Price to $"], ["lmin", "Lumens ≥"], ["tmin", "Throw ≥ m"], ["wmax", "Weight ≤ g"]];

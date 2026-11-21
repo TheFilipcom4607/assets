@@ -1444,7 +1444,7 @@
    "cri_html": "70",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "SST-40: 5000K, 5700K or 6500K. SST-70: 5700K or 6500K (<a href=\"https://download.luminus.com/datasheets/Luminus_SST-40-WSxx_Gen2_Datasheet.pdf\" target=\"_blank\" rel=\"noopener\">Luminus SST-40 datasheet</a>, <a href=\"https://www.luminus.com/datasheets/Luminus_2024_Specialty_Lighting_Catalog.pdf\" target=\"_blank\" rel=\"noopener\">Luminus catalog</a>). Domed, cheap, high-output flood/hybrid LEDs common in budget lights; very green at low power (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://convoylight.com/products/luminus-sst40-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
+   "notes_html": "SST-40: 5000K, 5700K or 6500K. SST-70: 5700K or 6500K (<a href=\"https://download.luminus.com/datasheets/Luminus_SST-40-WSxx_Gen2_Datasheet.pdf\" target=\"_blank\" rel=\"noopener\">Luminus SST-40 datasheet</a>, <a href=\"https://www.luminus.com/datasheets/Luminus_2024_Specialty_Lighting_Catalog.pdf\" target=\"_blank\" rel=\"noopener\">Luminus catalog</a>). Domed, cheap, high-output flood/hybrid LEDs common in budget lights; very green at low power (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://convoylight.com/products/luminus-sst40-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>). Bare SST-70 is sold out at Convoy (Nov 2026), but it still ships in Fenix, Convoy and Sofirn lights.",
    "sources": [
     {
      "label": "Luminus SST-40 datasheet",
@@ -1461,6 +1461,53 @@
     {
      "label": "Convoy",
      "url": "https://convoylight.com/products/luminus-sst40-led"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 81,
+   "name": "SST-25",
+   "alts": [
+    "SST-25"
+   ],
+   "maker": "Luminus",
+   "code": "",
+   "section": "2. Luminus (Throwers & High-Power Workhorses)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 1500.0,
+   "lm_hi": 1500.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [
+    6500
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "datasheet",
+   "footprint_html": "not stated · 3V",
+   "lm_html": "~1,500 lm (@ 3.75 A, 85 °C)",
+   "cri_html": "~70 (cool white)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Domed cool-white flood emitter. Mostly seen in Fenix lights: four in the C7 PRO, eight in the LR35R PRO, twelve in the LR36R and two in the HM75R PRO (<a href=\"https://download.luminus.com/datasheets/Luminus_SST-25-WES_Datasheet.pdf\" target=\"_blank\" rel=\"noopener\">Luminus datasheet</a>).",
+   "sources": [
+    {
+     "label": "Luminus datasheet",
+     "url": "https://download.luminus.com/datasheets/Luminus_SST-25-WES_Datasheet.pdf"
     }
    ],
    "candela": [],
@@ -2050,7 +2097,7 @@
    "cri_html": "70–90",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "ANSI bins 3000K–7000K, EasyWhite 2700K–5000K (<a href=\"https://www.mouser.co.uk/cree-xlamp-xhp70-2\" target=\"_blank\" rel=\"noopener\">Mouser</a>). Older <b>domed</b> XHP generation: very bright but floody, with visible rainbow tint shift. Still sold by Convoy (<a href=\"https://convoylight.com/collections/cree\" target=\"_blank\" rel=\"noopener\">Convoy Cree</a>).",
+   "notes_html": "ANSI bins 3000K–7000K, EasyWhite 2700K–5000K (<a href=\"https://www.mouser.co.uk/cree-xlamp-xhp70-2\" target=\"_blank\" rel=\"noopener\">Mouser</a>). Older <b>domed</b> XHP generation: very bright but floody, with visible rainbow tint shift. Still sold by Convoy (<a href=\"https://convoylight.com/collections/cree\" target=\"_blank\" rel=\"noopener\">Convoy Cree</a>). Convoy&#x27;s bare 6V XHP70.2 is sold out (Nov 2026); the XHP50.2 is still listed.",
    "sources": [
     {
      "label": "Mouser",
@@ -2124,6 +2171,56 @@
      "why_html": "10,000–25,000 lm class with flood-only beams; NV1010 also offered in R9080 (availability varies)"
     }
    ],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 82,
+   "name": "XHP50.3 HD",
+   "alts": [
+    "XHP50.3 HD"
+   ],
+   "maker": "Cree",
+   "code": "",
+   "section": "3. Cree (Efficiency & Brute-Force Output)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "5050"
+   ],
+   "voltages": [
+    "3V",
+    "6V"
+   ],
+   "lm_lo": 2067.0,
+   "lm_hi": 4800.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [
+    5700
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "datasheet",
+   "footprint_html": "<code>5050</code> · 3V / 6V",
+   "lm_html": "~2,070 lm (6 A) · ~4,800 lm (20 A overdrive)",
+   "cri_html": "70",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "The <b>high-density</b> sibling of the XHP50.3 HI: Cree rates it for lumens rather than throw, so expect a wider, less intense hotspot. Found in the Fenix TK17 (<a href=\"https://assets.cree-led.com/a/ds/x/XLamp-XHP50.3.pdf\" target=\"_blank\" rel=\"noopener\">Cree datasheet</a>).",
+   "sources": [
+    {
+     "label": "Cree datasheet",
+     "url": "https://assets.cree-led.com/a/ds/x/XLamp-XHP50.3.pdf"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
    "cd_lo": null,
    "cd_hi": null,
    "throw_lo": null,
@@ -2647,7 +2744,7 @@
    "r9080": true,
    "rosy": false,
    "domeless": false,
-   "unavailable": true,
+   "unavailable": false,
    "colours": [],
    "basis": "estimate",
    "footprint_html": "<code>10 × 10 mm</code> · 3V",
@@ -2655,7 +2752,7 @@
    "cri_html": "70 or <b>R9080</b> (5000K)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "16 × 75 mil San&#x27;an chips; 60–80 A only with excellent cooling. Wide, clean beam; the 5000K R9080 version is praised for neutral tint. <b>Currently listed as unavailable</b> (<a href=\"https://convoylight.com/products/nv1010-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
+   "notes_html": "16 × 75 mil San&#x27;an chips; 60–80 A only with excellent cooling. Wide, clean beam; the 5000K R9080 version is praised for neutral tint. Back in stock at Convoy (Nov 2026): 6000K / 5500K R70 and 5000K / 4000K / 3000K R9080, bare or on 20 / 25 mm MCPCB (<a href=\"https://convoylight.com/products/nv1010-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>).",
    "sources": [
     {
      "label": "Convoy",
@@ -2718,7 +2815,7 @@
    "r9080": false,
    "rosy": false,
    "domeless": false,
-   "unavailable": true,
+   "unavailable": false,
    "colours": [],
    "basis": "typical",
    "footprint_html": "<code>7070</code> · 3V",
@@ -2726,7 +2823,7 @@
    "cri_html": "70 (5500K/6500K)<br>high-CRI (3000K)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "Common Emisar / Noctigon hotrod emitter. Decent tint at 6500K, slightly green at 5500K. Competes with the SBT90 on lumens but throws less. May be discontinued; check stock (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://intl-outdoor.com/\" target=\"_blank\" rel=\"noopener\">Emisar</a>).",
+   "notes_html": "Common Emisar / Noctigon hotrod emitter. Decent tint at 6500K, slightly green at 5500K. Competes with the SBT90 on lumens but throws less. Not sold bare by Convoy, but still offered in the <a href=\"https://intl-outdoor.com/product/noctigon-kr1-tail-e-switch-18650-pocket-thrower/\" target=\"_blank\" rel=\"noopener\">Noctigon KR1</a> (6500K / 5500K / 3000K) and Lumintop D3 (Nov 2026) (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://intl-outdoor.com/\" target=\"_blank\" rel=\"noopener\">Emisar</a>).",
    "sources": [
     {
      "label": "BLF Guide",
@@ -2735,6 +2832,10 @@
     {
      "label": "Emisar",
      "url": "https://intl-outdoor.com/"
+    },
+    {
+     "label": "Noctigon KR1",
+     "url": "https://intl-outdoor.com/product/noctigon-kr1-tail-e-switch-18650-pocket-thrower/"
     }
    ],
    "candela": [
@@ -4611,6 +4712,109 @@
    "throw_hi": null
   },
   {
+   "id": 83,
+   "name": "SL-F50S",
+   "alts": [
+    "SL-F50S"
+   ],
+   "maker": "Skilhunt",
+   "code": "",
+   "section": "6. Boutique & House-Brand Emitters (FireflyLite FFL, Noctigon NTG, LMP, Getian) — Other boutique / budget emitters",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "5050"
+   ],
+   "voltages": [
+    "3V",
+    "6V"
+   ],
+   "lm_lo": 1650.0,
+   "lm_hi": 2200.0,
+   "cri_min": 90,
+   "cri_max": 95,
+   "ccts": [
+    5000
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>5050</code> · 3V / 6V",
+   "lm_html": "~1,650–2,200 lm (in Skilhunt H300 / M300 V4)",
+   "cri_html": "90–95 (5000K)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Skilhunt&#x27;s own quad-die flip-chip LED, 5000K high CRI. Efficacy is close to the FFL5009R and XHP50.3 HI, but the larger die throws less in the same optic. No datasheet and not sold bare; only in Skilhunt lights such as the H300 and M300 V4 (<a href=\"https://budgetlightforum.com/t/led-test-review-skilhunt-sl-f50-s-6v-5000-k-95-cri-new-custom-led-from-skilhunt/230950\" target=\"_blank\" rel=\"noopener\">BLF test</a>, <a href=\"https://budgetlightforum.com/t/review-skilhunt-h300-v4-with-new-sl-f50s-led/230949\" target=\"_blank\" rel=\"noopener\">BLF H300 review</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-skilhunt-sl-f50-s-6v-5000-k-95-cri-new-custom-led-from-skilhunt/230950"
+    },
+    {
+     "label": "BLF H300 review",
+     "url": "https://budgetlightforum.com/t/review-skilhunt-h300-v4-with-new-sl-f50s-led/230949"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 84,
+   "name": "SL-F35R",
+   "alts": [
+    "SL-F35R"
+   ],
+   "maker": "Skilhunt",
+   "code": "",
+   "section": "6. Boutique & House-Brand Emitters (FireflyLite FFL, Noctigon NTG, LMP, Getian) — Other boutique / budget emitters",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": null,
+   "lm_hi": null,
+   "cri_min": 95,
+   "cri_max": 95,
+   "ccts": [
+    5000
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>3535</code> · 3V",
+   "lm_html": "",
+   "cri_html": "95 (5000K)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Skilhunt&#x27;s small-LES high-CRI LED: 5000K 95 CRI with high luminance, so it keeps more throw than a 519A. Offered in the M150 / M200 V4 on Skilhunt&#x27;s own store (<a href=\"https://budgetlightforum.com/t/led-test-review-skilhunt-sl-f35r-3v-5000-k-95-cri-good-high-cri-led-with-small-les-and-high-luminance/231848\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-skilhunt-sl-f35r-3v-5000-k-95-cri-good-high-cri-led-with-small-les-and-high-luminance/231848"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
    "id": 64,
    "name": "NVSU233B(T)",
    "alts": [
@@ -5000,6 +5204,112 @@
    "throw_hi": null
   },
   {
+   "id": 86,
+   "name": "CUN66A1B",
+   "alts": [
+    "CUN66A1B"
+   ],
+   "maker": "Seoul Viosys",
+   "code": "",
+   "section": "7. Specialty Emitters: UV, IR & Monochromatic",
+   "kind": "UV",
+   "type_label": "365 nm UV",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": null,
+   "lm_hi": null,
+   "cri_min": null,
+   "cri_max": null,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [
+    "UV"
+   ],
+   "basis": "datasheet",
+   "footprint_html": "<code>3535</code>",
+   "lm_html": "",
+   "cri_html": "",
+   "cri_label": "CRI",
+   "type_html": "365–367 nm UV · 1 W radiant",
+   "notes_html": "Seoul Viosys UV Z5, 365–367 nm, about 1 W radiant at up to 500 mA. The UV in the Skilhunt EC200S Mini UV; sold bare at Convoy (<a href=\"https://convoylight.com/products/cun66a1b-uva-365nm-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>, <a href=\"https://uk.rs-online.com/web/p/uv-leds/2471990\" target=\"_blank\" rel=\"noopener\">RS</a>).",
+   "sources": [
+    {
+     "label": "Convoy",
+     "url": "https://convoylight.com/products/cun66a1b-uva-365nm-led"
+    },
+    {
+     "label": "RS",
+     "url": "https://uk.rs-online.com/web/p/uv-leds/2471990"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 87,
+   "name": "CUN66A1G",
+   "alts": [
+    "CUN66A1G"
+   ],
+   "maker": "Seoul Viosys",
+   "code": "",
+   "section": "7. Specialty Emitters: UV, IR & Monochromatic",
+   "kind": "UV",
+   "type_label": "365 nm UV",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": null,
+   "lm_hi": null,
+   "cri_min": null,
+   "cri_max": null,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [
+    "UV"
+   ],
+   "basis": "datasheet",
+   "footprint_html": "<code>3535</code>",
+   "lm_html": "",
+   "cri_html": "",
+   "cri_label": "CRI",
+   "type_html": "365–367 nm UV · 1.8 W radiant",
+   "notes_html": "High-power UV Z5 version: about 1.8 W radiant at 365–367 nm. Sold bare at Convoy (<a href=\"https://convoylight.com/products/cun66a1g-uva-365nm-led\" target=\"_blank\" rel=\"noopener\">Convoy</a>, <a href=\"https://uk.rs-online.com/web/p/uv-leds/2471995\" target=\"_blank\" rel=\"noopener\">RS</a>).",
+   "sources": [
+    {
+     "label": "Convoy",
+     "url": "https://convoylight.com/products/cun66a1g-uva-365nm-led"
+    },
+    {
+     "label": "RS",
+     "url": "https://uk.rs-online.com/web/p/uv-leds/2471995"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
    "id": 76,
    "name": "LH351D",
    "alts": [
@@ -5311,6 +5621,51 @@
     {
      "label": "BLF Guide",
      "url": "https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 85,
+   "name": "HL4X",
+   "alts": [
+    "HL4X"
+   ],
+   "maker": "Lumileds",
+   "code": "",
+   "section": "8. Other Notable Emitters",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [],
+   "voltages": [],
+   "lm_lo": null,
+   "lm_hi": null,
+   "cri_min": null,
+   "cri_max": null,
+   "ccts": [
+    6500
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "estimate",
+   "footprint_html": "not stated",
+   "lm_html": "",
+   "cri_html": "",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "LUXEON HL4X, the bigger sibling of the HL2X. Eight of them give the Acebeam X20-R its 10,000 lm / 440 m (vs 8,000 lm / 645 m with SFT-25R). No public datasheet found (<a href=\"https://www.acebeam.com/x20-r\" target=\"_blank\" rel=\"noopener\">Acebeam X20-R</a>).",
+   "sources": [
+    {
+     "label": "Acebeam X20-R",
+     "url": "https://www.acebeam.com/x20-r"
     }
    ],
    "candela": [],
