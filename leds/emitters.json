@@ -98,7 +98,13 @@
    "cri_min": 90,
    "cri_max": 95,
    "ccts": [
+    1800,
     2700,
+    3000,
+    3500,
+    4000,
+    4500,
+    5000,
     5700
    ],
    "r9080": true,
@@ -112,7 +118,7 @@
    "cri_html": "90–95+ (R9080)",
    "cri_label": "CRI",
    "type_html": "",
-   "notes_html": "<b>The all-round gold standard.</b> Wide range of CCTs (roughly 2700K–5700K), neutral to rosy tint. Floody with the dome on. Easily dedomed for more throw, a lower CCT and a rosier tint. &quot;V1&quot; is the newer, preferred revision (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://intl-outdoor.com/single-channel-led-flashlights/emisar-d4sv2.html\" target=\"_blank\" rel=\"noopener\">Emisar</a>).",
+   "notes_html": "<b>The all-round gold standard.</b> Wide range of CCTs (Convoy sells 1800K, 2700K, 3000K, 3500K, 4000K, 4500K, 5000K and 5700K), neutral to rosy tint. Floody with the dome on. Easily dedomed for more throw, a lower CCT and a rosier tint. &quot;V1&quot; is the newer, preferred revision (<a href=\"https://budgetlightforum.com/t/quick-guide-to-popular-leds-updated-for-2024/218708\" target=\"_blank\" rel=\"noopener\">BLF Guide</a>, <a href=\"https://intl-outdoor.com/single-channel-led-flashlights/emisar-d4sv2.html\" target=\"_blank\" rel=\"noopener\">Emisar</a>).",
    "sources": [
     {
      "label": "BLF Guide",
@@ -404,6 +410,12 @@
    "cri_max": 95,
    "ccts": [
     2700,
+    3000,
+    3500,
+    4000,
+    4500,
+    5000,
+    5700,
     6500
    ],
    "r9080": true,
@@ -474,6 +486,8 @@
    "cri_min": 90,
    "cri_max": 90,
    "ccts": [
+    2700,
+    3000,
     4000,
     5000
    ],
@@ -597,6 +611,10 @@
    "cri_max": 95,
    "ccts": [
     1850,
+    2000,
+    3500,
+    4500,
+    5000,
     6500
    ],
    "r9080": true,
@@ -658,6 +676,105 @@
    "throw_hi": null
   },
   {
+   "id": 91,
+   "name": "319A",
+   "alts": [
+    "319A"
+   ],
+   "maker": "Nichia",
+   "code": "",
+   "section": "1. Nichia (Color Accuracy & Tint Favorites)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 740.0,
+   "lm_hi": 850.0,
+   "cri_min": 83,
+   "cri_max": 83,
+   "ccts": [
+    5000
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>3535</code> · 3V",
+   "lm_html": "~740–850 lm (2.0–2.4 A)",
+   "cri_html": "min. 83 (R9 0)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Older Nichia x19 part (NVSW319AT) in the XP footprint, brighter than the 219 series but with low red rendering. Largely replaced by the 519A (<a href=\"https://budgetlightforum.com/t/led-test-review-nichia-nvsw319at-sm503-d400f2-r8000-cct-5000-k-typ-83-cri/50303\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-nichia-nvsw319at-sm503-d400f2-r8000-cct-5000-k-typ-83-cri/50303"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 92,
+   "name": "Optisolis",
+   "alts": [
+    "Optisolis"
+   ],
+   "maker": "Nichia",
+   "code": "757G",
+   "section": "1. Nichia (Color Accuracy & Tint Favorites)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3030"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": null,
+   "lm_hi": null,
+   "cri_min": 97,
+   "cri_max": 98,
+   "ccts": [
+    3000,
+    5000
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>3030</code> · 3V",
+   "lm_html": "",
+   "cri_html": "~98 (full-spectrum)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Nichia&#x27;s <b>full-spectrum</b> mid-power LED (NF2W757G-F1 / NF2L757G-F1) with the closest match to sunlight / incandescent of any LED tested. Low current and 120 °C max Tj limit it to low-output, colour-critical lights (<a href=\"https://budgetlightforum.com/t/led-test-review-nichia-optisolis-3000-5000-k-ultra-high-light-quality-even-with-high-performance-in-mid-power-class/51872\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-nichia-optisolis-3000-5000-k-ultra-high-light-quality-even-with-high-performance-in-mid-power-class/51872"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
    "id": 8,
    "name": "SFT-25R",
    "alts": [
@@ -681,7 +798,9 @@
    "ccts": [
     5000,
     5700,
-    6500
+    6000,
+    6500,
+    7500
    ],
    "r9080": false,
    "rosy": false,
@@ -772,6 +891,7 @@
    "ccts": [
     3000,
     5000,
+    6000,
     6500
    ],
    "r9080": false,
@@ -880,6 +1000,7 @@
     3000,
     4000,
     5000,
+    6000,
     6500
    ],
    "r9080": false,
@@ -1052,6 +1173,7 @@
    "cri_min": 70,
    "cri_max": 70,
    "ccts": [
+    4000,
     5000,
     6500
    ],
@@ -1338,8 +1460,10 @@
    "cri_min": 70,
    "cri_max": 95,
    "ccts": [
+    3000,
     4000,
     5000,
+    6000,
     6500
    ],
    "r9080": true,
@@ -1430,7 +1554,9 @@
    "cri_max": 70,
    "ccts": [
     5000,
+    5300,
     5700,
+    6000,
     6500
    ],
    "r9080": false,
@@ -1490,6 +1616,7 @@
    "cri_min": 70,
    "cri_max": 70,
    "ccts": [
+    6000,
     6500
    ],
    "r9080": false,
@@ -1508,6 +1635,102 @@
     {
      "label": "Luminus datasheet",
      "url": "https://download.luminus.com/datasheets/Luminus_SST-25-WES_Datasheet.pdf"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 88,
+   "name": "SST-12",
+   "alts": [
+    "SST-12"
+   ],
+   "maker": "Luminus",
+   "code": "SST-12-WxS",
+   "section": "2. Luminus (Throwers & High-Power Workhorses)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 600.0,
+   "lm_hi": 710.0,
+   "cri_min": 65,
+   "cri_max": 65,
+   "ccts": [
+    5000
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>3535</code> · 3V",
+   "lm_html": "~600–710 lm (1.8–2.4 A)",
+   "cri_html": "~65 (≈5000K)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Domed small round-die emitter in the XP footprint, a step down from the SST-20 with a tidier beam. Max 1.8 A rated (<a href=\"https://budgetlightforum.com/t/led-test-review-luminus-sst-12-wxs-specialty-white-5000-k-typ-65-cri/219049\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-luminus-sst-12-wxs-specialty-white-5000-k-typ-65-cri/219049"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 96,
+   "name": "CBT-140",
+   "alts": [
+    "CBT-140"
+   ],
+   "maker": "Luminus",
+   "code": "",
+   "section": "2. Luminus (Throwers & High-Power Workhorses)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 4885.0,
+   "lm_hi": 6206.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [
+    5700
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "large module · 3V",
+   "lm_html": "~4,900 lm (28 A) · ~6,200 lm (53 A)",
+   "cri_html": "70 (5700K)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "One of the largest single LED chips ever: huge output but very low efficiency (about 45 lm/W at 28 A). The SBT90.2 makes 5000 lm at 19 A instead (<a href=\"https://budgetlightforum.com/t/led-test-review-luminus-cbt-140-wcs-expensive-led-with-one-of-the-biggest-led-chips-of-all-time/228242\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-luminus-cbt-140-wcs-expensive-led-with-one-of-the-biggest-led-chips-of-all-time/228242"
     }
    ],
    "candela": [],
@@ -1542,6 +1765,9 @@
     2700,
     3000,
     4000,
+    5000,
+    5700,
+    6500,
     7000
    ],
    "r9080": false,
@@ -1620,6 +1846,8 @@
     2700,
     3000,
     4000,
+    5700,
+    6500,
     7000
    ],
    "r9080": false,
@@ -1824,6 +2052,8 @@
    "cri_max": 95,
    "ccts": [
     2700,
+    5700,
+    6500,
     7000
    ],
    "r9080": false,
@@ -2083,7 +2313,10 @@
    "ccts": [
     2700,
     3000,
+    4000,
     5000,
+    6000,
+    6500,
     7000
    ],
    "r9080": false,
@@ -2227,6 +2460,102 @@
    "throw_hi": null
   },
   {
+   "id": 90,
+   "name": "XM-L3",
+   "alts": [
+    "XM-L3"
+   ],
+   "maker": "Cree",
+   "code": "",
+   "section": "3. Cree (Efficiency & Brute-Force Output)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "5050"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 1950.0,
+   "lm_hi": 1950.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [
+    5700
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>5050</code> · 3V",
+   "lm_html": "~1,950 lm (@ 5 A)",
+   "cri_html": "70 (≈5700K)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Higher-current successor to the XM-L2 (rated 5 A, low Vf, lots of flux), but the big die gives a less pleasant beam in optics (<a href=\"https://budgetlightforum.com/t/led-test-review-xm-l3-u4-color-kit-e2-basically-more-powerful-1st-gen-xm-l2-low-vf-high-light-flux-but-not-so-nice-light-in-optics/219338\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-xm-l3-u4-color-kit-e2-basically-more-powerful-1st-gen-xm-l2-low-vf-high-light-flux-but-not-so-nice-light-in-optics/219338"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 97,
+   "name": "XP-L HD",
+   "alts": [
+    "XP-L HD"
+   ],
+   "maker": "Cree",
+   "code": "",
+   "section": "3. Cree (Efficiency & Brute-Force Output)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": null,
+   "lm_hi": null,
+   "cri_min": 70,
+   "cri_max": 90,
+   "ccts": [],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>3535</code> · 3V",
+   "lm_html": "",
+   "cri_html": "70 · 90",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Domed high-density XP-L: floodier and slightly brighter than the domeless XP-L HI. Older but still in budget lights (<a href=\"https://budgetlightforum.com/t/led-test-review-sc5-based-cree-leds-xp-l-hd-hi-xp-g2-e2-xm-l2-wip/51980\" target=\"_blank\" rel=\"noopener\">BLF SC5 test</a>).",
+   "sources": [
+    {
+     "label": "BLF SC5 test",
+     "url": "https://budgetlightforum.com/t/led-test-review-sc5-based-cree-leds-xp-l-hd-hi-xp-g2-e2-xm-l2-wip/51980"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
    "id": 28,
    "name": "W1",
    "alts": [
@@ -2360,7 +2689,8 @@
    "cri_min": 70,
    "cri_max": 70,
    "ccts": [
-    5700
+    5700,
+    6000
    ],
    "r9080": false,
    "rosy": false,
@@ -2572,6 +2902,55 @@
    "throw_hi": null
   },
   {
+   "id": 95,
+   "name": "OSLON Black Flat",
+   "alts": [
+    "OSLON Black Flat"
+   ],
+   "maker": "Osram",
+   "code": "LUW HWQP",
+   "section": "4. Osram (Dedicated Compact Throwers)",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3030"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 320.0,
+   "lm_hi": 440.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [
+    6500
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": true,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>3030</code> · 3V (fits XP boards)",
+   "lm_html": "~320–440 lm (1–1.5 A)",
+   "cri_html": "~70 (cool white)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "The classic pre-W1 <b>long-range thrower</b> LED (LUW HWQP): tiny flat die with very high luminance at modest current (<a href=\"https://budgetlightforum.com/t/led-test-review-osram-oslon-black-flat-hwqp-still-highest-luminance-of-all-leds-to-date/50320\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-osram-oslon-black-flat-hwqp-still-highest-luminance-of-all-leds-to-date/50320"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
    "id": 32,
    "name": "F45R",
    "alts": [
@@ -2595,7 +2974,8 @@
    "ccts": [
     3000,
     4000,
-    5000
+    5000,
+    6500
    ],
    "r9080": false,
    "rosy": false,
@@ -2670,7 +3050,9 @@
    "cri_max": 70,
    "ccts": [
     3000,
-    4000
+    4000,
+    5000,
+    6500
    ],
    "r9080": false,
    "rosy": true,
@@ -2739,7 +3121,11 @@
    "cri_min": 70,
    "cri_max": 70,
    "ccts": [
-    5000
+    3000,
+    4000,
+    5000,
+    5500,
+    6000
    ],
    "r9080": true,
    "rosy": false,
@@ -3372,8 +3758,11 @@
    "cri_max": 96,
    "ccts": [
     1800,
+    2700,
     3700,
     3955,
+    4200,
+    4500,
     5000
    ],
    "r9080": false,
@@ -3466,6 +3855,7 @@
     3000,
     3500,
     3845,
+    4000,
     6500
    ],
    "r9080": false,
@@ -3540,8 +3930,11 @@
    "cri_min": 89,
    "cri_max": 98,
    "ccts": [
+    1800,
     4000,
-    4277
+    4277,
+    5000,
+    6500
    ],
    "r9080": false,
    "rosy": true,
@@ -4272,6 +4665,7 @@
    "ccts": [
     1800,
     3000,
+    4000,
     5000,
     6500
    ],
@@ -4429,7 +4823,8 @@
    "cri_max": 71,
    "ccts": [
     3000,
-    3208
+    3208,
+    6500
    ],
    "r9080": false,
    "rosy": false,
@@ -4491,8 +4886,10 @@
    "cri_min": 70,
    "cri_max": 70,
    "ccts": [
+    3000,
     4000,
-    5000
+    5000,
+    6500
    ],
    "r9080": false,
    "rosy": false,
@@ -4680,7 +5077,10 @@
    "cri_min": 95,
    "cri_max": 95,
    "ccts": [
-    1800
+    1800,
+    3000,
+    4000,
+    5000
    ],
    "r9080": true,
    "rosy": false,
@@ -5332,6 +5732,9 @@
    "cri_max": 90,
    "ccts": [
     2700,
+    3500,
+    5000,
+    5700,
     6500
    ],
    "r9080": false,
@@ -5402,8 +5805,10 @@
    "cri_min": 70,
    "cri_max": 90,
    "ccts": [
+    4000,
     5000,
-    6500
+    6500,
+    7000
    ],
    "r9080": false,
    "rosy": false,
@@ -5666,6 +6071,150 @@
     {
      "label": "Acebeam X20-R",
      "url": "https://www.acebeam.com/x20-r"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 89,
+   "name": "MN-S3535",
+   "alts": [
+    "MN-S3535"
+   ],
+   "maker": "Moonleds",
+   "code": "",
+   "section": "8. Other Notable Emitters",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [
+    "3535"
+   ],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 190.0,
+   "lm_hi": 220.0,
+   "cri_min": 97,
+   "cri_max": 97,
+   "ccts": [
+    6000,
+    6500
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "<code>3535</code> · 3V",
+   "lm_html": "~190–220 lm bin (@ 700 mA)",
+   "cri_html": "97 typ. (R9 / R12 ≥ 90)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "<b>Daylight high-CRI</b> part: 6000–6500K with typ. 97 CRI and R9/R12 above 90, the cool-white answer to the 519A. Rated only to 1 A, so output is modest (<a href=\"https://budgetlightforum.com/t/led-test-review-moonleds-mn-s3535-6000-k-typ-97-cri-r9-r12-min-90-real-daylight-led/222478\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-moonleds-mn-s3535-6000-k-typ-97-cri-r9-r12-min-90-real-daylight-led/222478"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 93,
+   "name": "Luxeon MZ",
+   "alts": [
+    "Luxeon MZ"
+   ],
+   "maker": "Lumileds",
+   "code": "LMZ9-QW57",
+   "section": "8. Other Notable Emitters",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 700.0,
+   "lm_hi": 770.0,
+   "cri_min": 90,
+   "cri_max": 90,
+   "ccts": [
+    5700
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "Lumileds own footprint · 3V",
+   "lm_html": "~700–770 lm bin (85 °C)",
+   "cri_html": "min. 90 (5700K)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "Rare high-CRI part that is also efficient and powerful (rated 4.8 A) thanks to very low thermal resistance; needs its own board footprint (<a href=\"https://budgetlightforum.com/t/led-test-review-lumileds-luxeon-mz-5700-k-min-90-cri-3v-finally-high-cri-high-power-beautiful-light/49328\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-lumileds-luxeon-mz-5700-k-min-90-cri-3v-finally-high-cri-high-power-beautiful-light/49328"
+    }
+   ],
+   "candela": [],
+   "best_for": [],
+   "cd_lo": null,
+   "cd_hi": null,
+   "throw_lo": null,
+   "throw_hi": null
+  },
+  {
+   "id": 94,
+   "name": "Luxeon V",
+   "alts": [
+    "Luxeon V"
+   ],
+   "maker": "Lumileds",
+   "code": "",
+   "section": "8. Other Notable Emitters",
+   "kind": "White",
+   "type_label": "",
+   "footprints": [],
+   "voltages": [
+    "3V"
+   ],
+   "lm_lo": 1590.0,
+   "lm_hi": 1590.0,
+   "cri_min": 70,
+   "cri_max": 70,
+   "ccts": [
+    4000
+   ],
+   "r9080": false,
+   "rosy": false,
+   "domeless": false,
+   "unavailable": false,
+   "colours": [],
+   "basis": "lab",
+   "footprint_html": "Lumileds own footprint · 3V",
+   "lm_html": "~1,590 lm (@ 4.8 A)",
+   "cri_html": "70 (4000K)",
+   "cri_label": "CRI",
+   "type_html": "",
+   "notes_html": "CSP emitter with high flux and a clean beam; Vf varies between samples. Needs its own board footprint (<a href=\"https://budgetlightforum.com/t/led-test-review-lumileds-luxeon-v-csp-4000-k-70-cri-high-flux-and-nice-beam-pattern-but-differences-in-vf/49731\" target=\"_blank\" rel=\"noopener\">BLF test</a>).",
+   "sources": [
+    {
+     "label": "BLF test",
+     "url": "https://budgetlightforum.com/t/led-test-review-lumileds-luxeon-v-csp-4000-k-70-cri-high-flux-and-nice-beam-pattern-but-differences-in-vf/49731"
     }
    ],
    "candela": [],
